@@ -1,0 +1,19 @@
+{
+  "extends": "tslint:recommended",
+  "rules": {
+    "quotemark": [true, "single", "avoid-escape"],
+    "interface-name": [false],
+    "interface-over-type-literal": false,
+    "variable-name": [true, "check-format", "allow-leading-underscore"],
+    "object-literal-sort-keys": false,
+    "ordered-imports": false,
+    "prefer-const": false,
+    "whitespace": [true],
+    "member-access": [false],
+    "no-console": [false],
+    "no-namespace": [false],
+    "no-unused-expression": false,
+    "no-empty": false,
+    "unified-signatures": false
+  }
+}

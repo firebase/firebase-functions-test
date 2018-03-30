@@ -1,0 +1,38 @@
+{
+  "name": "firebase-functions-test",
+  "version": "0.1.0",
+  "description": "A testing companion to firebase-functions.",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "npm i && node_modules/.bin/tsc -p tsconfig.release.json",
+    "build:pack": "npm prune --production && rm -rf lib && npm install && node_modules/.bin/tsc -p tsconfig.release.json && npm pack && npm install",
+    "build:release": "npm install --production && npm install typescript firebase-functions && node_modules/.bin/tsc -p tsconfig.release.json",
+    "lint": "node_modules/.bin/tslint src/{**/*,*}.ts spec/{**/*,*}.ts",
+    "pretest": "node_modules/.bin/tsc",
+    "test": "mocha .tmp/spec/index.spec.js",
+    "posttest": "npm run lint && rm -rf .tmp"
+  },
+  "author": "Firebase Team",
+  "dependencies": {
+    "@types/lodash": "^4.14.104",
+    "firebase-admin": "^5.11.0",
+    "lodash": "^4.17.5"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.2",
+    "@types/mocha": "^5.0.0",
+    "chai": "^4.1.2",
+    "firebase-functions": "https://storage.googleapis.com/functions-dev-preview/firebase-functions-1.0.0-rc4.tgz",
+    "mocha": "^5.0.5",
+    "sinon": "^4.4.9",
+    "tslint": "^5.8.0",
+    "typescript": "^2.4.1"
+  },
+  "peerDependencies": {
+    "firebase-functions": "https://storage.googleapis.com/functions-dev-preview/firebase-functions-1.0.0-rc4.tgz"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "typings": "lib/index.d.ts"
+}
