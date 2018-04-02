@@ -21,29 +21,19 @@
 // SOFTWARE.
 
 import { AppOptions } from 'firebase-admin';
+import { merge } from 'lodash';
 
 import { FirebaseFunctionsTest } from './lifecycle';
-import { makeChange, wrap, mockConfig } from './main';
-import * as analytics from './providers/analytics';
-import * as crashlytics from './providers/crashlytics';
-import * as database from './providers/database';
-import * as firestore from './providers/firestore';
-import * as pubsub from './providers/pubsub';
-import * as storage from './providers/storage';
+import { features as lazyFeatures, FeaturesList } from './features';
 
 export = (firebaseConfig?: AppOptions) => {
   const test = new FirebaseFunctionsTest();
   test.init(firebaseConfig);
-  return {
-    cleanup: test.cleanup,
-    mockConfig,
-    wrap,
-    makeChange,
-    analytics,
-    crashlytics,
-    database,
-    firestore,
-    pubsub,
-    storage,
-  };
+  // Ensure other files get loaded after init function, since they load `firebase-functions`
+  // which will issue warning if process.env.FIREBASE_CONFIG is not yet set.
+  let features = require('./features') as typeof lazyFeatures;
+  features = merge({}, features, {
+    cleanup: () => test.cleanup,
+  });
+  return features;
 };
