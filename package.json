@@ -22,14 +22,14 @@
     "@types/chai": "^4.1.2",
     "@types/mocha": "^5.0.0",
     "chai": "^4.1.2",
-    "firebase-functions": "https://storage.googleapis.com/functions-dev-preview/firebase-functions-1.0.0-rc5.tgz",
+    "firebase-functions": "^1.0.0",
     "mocha": "^5.0.5",
     "sinon": "^4.4.9",
     "tslint": "^5.8.0",
     "typescript": "^2.4.1"
   },
   "peerDependencies": {
-    "firebase-functions": "https://storage.googleapis.com/functions-dev-preview/firebase-functions-1.0.0-rc4.tgz"
+    "firebase-functions": "^1.0.0"
   },
   "engines": {
     "node": ">=6.0.0"
