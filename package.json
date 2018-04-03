@@ -12,7 +12,23 @@
     "test": "mocha .tmp/spec/index.spec.js",
     "posttest": "npm run lint && rm -rf .tmp"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/firebase/firebase-functions-test.git"
+  },
+  "keywords": [
+    "firebase",
+    "functions",
+    "google",
+    "cloud",
+    "test"
+  ],
   "author": "Firebase Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/firebase/firebase-functions-test/issues"
+  },
+  "homepage": "https://github.com/firebase/firebase-functions-test#readme",
   "dependencies": {
     "@types/lodash": "^4.14.104",
     "firebase-admin": "^5.11.0",
