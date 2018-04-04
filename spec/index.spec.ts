@@ -24,6 +24,25 @@ import 'mocha';
 import './lifecycle.spec';
 import './main.spec';
 import './app.spec';
+import { expect } from 'chai';
+
+const indexExport = require('../src')()
+
+describe('index exports', () => {
+  it('wrap', () => {
+    expect(indexExport.wrap).to.be.an('function')
+  });
+  it('makeChange', () => {
+    expect(indexExport.makeChange).to.be.an('function')
+  });
+  it('mockConfig', () => {
+    expect(indexExport.mockConfig).to.be.an('function')
+  });
+  it('cleanup', () => {
+    expect(indexExport.cleanup).to.be.an('function')
+  });
+});
+
 // import './providers/analytics.spec';
 // import './providers/auth.spec';
 // import './providers/database.spec';
