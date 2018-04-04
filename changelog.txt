@@ -1,0 +1,1 @@
+fixed - Fix bug where methods such as `wrap` were nested under `features` instead of being available at the top level of the module.
