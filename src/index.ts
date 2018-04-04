@@ -31,7 +31,7 @@ export = (firebaseConfig?: AppOptions) => {
   test.init(firebaseConfig);
   // Ensure other files get loaded after init function, since they load `firebase-functions`
   // which will issue warning if process.env.FIREBASE_CONFIG is not yet set.
-  let features = require('./features') as typeof lazyFeatures;
+  let features = require('./features').features as typeof lazyFeatures;
   features = merge({}, features, {
     cleanup: () => test.cleanup,
   });
