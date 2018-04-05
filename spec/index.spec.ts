@@ -24,6 +24,34 @@ import 'mocha';
 import './lifecycle.spec';
 import './main.spec';
 import './app.spec';
+import { expect } from 'chai';
+
+/* tslint:disable-next-line:no-var-requires */
+const indexExport = require('../src')();
+
+describe('index', () => {
+  after(() => {
+    // Call cleanup (handles case of cleanup function not existing)
+    indexExport.cleanup && indexExport.cleanup();
+  });
+
+  it('should export wrap as a function', () => {
+    expect(indexExport.wrap).to.be.an('function');
+  });
+
+  it('should export makeChange as a function', () => {
+    expect(indexExport.makeChange).to.be.an('function');
+  });
+
+  it('should export mockConfig as a function', () => {
+    expect(indexExport.mockConfig).to.be.an('function');
+  });
+
+  it('should export cleanup as a function', () => {
+    expect(indexExport.cleanup).to.be.an('function');
+  });
+});
+
 // import './providers/analytics.spec';
 // import './providers/auth.spec';
 // import './providers/database.spec';
