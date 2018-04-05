@@ -26,28 +26,29 @@ import './main.spec';
 import './app.spec';
 import { expect } from 'chai';
 
-const indexExport = require('../src')()
+/* tslint:disable-next-line:no-var-requires */
+const indexExport = require('../src')();
 
 describe('index', () => {
   after(() => {
     // Call cleanup (handles case of cleanup function not existing)
-    indexExport.cleanup && indexExport.cleanup()
-  })
+    indexExport.cleanup && indexExport.cleanup();
+  });
 
   it('should export wrap as a function', () => {
-    expect(indexExport.wrap).to.be.an('function')
+    expect(indexExport.wrap).to.be.an('function');
   });
 
   it('should export makeChange as a function', () => {
-    expect(indexExport.makeChange).to.be.an('function')
+    expect(indexExport.makeChange).to.be.an('function');
   });
 
   it('should export mockConfig as a function', () => {
-    expect(indexExport.mockConfig).to.be.an('function')
+    expect(indexExport.mockConfig).to.be.an('function');
   });
 
   it('should export cleanup as a function', () => {
-    expect(indexExport.cleanup).to.be.an('function')
+    expect(indexExport.cleanup).to.be.an('function');
   });
 });
 
