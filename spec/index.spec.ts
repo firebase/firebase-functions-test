@@ -28,17 +28,25 @@ import { expect } from 'chai';
 
 const indexExport = require('../src')()
 
-describe('index exports', () => {
-  it('wrap', () => {
+describe('index', () => {
+  after(() => {
+    // Call cleanup (handles case of cleanup function not existing)
+    indexExport.cleanup && indexExport.cleanup()
+  })
+
+  it('should export wrap as a function', () => {
     expect(indexExport.wrap).to.be.an('function')
   });
-  it('makeChange', () => {
+
+  it('should export makeChange as a function', () => {
     expect(indexExport.makeChange).to.be.an('function')
   });
-  it('mockConfig', () => {
+
+  it('should export mockConfig as a function', () => {
     expect(indexExport.mockConfig).to.be.an('function')
   });
-  it('cleanup', () => {
+
+  it('should export cleanup as a function', () => {
     expect(indexExport.cleanup).to.be.an('function')
   });
 });
