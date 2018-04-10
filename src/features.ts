@@ -32,3 +32,7 @@ export const features: FeaturesList = {
   pubsub,
   storage,
 };
+
+export interface TestFeatureList extends FeaturesList {
+  cleanup();
+}
