@@ -33,6 +33,6 @@ export const features: LazyFeatures = {
   storage,
 };
 
-export interface FeatureList extends LazyFeatures {
+export interface FeaturesList extends LazyFeatures {
   cleanup;
 }

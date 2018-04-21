@@ -24,7 +24,7 @@ import { AppOptions } from 'firebase-admin';
 import { merge } from 'lodash';
 
 import { FirebaseFunctionsTest } from './lifecycle';
-import { features as lazyFeatures, FeatureList } from './features';
+import { features as lazyFeatures, FeaturesList } from './features';
 
 export = (firebaseConfig?: AppOptions) => {
   const test = new FirebaseFunctionsTest();
@@ -35,5 +35,5 @@ export = (firebaseConfig?: AppOptions) => {
   features = merge({}, features, {
     cleanup: () => test.cleanup,
   });
-  return features as FeatureList;
+  return features as FeaturesList;
 };
