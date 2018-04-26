@@ -59,6 +59,13 @@ describe('lifecycle', () => {
   });
 
   describe('#cleanUp', () => {
+    beforeEach(() => {
+      delete process.env.FIREBASE_CONFIG;
+      delete process.env.GCLOUD_PROJECT;
+      delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
+      delete process.env.CLOUD_RUNTIME_CONFIG;
+    });
+
     afterEach(() => {
       delete process.env.FIREBASE_CONFIG;
       delete process.env.GCLOUD_PROJECT;

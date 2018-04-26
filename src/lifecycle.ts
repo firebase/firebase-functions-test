@@ -30,12 +30,7 @@ export class FirebaseFunctionsTest {
   private _oldEnv: { [key: string]: string };
 
   constructor() {
-    this._oldEnv = {
-      FIREBASE_CONFIG: process.env.FIREBASE_CONFIG,
-      GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-      GCLOUD_PROJECT: process.env.GCLOUD_PROJECT,
-      CLOUD_RUNTIME_CONFIG: process.env.CLOUD_RUNTIME_CONFIG,
-    };
+    this._oldEnv = {};
   }
 
   /** Initialize the SDK. */
@@ -50,6 +45,14 @@ export class FirebaseFunctionsTest {
       /** Path to a service account key file to be used when initializing the Firebase app. */
       pathToServiceAccountKey?: string,
     ) {
+
+    this._oldEnv = {
+      FIREBASE_CONFIG: process.env.FIREBASE_CONFIG,
+      GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+      GCLOUD_PROJECT: process.env.GCLOUD_PROJECT,
+      CLOUD_RUNTIME_CONFIG: process.env.CLOUD_RUNTIME_CONFIG,
+    };
+
     if (isEmpty(firebaseConfig)) {
       process.env.FIREBASE_CONFIG = JSON.stringify({
           databaseURL: 'https://not-a-project.firebaseio.com',
