@@ -35,5 +35,5 @@ export = (firebaseConfig?: AppOptions) => {
   features = merge({}, features, {
     cleanup: () => test.cleanup,
   });
-  return features;
+  return features as FeaturesList;
 };

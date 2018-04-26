@@ -7,7 +7,7 @@ import * as firestore from './providers/firestore';
 import * as pubsub from './providers/pubsub';
 import * as storage from './providers/storage';
 
-export interface FeaturesList {
+export interface LazyFeatures {
   mockConfig: typeof mockConfig;
   wrap: typeof wrap;
   makeChange: typeof makeChange;
@@ -20,7 +20,7 @@ export interface FeaturesList {
   storage: typeof storage;
 }
 
-export const features: FeaturesList = {
+export const features: LazyFeatures = {
   mockConfig,
   wrap,
   makeChange,
@@ -32,3 +32,7 @@ export const features: FeaturesList = {
   pubsub,
   storage,
 };
+
+export interface FeaturesList extends LazyFeatures {
+  cleanup;
+}
