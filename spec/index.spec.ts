@@ -32,18 +32,18 @@ describe('index', () => {
   });
 
   it('should export the expected functions and namespaces', () => {
-    expect(Object.getOwnPropertyNames(indexExport)).to.deep.equal([
-      'mockConfig',
-      'wrap',
-      'makeChange',
+    expect(Object.getOwnPropertyNames(indexExport).sort()).to.deep.equal([
       'analytics',
       'auth',
+      'cleanup',
       'crashlytics',
       'database',
       'firestore',
+      'makeChange',
+      'mockConfig',
       'pubsub',
       'storage',
-      'cleanup',
+      'wrap',
     ]);
   });
 
