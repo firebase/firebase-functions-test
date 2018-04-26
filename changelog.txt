@@ -1,0 +1,2 @@
+fixed - Fix bug where setting service account key file location when initializing the SDK wasn't working.
+fixed - Fix bug where `cleanup` was not in the TypeScript type definition of the top level module export.
