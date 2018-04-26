@@ -28,7 +28,12 @@ import { afterEach } from 'mocha';
 
 describe('lifecycle', () => {
   describe('#init', () => {
-    let test = new FirebaseFunctionsTest();
+    let test;
+
+    before(() => {
+      test = new FirebaseFunctionsTest();
+    });
+
     afterEach(() => {
       test.cleanup();
     });

@@ -29,8 +29,10 @@ import { FirebaseFunctionsTest } from '../src/lifecycle';
 
 describe('app', () => {
   let appInstance;
-  let test = new FirebaseFunctionsTest();
+  let test;
+
   before(() => {
+    test = new FirebaseFunctionsTest();
     test.init();
     appInstance = testApp();
   });

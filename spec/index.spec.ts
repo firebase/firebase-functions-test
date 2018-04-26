@@ -21,37 +21,47 @@
 // SOFTWARE.
 
 import 'mocha';
-import './lifecycle.spec';
-import './main.spec';
-import './app.spec';
 import { expect } from 'chai';
 
-/* tslint:disable-next-line:no-var-requires */
-const indexExport = require('../src')();
-
 describe('index', () => {
+  /* tslint:disable-next-line:no-var-requires */
+  const indexExport = require('../src')({ projectId: 'fakeProject' }, 'fakeServiceAccount');
   after(() => {
     // Call cleanup (handles case of cleanup function not existing)
     indexExport.cleanup && indexExport.cleanup();
   });
 
-  it('should export wrap as a function', () => {
-    expect(indexExport.wrap).to.be.an('function');
+  it('should export the expected functions and namespaces', () => {
+    expect(Object.getOwnPropertyNames(indexExport)).to.deep.equal([
+      'mockConfig',
+      'wrap',
+      'makeChange',
+      'analytics',
+      'auth',
+      'crashlytics',
+      'database',
+      'firestore',
+      'pubsub',
+      'storage',
+      'cleanup',
+    ]);
   });
 
-  it('should export makeChange as a function', () => {
-    expect(indexExport.makeChange).to.be.an('function');
+  it('should set env variables based parameters SDK was initialized with', () => {
+    expect(process.env.FIREBASE_CONFIG).to.equal(JSON.stringify({ projectId: 'fakeProject' }));
+    expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).to.equal('fakeServiceAccount');
   });
 
-  it('should export mockConfig as a function', () => {
-    expect(indexExport.mockConfig).to.be.an('function');
-  });
-
-  it('should export cleanup as a function', () => {
-    expect(indexExport.cleanup).to.be.an('function');
+  it('should clean up env variables once cleanup is called', () => {
+    indexExport.cleanup();
+    expect(process.env.FIREBASE_CONFIG).to.equal(undefined);
+    expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).to.equal(undefined);
   });
 });
 
+import './lifecycle.spec';
+import './main.spec';
+import './app.spec';
 // import './providers/analytics.spec';
 // import './providers/auth.spec';
 // import './providers/database.spec';

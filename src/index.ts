@@ -26,14 +26,14 @@ import { merge } from 'lodash';
 import { FirebaseFunctionsTest } from './lifecycle';
 import { features as lazyFeatures, FeaturesList } from './features';
 
-export = (firebaseConfig?: AppOptions) => {
+export = (firebaseConfig?: AppOptions, pathToServiceAccountKey?: string) => {
   const test = new FirebaseFunctionsTest();
-  test.init(firebaseConfig);
+  test.init(firebaseConfig, pathToServiceAccountKey);
   // Ensure other files get loaded after init function, since they load `firebase-functions`
   // which will issue warning if process.env.FIREBASE_CONFIG is not yet set.
   let features = require('./features').features as typeof lazyFeatures;
   features = merge({}, features, {
-    cleanup: () => test.cleanup,
+    cleanup: () => test.cleanup(),
   });
   return features;
 };
