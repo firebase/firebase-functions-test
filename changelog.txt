@@ -1,0 +1,1 @@
+changed - Update firebase-functions peer dependency to accept any versions above v1.0.1.
