@@ -46,7 +46,7 @@
   },
   "peerDependencies": {
     "firebase-functions": ">1.0.1",
-    "firebase-admin": "^5.12.0"
+    "firebase-admin": ">5.12.0"
   },
   "engines": {
     "node": ">=6.0.0"
