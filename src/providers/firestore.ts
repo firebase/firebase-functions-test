@@ -162,8 +162,8 @@ export function objectToValueProto(data: object) {
       };
     }
     if (val instanceof firestore.DocumentReference) {
-      const projectId: string = 'projectId'; // Determine project id
-      const database: string = '(default)'; // Determine database
+      const projectId: string = get(val, '_referencePath.projectId');
+      const database: string = get(val, '_referencePath.databaseId');
       const referenceValue: string = [
         'projects', projectId,
         'databases', database,
