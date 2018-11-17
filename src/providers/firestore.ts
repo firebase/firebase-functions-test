@@ -161,6 +161,21 @@ export function objectToValueProto(data: object) {
         bytesValue: val,
       };
     }
+    if (val instanceof firestore.DocumentReference) {
+      const projectId: string = get(val, '_referencePath.projectId');
+      const database: string = get(val, '_referencePath.databaseId');
+      const referenceValue: string = [
+        'projects', projectId,
+        'databases', database,
+        val.path,
+      ].join('/');
+      return { referenceValue };
+    }
+    if (val instanceof firestore.Timestamp) {
+      return {
+        timestampValue: val.toDate().toISOString(),
+      };
+    }
     if (isPlainObject(val)) {
       return {
         mapValue: {
@@ -170,7 +185,7 @@ export function objectToValueProto(data: object) {
     }
     throw new Error(
       'Cannot encode ' + val + 'to a Firestore Value.' +
-      ' Local testing does not yet support Firestore document reference values or geo points.');
+      ' Local testing does not yet support Firestore geo points.');
   };
 
   return mapValues(data, encodeHelper);
