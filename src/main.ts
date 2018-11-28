@@ -23,6 +23,7 @@
 import { has, merge, random, get } from 'lodash';
 
 import { CloudFunction, EventContext, Resource, Change } from 'firebase-functions';
+import {makeDataSnapshot} from './providers/database';
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -65,7 +66,7 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
       eventId: _makeEventId(),
       resource: {
         service: cloudFunction.__trigger.eventTrigger.service,
-        name: _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, options? options.params: null),
+        name: _compiledWildcardPath(cloudFunction.__trigger.eventTrigger.resource, options? options.params: null),
       },
       eventType: cloudFunction.__trigger.eventTrigger.eventType,
       timestamp: (new Date()).toISOString(),
@@ -74,7 +75,14 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
     if (defaultContext.eventType.match(/firebase.database/)) {
       defaultContext.authType = 'UNAUTHENTICATED';
       defaultContext.auth = null;
+
+      if (typeof data === 'object') {
+          const unsafeData = data as any;
+          const formattedSnapshotPath = _compiledWildcardPath(unsafeData._path, options ? options.params : null);
+          data = makeDataSnapshot(unsafeData._data, formattedSnapshotPath) as any;
+      }
     }
+
     let context = merge({}, defaultContext, options);
     return cloudFunction.run(
       data,
@@ -85,14 +93,15 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
 }
 
 /** @internal */
-export function _makeResourceName(triggerResource: string, params = {}): string {
+export function _compiledWildcardPath(triggerResource: string, params = {}): string {
   const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
   let resourceName = triggerResource.replace(wildcardRegex, (wildcard) => {
     let wildcardNoBraces = wildcard.slice(1, -1); // .slice removes '{' and '}' from wildcard
     let sub = get(params, wildcardNoBraces);
     return sub || wildcardNoBraces + random(1, 9);
   });
-  return resourceName;
+
+  return resourceName.split('/').filter((c) => c).join('/');
 }
 
 function _makeEventId(): string {

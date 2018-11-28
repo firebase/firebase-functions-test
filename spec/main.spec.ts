@@ -24,7 +24,9 @@ import { expect } from 'chai';
 import * as functions from 'firebase-functions';
 import { set } from 'lodash';
 
-import { mockConfig, makeChange, _makeResourceName, wrap } from '../src/main';
+import { mockConfig, makeChange, _compiledWildcardPath, wrap } from '../src/main';
+import { makeDataSnapshot } from '../src/providers/database';
+import { FirebaseFunctionsTest } from '../src/lifecycle';
 
 describe('main', () => {
   describe('#wrap', () => {
@@ -98,11 +100,29 @@ describe('main', () => {
       expect(context.params).to.deep.equal(params);
       expect(context.resource.name).to.equal('ref/a/nested/b');
     });
+
+    it('should set DataSnapshot path based on params', () => {
+      const fft = new FirebaseFunctionsTest();
+      fft.init();
+
+      const snap = makeDataSnapshot(
+          'hello world',
+          '/ref/{wildcard}/nested/{anotherWildcard}',
+      );
+      const params = {
+          wildcard: 'at',
+          anotherWildcard: 'bat',
+      };
+      const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
+      const result = wrapped(snap, { params });
+      expect(result.data._path).to.equal('ref/at/nested/bat');
+      expect(result.context.resource.name).to.equal('ref/at/nested/bat');
+    });
   });
 
-  describe('#_makeResourceName', () => {
+  describe('#_compiledWildcardPath', () => {
     it('constructs the right resource name from params', () => {
-      const resource = _makeResourceName('companies/{company}/users/{user}', {
+      const resource = _compiledWildcardPath('companies/{company}/users/{user}', {
         company: 'Google',
         user: 'Lauren',
       });
