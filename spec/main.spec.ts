@@ -127,25 +127,6 @@ describe('main', () => {
       expect(result.context.resource.name).to.equal('ref/at/nested/bat');
     });
 
-    it('should set auto-fill DataSnapshot path based on params', () => {
-      const fft = new FirebaseFunctionsTest();
-      fft.init();
-
-      const snap = makeDataSnapshot(
-          'hello world',
-          '/ref/{wildcard}/nested/{anotherWildcard}',
-      );
-      const params = {
-          wildcard: 'at',
-          anotherWildcard: 'bat',
-      };
-      const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
-      const result = wrapped(snap, { params });
-      expect(result.data._path).to.equal('ref/at/nested/bat');
-      expect(result.data.key).to.equal('bat');
-      expect(result.context.resource.name).to.equal('ref/at/nested/bat');
-    });
-
     it('should set auto-fill params based on DataSnapshot path', () => {
       const fft = new FirebaseFunctionsTest();
       fft.init();
