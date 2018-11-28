@@ -24,7 +24,7 @@ import { expect } from 'chai';
 import * as functions from 'firebase-functions';
 import { set } from 'lodash';
 
-import { mockConfig, makeChange, _compiledWildcardPath, wrap } from '../src/main';
+import {mockConfig, makeChange, _compiledWildcardPath, wrap, _isValidWildcardMatch} from '../src/main';
 import { makeDataSnapshot } from '../src/providers/database';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
 
@@ -118,6 +118,52 @@ describe('main', () => {
       expect(result.data._path).to.equal('ref/at/nested/bat');
       expect(result.context.resource.name).to.equal('ref/at/nested/bat');
     });
+
+    it('should error when DataSnapshot wildcard path does not match resource path', () => {
+        const fft = new FirebaseFunctionsTest();
+        fft.init();
+
+        const snap = makeDataSnapshot(
+            'hello world',
+            '/different/{wildcard}/nested/{anotherWildcard}',
+        );
+        const params = {
+            wildcard: 'at',
+            anotherWildcard: 'bat',
+        };
+        const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
+        expect(() => wrapped(snap, { params })).to.throw();
+    });
+  });
+
+  describe('#_isValidWildcardMatch', () => {
+      it('should match a path which fits a wildcard template', () => {
+          const valid = _isValidWildcardMatch(
+              'companies/{company}/users/{user}',
+              '/companies/firebase/users/abe');
+          expect(valid).to.equal(true);
+      });
+
+      it('should not match a path which is too long', () => {
+          const tooLong = _isValidWildcardMatch(
+              'companies/{company}/users/{user}',
+              'companies/firebase/users/abe/boots');
+          expect(tooLong).to.equal(false);
+      });
+
+      it('should not match a path which is too short', () => {
+          const tooShort = _isValidWildcardMatch(
+              'companies/{company}/users/{user}',
+              'companies/firebase/users/');
+          expect(tooShort).to.equal(false);
+      });
+
+      it('should not match a path which has different chunks', () => {
+          const differentChunk = _isValidWildcardMatch(
+              'locations/{company}/users/{user}',
+              'companies/firebase/users/{user}');
+          expect(differentChunk).to.equal(false);
+      });
   });
 
   describe('#_compiledWildcardPath', () => {

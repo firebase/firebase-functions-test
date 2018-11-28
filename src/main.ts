@@ -72,15 +72,22 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
       timestamp: (new Date()).toISOString(),
       params: {},
     };
+
+    const unsafeData = data as any;
     if (defaultContext.eventType.match(/firebase.database/)) {
       defaultContext.authType = 'UNAUTHENTICATED';
       defaultContext.auth = null;
 
-      if (typeof data === 'object') {
-          const unsafeData = data as any;
-          const formattedSnapshotPath = _compiledWildcardPath(unsafeData._path, options ? options.params : null);
-          data = makeDataSnapshot(unsafeData._data, formattedSnapshotPath) as any;
+      if (typeof unsafeData === 'object' && unsafeData._path) {
+        const formattedSnapshotPath = _compiledWildcardPath(unsafeData._path, options ? options.params : null);
+        data = makeDataSnapshot(unsafeData._data, formattedSnapshotPath, unsafeData.app) as any;
       }
+    }
+
+    if (unsafeData._path &&
+        !_isValidWildcardMatch(cloudFunction.__trigger.eventTrigger.resource, unsafeData._path)) {
+      throw new Error(`Provided path ${_trimSlashes(unsafeData._path)} \
+does not match trigger template ${_trimSlashes(cloudFunction.__trigger.eventTrigger.resource)}`);
     }
 
     let context = merge({}, defaultContext, options);
@@ -101,7 +108,27 @@ export function _compiledWildcardPath(triggerResource: string, params = {}): str
     return sub || wildcardNoBraces + random(1, 9);
   });
 
-  return resourceName.split('/').filter((c) => c).join('/');
+  return _trimSlashes(resourceName);
+}
+
+export function _isValidWildcardMatch(wildcardPath, snapshotPath) {
+  const wildcardRegex = /{.+}/;
+  const wildcardChunks = _trimSlashes(wildcardPath).split('/');
+  const snapshotChucks = _trimSlashes(snapshotPath).split('/');
+
+  if (snapshotChucks.length > wildcardChunks.length) {
+    return false;
+  }
+
+  const mismatchedChunks = wildcardChunks.slice(-snapshotChucks.length).filter((chunk, index) => {
+    return !(wildcardRegex.exec(chunk) || chunk === snapshotChucks[index]);
+  });
+
+  return !mismatchedChunks.length;
+}
+
+export function _trimSlashes(path: string) {
+  return path.split('/').filter((c) => c).join('/');
 }
 
 function _makeEventId(): string {
