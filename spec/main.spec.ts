@@ -161,6 +161,7 @@ describe('main', () => {
 
       expect(result.data._path).to.equal('ref/cat/nested/that');
       expect(result.data.key).to.equal('that');
+      expect(result.context.params.wildcard).to.equal('cat');
       expect(result.context.resource.name).to.equal('ref/cat/nested/that');
     });
 
@@ -179,6 +180,8 @@ describe('main', () => {
 
       expect(result.data._path).to.equal('ref/cat/nested/where');
       expect(result.data.key).to.equal('where');
+      expect(result.context.params.wildcard).to.equal('cat');
+      expect(result.context.params.anotherWildcard).to.equal('where');
       expect(result.context.resource.name).to.equal('ref/cat/nested/where');
     });
 
