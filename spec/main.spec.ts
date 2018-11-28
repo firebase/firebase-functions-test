@@ -116,6 +116,7 @@ describe('main', () => {
       const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
       const result = wrapped(snap, { params });
       expect(result.data._path).to.equal('ref/at/nested/bat');
+      expect(result.data.key).to.equal('bat');
       expect(result.context.resource.name).to.equal('ref/at/nested/bat');
     });
 
