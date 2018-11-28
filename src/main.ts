@@ -62,6 +62,19 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
     throw new Error('This library can only be used with functions written with firebase-functions v1.0.0 and above');
   }
   let wrapped: WrappedFunction = (data: T, options: EventContextOptions) => {
+    // Although in Typescript we require `options` some of our JS samples do not pass it.
+    options = options || {};
+
+    const unsafeData = data as any;
+    if (typeof unsafeData === 'object' && unsafeData._path) {
+        options.params = {
+          ...options.params,
+          ..._extractParamsFromPath(cloudFunction.__trigger.eventTrigger.resource, unsafeData._path),
+        };
+        const formattedSnapshotPath = _compiledWildcardPath(unsafeData._path, options ? options.params : null);
+        data = makeDataSnapshot(unsafeData._data, formattedSnapshotPath, unsafeData.app) as any;
+    }
+
     const defaultContext: EventContext = {
       eventId: _makeEventId(),
       resource: {
@@ -73,15 +86,9 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
       params: {},
     };
 
-    const unsafeData = data as any;
     if (defaultContext.eventType.match(/firebase.database/)) {
       defaultContext.authType = 'UNAUTHENTICATED';
       defaultContext.auth = null;
-
-      if (typeof unsafeData === 'object' && unsafeData._path) {
-        const formattedSnapshotPath = _compiledWildcardPath(unsafeData._path, options ? options.params : null);
-        data = makeDataSnapshot(unsafeData._data, formattedSnapshotPath, unsafeData.app) as any;
-      }
     }
 
     if (unsafeData._path &&
@@ -109,6 +116,27 @@ export function _compiledWildcardPath(triggerResource: string, params = {}): str
   });
 
   return _trimSlashes(resourceName);
+}
+
+export function _extractParamsFromPath(wildcardPath, snapshotPath) {
+  if (!_isValidWildcardMatch(wildcardPath, snapshotPath)) {
+    return {};
+  }
+
+  const wildcardKeyRegex = /{(.+)}/;
+  const wildcardChunks = _trimSlashes(wildcardPath).split('/');
+  const snapshotChucks = _trimSlashes(snapshotPath).split('/');
+  return wildcardChunks.slice(-snapshotChucks.length).reduce((params, chunk, index) => {
+    let match = wildcardKeyRegex.exec(chunk);
+    if (match) {
+        const wildcardKey = match[1];
+        const potentialWildcardValue = snapshotChucks[index];
+        if (!wildcardKeyRegex.exec(potentialWildcardValue)) {
+          params[wildcardKey] = potentialWildcardValue;
+        }
+    }
+    return params;
+  }, {});
 }
 
 export function _isValidWildcardMatch(wildcardPath, snapshotPath) {

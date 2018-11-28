@@ -24,7 +24,14 @@ import { expect } from 'chai';
 import * as functions from 'firebase-functions';
 import { set } from 'lodash';
 
-import {mockConfig, makeChange, _compiledWildcardPath, wrap, _isValidWildcardMatch} from '../src/main';
+import {
+    mockConfig,
+    makeChange,
+    _compiledWildcardPath,
+    wrap,
+    _isValidWildcardMatch,
+    _extractParamsFromPath,
+} from '../src/main';
 import { makeDataSnapshot } from '../src/providers/database';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
 
@@ -56,7 +63,7 @@ describe('main', () => {
       expect(typeof context.eventId).to.equal('string');
       expect(context.resource.service).to.equal('service');
       expect(/ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/
-        .test(context.resource.name)).to.be.true;
+      .test(context.resource.name)).to.be.true;
       expect(context.eventType).to.equal('event');
       expect(Date.parse(context.timestamp)).to.be.greaterThan(0);
       expect(context.params).to.deep.equal({});
@@ -101,7 +108,7 @@ describe('main', () => {
       expect(context.resource.name).to.equal('ref/a/nested/b');
     });
 
-    it('should set DataSnapshot path based on params', () => {
+    it('should set auto-fill DataSnapshot path based on params', () => {
       const fft = new FirebaseFunctionsTest();
       fft.init();
 
@@ -120,20 +127,112 @@ describe('main', () => {
       expect(result.context.resource.name).to.equal('ref/at/nested/bat');
     });
 
-    it('should error when DataSnapshot wildcard path does not match resource path', () => {
-        const fft = new FirebaseFunctionsTest();
-        fft.init();
+    it('should set auto-fill DataSnapshot path based on params', () => {
+      const fft = new FirebaseFunctionsTest();
+      fft.init();
 
-        const snap = makeDataSnapshot(
-            'hello world',
-            '/different/{wildcard}/nested/{anotherWildcard}',
-        );
-        const params = {
-            wildcard: 'at',
-            anotherWildcard: 'bat',
-        };
-        const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
-        expect(() => wrapped(snap, { params })).to.throw();
+      const snap = makeDataSnapshot(
+          'hello world',
+          '/ref/{wildcard}/nested/{anotherWildcard}',
+      );
+      const params = {
+          wildcard: 'at',
+          anotherWildcard: 'bat',
+      };
+      const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
+      const result = wrapped(snap, { params });
+      expect(result.data._path).to.equal('ref/at/nested/bat');
+      expect(result.data.key).to.equal('bat');
+      expect(result.context.resource.name).to.equal('ref/at/nested/bat');
+    });
+
+    it('should set auto-fill params based on DataSnapshot path', () => {
+      const fft = new FirebaseFunctionsTest();
+      fft.init();
+
+      const snap = makeDataSnapshot(
+        'hello world',
+        '/ref/cat/nested/that',
+      );
+
+      const params = {};
+      const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
+      const result = wrapped(snap, { params });
+
+      expect(result.data._path).to.equal('ref/cat/nested/that');
+      expect(result.data.key).to.equal('that');
+      expect(result.context.resource.name).to.equal('ref/cat/nested/that');
+    });
+
+    it('should allow mixed wildcards based on DataSnapshot path and params', () => {
+      const fft = new FirebaseFunctionsTest();
+      fft.init();
+
+      const snap = makeDataSnapshot(
+          'hello world',
+          '/ref/cat/nested/{anotherWildcard}',
+      );
+
+      const params = {anotherWildcard: 'where'};
+      const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
+      const result = wrapped(snap, { params });
+
+      expect(result.data._path).to.equal('ref/cat/nested/where');
+      expect(result.data.key).to.equal('where');
+      expect(result.context.resource.name).to.equal('ref/cat/nested/where');
+    });
+
+    it('should error when DataSnapshot wildcard path does not match resource path', () => {
+      const fft = new FirebaseFunctionsTest();
+      fft.init();
+
+      const snap = makeDataSnapshot(
+          'hello world',
+          '/different/{wildcard}/nested/{anotherWildcard}',
+      );
+      const params = {
+          wildcard: 'at',
+          anotherWildcard: 'bat',
+      };
+      const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
+      expect(() => wrapped(snap, { params })).to.throw();
+    });
+  });
+
+  describe('#_extractParamsFromPath', () => {
+    it('should match a path which fits a wildcard template', () => {
+      const params = _extractParamsFromPath(
+        'companies/{company}/users/{user}',
+                '/companies/firebase/users/abe');
+      expect(params).to.deep.equal({company: 'firebase', user: 'abe'});
+    });
+
+    it('should not match unfilled wildcards which is too long', () => {
+      const params = _extractParamsFromPath(
+          'companies/{company}/users/{user}',
+          'companies/{still_wild}/users/abe');
+      expect(params).to.deep.equal({user: 'abe'});
+    });
+
+    it('should not match a path which is too long', () => {
+      const params = _extractParamsFromPath(
+          'companies/{company}/users/{user}',
+          'companies/firebase/users/abe/boots');
+      expect(params).to.deep.equal({});
+    });
+
+    it('should not match a path which is too short', () => {
+      const params = _extractParamsFromPath(
+        'companies/{company}/users/{user}',
+        'companies/firebase/users/');
+      expect(params).to.deep.equal({});
+    });
+
+    it('should not match a path which has different chunks', () => {
+      const params = _extractParamsFromPath(
+        'locations/{company}/users/{user}',
+        'companies/firebase/users/{user}');
+      expect(params).to.deep.equal({});
     });
   });
 
