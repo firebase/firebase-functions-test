@@ -54,8 +54,9 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
   if (!has(cloudFunction, '__trigger')) {
     throw new Error('Wrap can only be called on functions written with the firebase-functions SDK.');
   }
-  if (!has(cloudFunction, '__trigger.eventTrigger')) {
-    throw new Error('Wrap function is only available for non-HTTP functions.');
+  if (has(cloudFunction, '__trigger.httpsTrigger') &&
+      ((cloudFunction.__trigger.labels || {})['deployment-callable'] !== 'true')) {
+    throw new Error('Wrap function is only available for `onCall` HTTP functions, not `onRequest`.');
   }
   if (!has(cloudFunction, 'run')) {
     throw new Error('This library can only be used with functions written with firebase-functions v1.0.0 and above');
@@ -63,15 +64,15 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
   let wrapped: WrappedFunction = (data: T, options: EventContextOptions) => {
     const defaultContext: EventContext = {
       eventId: _makeEventId(),
-      resource: {
+      resource: cloudFunction.__trigger.eventTrigger? {
         service: cloudFunction.__trigger.eventTrigger.service,
         name: _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, options? options.params: null),
-      },
-      eventType: cloudFunction.__trigger.eventTrigger.eventType,
+      } : undefined,
+      eventType: cloudFunction.__trigger.eventTrigger? cloudFunction.__trigger.eventTrigger.eventType : undefined,
       timestamp: (new Date()).toISOString(),
       params: {},
     };
-    if (defaultContext.eventType.match(/firebase.database/)) {
+    if (defaultContext.eventType && defaultContext.eventType.match(/firebase.database/)) {
       defaultContext.authType = 'UNAUTHENTICATED';
       defaultContext.auth = null;
     }
