@@ -22,7 +22,7 @@
 
 import { has, merge, random, get } from 'lodash';
 
-import { CloudFunction, EventContext, Resource, Change } from 'firebase-functions';
+import { CloudFunction, EventContext, Change } from 'firebase-functions';
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -44,10 +44,26 @@ export type EventContextOptions = {
   authType?: 'ADMIN' | 'USER' | 'UNAUTHENTICATED';
 };
 
+/** Fields of the callable context that can be overridden/customized. */
+export type CallableContextOptions = {
+    /**
+     * The result of decoding and verifying a Firebase Auth ID token.
+     */
+    auth?: {
+        uid: string;
+        token: string;
+    };
+
+    /**
+     * An unverified token for a Firebase Instance ID.
+     */
+    instanceIdToken?: string;
+};
+
 /** A function that can be called with test data and optional override values for the event context.
  * It will subsequently invoke the cloud function it wraps with the provided test data and a generated event context.
  */
-export type WrappedFunction = (data: any, options?: EventContextOptions) => any | Promise<any>;
+export type WrappedFunction = (data: any, options?: EventContextOptions | CallableContextOptions) => any | Promise<any>;
 
 /** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
 export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
@@ -55,20 +71,21 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
     throw new Error('Wrap can only be called on functions written with the firebase-functions SDK.');
   }
   if (has(cloudFunction, '__trigger.httpsTrigger') &&
-      ((cloudFunction.__trigger.labels || {})['deployment-callable'] !== 'true')) {
+      (get(cloudFunction, '__trigger.labels.deployment-callable') !== 'true')) {
     throw new Error('Wrap function is only available for `onCall` HTTP functions, not `onRequest`.');
   }
   if (!has(cloudFunction, 'run')) {
     throw new Error('This library can only be used with functions written with firebase-functions v1.0.0 and above');
   }
-  let wrapped: WrappedFunction = (data: T, options: EventContextOptions) => {
+
+  let wrapped: WrappedFunction = (data: T, options: EventContextOptions | CallableContextOptions) => {
     const defaultContext: EventContext = {
       eventId: _makeEventId(),
-      resource: cloudFunction.__trigger.eventTrigger? {
+      resource: cloudFunction.__trigger.eventTrigger && {
         service: cloudFunction.__trigger.eventTrigger.service,
-        name: _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, options? options.params: null),
-      } : undefined,
-      eventType: cloudFunction.__trigger.eventTrigger? cloudFunction.__trigger.eventTrigger.eventType : undefined,
+        name: _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, options.params),
+      },
+      eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
       timestamp: (new Date()).toISOString(),
       params: {},
     };
