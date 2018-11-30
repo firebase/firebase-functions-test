@@ -34,11 +34,11 @@ export type EventContextOptions = {
    * If omitted, random values will be generated.
    */
   params?: { [option: string]: any };
-  /** (Only for database functions.) Firebase auth variable representing the user that triggered
+  /** (Only for database functions and https.onCall.) Firebase auth variable representing the user that triggered
    *  the function. Defaults to null.
    */
   auth?: any;
-  /** (Only for database functions.) The authentication state of the user that triggered the function.
+  /** (Only for database and functions.) The authentication state of the user that triggered the function.
    * Default is 'UNAUTHENTICATED'.
    */
   authType?: 'ADMIN' | 'USER' | 'UNAUTHENTICATED';
@@ -46,59 +46,85 @@ export type EventContextOptions = {
 
 /** Fields of the callable context that can be overridden/customized. */
 export type CallableContextOptions = {
-    /**
-     * The result of decoding and verifying a Firebase Auth ID token.
-     */
-    auth?: {
-        uid: string;
-        token: string;
-    };
+  /**
+   * The result of decoding and verifying a Firebase Auth ID token.
+   */
+  auth?: any;
 
-    /**
-     * An unverified token for a Firebase Instance ID.
-     */
-    instanceIdToken?: string;
+  /**
+   * An unverified token for a Firebase Instance ID.
+   */
+  instanceIdToken?: string;
 };
+
+/* Fields for both Event and Callable contexts, checked at runtime */
+export type ContextOptions = EventContextOptions | CallableContextOptions;
 
 /** A function that can be called with test data and optional override values for the event context.
  * It will subsequently invoke the cloud function it wraps with the provided test data and a generated event context.
  */
-export type WrappedFunction = (data: any, options?: EventContextOptions | CallableContextOptions) => any | Promise<any>;
+export type WrappedFunction = (data: any, options?: ContextOptions) => any | Promise<any>;
 
 /** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
 export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
   if (!has(cloudFunction, '__trigger')) {
     throw new Error('Wrap can only be called on functions written with the firebase-functions SDK.');
   }
+
   if (has(cloudFunction, '__trigger.httpsTrigger') &&
       (get(cloudFunction, '__trigger.labels.deployment-callable') !== 'true')) {
     throw new Error('Wrap function is only available for `onCall` HTTP functions, not `onRequest`.');
   }
+
   if (!has(cloudFunction, 'run')) {
     throw new Error('This library can only be used with functions written with firebase-functions v1.0.0 and above');
   }
 
-  let wrapped: WrappedFunction = (data: T, options: EventContextOptions | CallableContextOptions) => {
-    const defaultContext: EventContext = {
-      eventId: _makeEventId(),
-      resource: cloudFunction.__trigger.eventTrigger && {
-        service: cloudFunction.__trigger.eventTrigger.service,
-        name: _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, options.params),
-      },
-      eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
-      timestamp: (new Date()).toISOString(),
-      params: {},
-    };
-    if (defaultContext.eventType && defaultContext.eventType.match(/firebase.database/)) {
-      defaultContext.authType = 'UNAUTHENTICATED';
-      defaultContext.auth = null;
+  const isCallableFunction = get(cloudFunction, '__trigger.labels.deployment-callable') === 'true';
+
+  let wrapped: WrappedFunction = (data: T, options: ContextOptions) => {
+    // Although in Typescript we require `options` some of our JS samples do not pass it.
+    options = options || {};
+    let context;
+
+    if (isCallableFunction) {
+      _checkOptionValidity(['auth', 'instanceIdToken'], options);
+      let callableContextOptions = options as CallableContextOptions;
+      context = {
+          ...callableContextOptions,
+          rawRequest: 'rawRequest is not supported in firebase-functions-test',
+      };
+    } else {
+      _checkOptionValidity(['eventId', 'timestamp', 'params', 'auth', 'authType'], options);
+      let eventContextOptions = options as EventContextOptions;
+      const defaultContext: EventContext = {
+          eventId: _makeEventId(),
+          resource: cloudFunction.__trigger.eventTrigger && {
+              service: cloudFunction.__trigger.eventTrigger.service,
+              name: _makeResourceName(
+                cloudFunction.__trigger.eventTrigger.resource,
+                has(eventContextOptions, 'params') && eventContextOptions.params,
+              ),
+          },
+          eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
+          timestamp: (new Date()).toISOString(),
+          params: {},
+      };
+
+      if (has(defaultContext, 'eventType') &&
+        defaultContext.eventType.match(/firebase.database/)) {
+        defaultContext.authType = 'UNAUTHENTICATED';
+        defaultContext.auth = null;
+      }
+      context = merge({}, defaultContext, eventContextOptions);
     }
-    let context = merge({}, defaultContext, options);
+
     return cloudFunction.run(
       data,
       context,
     );
   };
+
   return wrapped;
 }
 
@@ -115,6 +141,14 @@ export function _makeResourceName(triggerResource: string, params = {}): string 
 
 function _makeEventId(): string {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+function _checkOptionValidity(validFields: string[], options: {[s: string]: any}) {
+    Object.keys(options).forEach((key) => {
+        if (validFields.indexOf(key) === -1) {
+            throw new Error(`Options object ${JSON.stringify(options)} has invalid key "${key}"`);
+        }
+    });
 }
 
 /** Make a Change object to be used as test data for Firestore and real time database onWrite and onUpdate functions. */
