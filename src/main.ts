@@ -38,7 +38,7 @@ export type EventContextOptions = {
    *  the function. Defaults to null.
    */
   auth?: any;
-  /** (Only for database and functions.) The authentication state of the user that triggered the function.
+  /** (Only for database and https.onCall functions.) The authentication state of the user that triggered the function.
    * Default is 'UNAUTHENTICATED'.
    */
   authType?: 'ADMIN' | 'USER' | 'UNAUTHENTICATED';
