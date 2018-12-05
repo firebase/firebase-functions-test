@@ -22,7 +22,7 @@
 
 import { has, merge, random, get, differenceWith } from 'lodash';
 
-import { CloudFunction, EventContext, Resource, Change } from 'firebase-functions';
+import { CloudFunction, EventContext, Change } from 'firebase-functions';
 import {makeDataSnapshot} from './providers/database';
 const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
 
@@ -36,95 +36,137 @@ export type EventContextOptions = {
    * If omitted, random values will be generated.
    */
   params?: { [option: string]: any };
-  /** (Only for database functions.) Firebase auth variable representing the user that triggered
+  /** (Only for database functions and https.onCall.) Firebase auth variable representing the user that triggered
    *  the function. Defaults to null.
    */
   auth?: any;
-  /** (Only for database functions.) The authentication state of the user that triggered the function.
+  /** (Only for database and https.onCall functions.) The authentication state of the user that triggered the function.
    * Default is 'UNAUTHENTICATED'.
    */
   authType?: 'ADMIN' | 'USER' | 'UNAUTHENTICATED';
 };
 
+/** Fields of the callable context that can be overridden/customized. */
+export type CallableContextOptions = {
+  /**
+   * The result of decoding and verifying a Firebase Auth ID token.
+   */
+  auth?: any;
+
+  /**
+   * An unverified token for a Firebase Instance ID.
+   */
+  instanceIdToken?: string;
+};
+
+/* Fields for both Event and Callable contexts, checked at runtime */
+export type ContextOptions = EventContextOptions | CallableContextOptions;
+
 /** A function that can be called with test data and optional override values for the event context.
  * It will subsequently invoke the cloud function it wraps with the provided test data and a generated event context.
  */
-export type WrappedFunction = (data: any, options?: EventContextOptions) => any | Promise<any>;
+export type WrappedFunction = (data: any, options?: ContextOptions) => any | Promise<any>;
 
 /** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
 export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
   if (!has(cloudFunction, '__trigger')) {
     throw new Error('Wrap can only be called on functions written with the firebase-functions SDK.');
   }
-  if (!has(cloudFunction, '__trigger.eventTrigger')) {
-    throw new Error('Wrap function is only available for non-HTTP functions.');
+
+  if (has(cloudFunction, '__trigger.httpsTrigger') &&
+      (get(cloudFunction, '__trigger.labels.deployment-callable') !== 'true')) {
+    throw new Error('Wrap function is only available for `onCall` HTTP functions, not `onRequest`.');
   }
+
   if (!has(cloudFunction, 'run')) {
     throw new Error('This library can only be used with functions written with firebase-functions v1.0.0 and above');
   }
-  let wrapped: WrappedFunction = (data: T, options: EventContextOptions) => {
+
+  const isCallableFunction = get(cloudFunction, '__trigger.labels.deployment-callable') === 'true';
+
+  let wrapped: WrappedFunction = (data: T, options: ContextOptions) => {
     // Although in Typescript we require `options` some of our JS samples do not pass it.
     options = options || {};
+    let context;
 
-    const unsafeData = data as any;
-    if (typeof unsafeData === 'object' && unsafeData._path) {
+    if (isCallableFunction) {
+      _checkOptionValidity(['auth', 'instanceIdToken'], options);
+      let callableContextOptions = options as CallableContextOptions;
+      context = {
+          ...callableContextOptions,
+          rawRequest: 'rawRequest is not supported in firebase-functions-test',
+      };
+    } else {
+      _checkOptionValidity(['eventId', 'timestamp', 'params', 'auth', 'authType'], options);
+      let eventContextOptions = options as EventContextOptions;
+      const unsafeData = data as any;
+
+      if (typeof unsafeData === 'object' && unsafeData._path) {
         // Remake the snapshot to standardize the path and remove extra slashes
-        const formattedSnapshotPath = _compiledWildcardPath(unsafeData._path, options ? options.params : null);
+        const formattedSnapshotPath = _compiledWildcardPath(
+            unsafeData._path,
+            eventContextOptions ? eventContextOptions.params : null);
         data = makeDataSnapshot(unsafeData._data, formattedSnapshotPath, unsafeData.app) as any;
 
         // Ensure the path has no wildcards
         if (unsafeData._path.match(wildcardRegex)) {
-            throw new Error(`Data path ("${unsafeData._path}") should not contain wildcards.`);
+          throw new Error(`Data path ("${unsafeData._path}") should not contain wildcards.`);
         }
 
         // Ensure that the same param wasn't specified by the path and the options.params bundle
         const pathParams = _extractParamsFromPath(cloudFunction.__trigger.eventTrigger.resource, unsafeData._path);
         const overlappingWildcards = differenceWith(
-            Object.keys(options.params),
-            Object.keys(pathParams),
+          Object.keys(eventContextOptions.params),
+          Object.keys(pathParams),
         );
 
         if (overlappingWildcards.length) {
-            throw new Error(`The same context parameter (${overlappingWildcards.join(', ')}) \
+          throw new Error(`The same context parameter (${overlappingWildcards.join(', ')}) \
 was supplied by the data path "${unsafeData._path}" and the options bundle "${JSON.stringify(options)}".`);
         }
 
         // Build final params bundle
-        options.params = {
-          ...options.params,
+        eventContextOptions.params = {
+          ...eventContextOptions.params,
           ...pathParams,
         };
-    }
-    ///
+      }
 
-    const defaultContext: EventContext = {
-      eventId: _makeEventId(),
-      resource: {
-        service: cloudFunction.__trigger.eventTrigger.service,
-        name: _compiledWildcardPath(cloudFunction.__trigger.eventTrigger.resource, options? options.params: null),
-      },
-      eventType: cloudFunction.__trigger.eventTrigger.eventType,
-      timestamp: (new Date()).toISOString(),
-      params: {},
-    };
+      const defaultContext: EventContext = {
+        eventId: _makeEventId(),
+        resource: cloudFunction.__trigger.eventTrigger && {
+          service: cloudFunction.__trigger.eventTrigger.service,
+          name: _compiledWildcardPath(
+            cloudFunction.__trigger.eventTrigger.resource,
+            has(eventContextOptions, 'params') && eventContextOptions.params,
+            ),
+          },
+          eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
+          timestamp: (new Date()).toISOString(),
+          params: {},
+      };
 
-    if (defaultContext.eventType.match(/firebase.database/)) {
-      defaultContext.authType = 'UNAUTHENTICATED';
-      defaultContext.auth = null;
-    }
+      if (has(defaultContext, 'eventType') &&
+        defaultContext.eventType.match(/firebase.database/)) {
+        defaultContext.authType = 'UNAUTHENTICATED';
+        defaultContext.auth = null;
+      }
 
-    if (unsafeData._path &&
+      if (unsafeData._path &&
         !_isValidWildcardMatch(cloudFunction.__trigger.eventTrigger.resource, unsafeData._path)) {
-      throw new Error(`Provided path ${_trimSlashes(unsafeData._path)} \
+        throw new Error(`Provided path ${_trimSlashes(unsafeData._path)} \
 does not match trigger template ${_trimSlashes(cloudFunction.__trigger.eventTrigger.resource)}`);
+      }
+
+      context = merge({}, defaultContext, eventContextOptions);
     }
 
-    let context = merge({}, defaultContext, options);
     return cloudFunction.run(
       data,
       context,
     );
   };
+
   return wrapped;
 }
 
@@ -181,6 +223,14 @@ export function _trimSlashes(path: string) {
 
 function _makeEventId(): string {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+function _checkOptionValidity(validFields: string[], options: {[s: string]: any}) {
+    Object.keys(options).forEach((key) => {
+        if (validFields.indexOf(key) === -1) {
+            throw new Error(`Options object ${JSON.stringify(options)} has invalid key "${key}"`);
+        }
+    });
 }
 
 /** Make a Change object to be used as test data for Firestore and real time database onWrite and onUpdate functions. */

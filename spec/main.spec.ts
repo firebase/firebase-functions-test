@@ -97,6 +97,14 @@ describe('main', () => {
       expect(context.authType).to.equal('USER');
     });
 
+    it('should throw when passed invalid options', () => {
+      const wrapped = wrap(constructCF());
+      expect(() => wrapped('data', {
+          auth: { uid: 'abc' },
+          isInvalid: true,
+      } as any)).to.throw();
+    });
+
     it('should generate the appropriate resource based on params', () => {
       const params = {
         wildcard: 'a',
