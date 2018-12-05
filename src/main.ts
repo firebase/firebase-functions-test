@@ -20,10 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { has, merge, random, get } from 'lodash';
+import { has, merge, random, get, differenceWith } from 'lodash';
 
 import { CloudFunction, EventContext, Resource, Change } from 'firebase-functions';
 import {makeDataSnapshot} from './providers/database';
+const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -67,13 +68,34 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
 
     const unsafeData = data as any;
     if (typeof unsafeData === 'object' && unsafeData._path) {
-        options.params = {
-          ...options.params,
-          ..._extractParamsFromPath(cloudFunction.__trigger.eventTrigger.resource, unsafeData._path),
-        };
+        // Remake the snapshot to standardize the path and remove extra slashes
         const formattedSnapshotPath = _compiledWildcardPath(unsafeData._path, options ? options.params : null);
         data = makeDataSnapshot(unsafeData._data, formattedSnapshotPath, unsafeData.app) as any;
+
+        // Ensure the path has no wildcards
+        if (unsafeData._path.match(wildcardRegex)) {
+            throw new Error(`Data path ("${unsafeData._path}") should not contain wildcards.`);
+        }
+
+        // Ensure that the same param wasn't specified by the path and the options.params bundle
+        const pathParams = _extractParamsFromPath(cloudFunction.__trigger.eventTrigger.resource, unsafeData._path);
+        const overlappingWildcards = differenceWith(
+            Object.keys(options.params),
+            Object.keys(pathParams),
+        );
+
+        if (overlappingWildcards.length) {
+            throw new Error(`The same context parameter (${overlappingWildcards.join(', ')}) \
+was supplied by the data path "${unsafeData._path}" and the options bundle "${JSON.stringify(options)}".`);
+        }
+
+        // Build final params bundle
+        options.params = {
+          ...options.params,
+          ...pathParams,
+        };
     }
+    ///
 
     const defaultContext: EventContext = {
       eventId: _makeEventId(),
@@ -108,7 +130,6 @@ does not match trigger template ${_trimSlashes(cloudFunction.__trigger.eventTrig
 
 /** @internal */
 export function _compiledWildcardPath(triggerResource: string, params = {}): string {
-  const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
   let resourceName = triggerResource.replace(wildcardRegex, (wildcard) => {
     let wildcardNoBraces = wildcard.slice(1, -1); // .slice removes '{' and '}' from wildcard
     let sub = get(params, wildcardNoBraces);
@@ -140,7 +161,6 @@ export function _extractParamsFromPath(wildcardPath, snapshotPath) {
 }
 
 export function _isValidWildcardMatch(wildcardPath, snapshotPath) {
-  const wildcardRegex = /{.+}/;
   const wildcardChunks = _trimSlashes(wildcardPath).split('/');
   const snapshotChucks = _trimSlashes(snapshotPath).split('/');
 
