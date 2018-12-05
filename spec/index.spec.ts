@@ -62,6 +62,7 @@ describe('index', () => {
 import './lifecycle.spec';
 import './main.spec';
 import './app.spec';
+import './providers/https.spec';
 // import './providers/analytics.spec';
 // import './providers/auth.spec';
 // import './providers/database.spec';
