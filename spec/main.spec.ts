@@ -116,7 +116,7 @@ describe('main', () => {
       expect(context.resource.name).to.equal('ref/a/nested/b');
     });
 
-    it('should throw when snapshot path includes unspecified wildcards', () => {
+    it('should throw when snapshot path includes wildcards', () => {
       const fft = new FirebaseFunctionsTest();
       fft.init();
 
@@ -141,9 +141,8 @@ describe('main', () => {
         '/ref/cat/nested/that',
       );
 
-      const params = {};
       const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
-      const result = wrapped(snap, { params });
+      const result = wrapped(snap, {});
 
       expect(result.data._path).to.equal('ref/cat/nested/that');
       expect(result.data.key).to.equal('that');
@@ -151,18 +150,14 @@ describe('main', () => {
       expect(result.context.resource.name).to.equal('ref/cat/nested/that');
     });
 
-    it('should error when DataSnapshot wildcard path does not match resource path', () => {
+    it('should error when DataSnapshot path does not match trigger template', () => {
       const fft = new FirebaseFunctionsTest();
       fft.init();
 
       const snap = makeDataSnapshot(
           'hello world',
-          '/different/{wildcard}/nested/{anotherWildcard}',
+          '/different/at/nested/bat',
       );
-      const params = {
-          wildcard: 'at',
-          anotherWildcard: 'bat',
-      };
       const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
       expect(() => wrapped(snap, { params })).to.throw();
     });
@@ -176,7 +171,7 @@ describe('main', () => {
       expect(params).to.deep.equal({company: 'firebase', user: 'abe'});
     });
 
-    it('should not match unfilled wildcards which is too long', () => {
+    it('should not match unfilled wildcards', () => {
       const params = _extractParamsFromPath(
           'companies/{company}/users/{user}',
           'companies/{still_wild}/users/abe');
