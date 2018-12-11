@@ -36,7 +36,7 @@ export function exampleUserRecord(): auth.UserRecord {
     email: 'user@gmail.com',
     metadata: {
       creationTime: '2018-03-13T01:24:48Z',
-      lastSignInTime: '2018-04-03T03:92:48Z',
+      lastSignInTime: '2018-04-03T03:52:48Z',
     },
     uid: 'SQol8dFfyMapsQtRD4JgZdC5r1G2',
   });
