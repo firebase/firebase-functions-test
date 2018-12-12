@@ -1,0 +1,2 @@
+important - HTTPS onCall functions are now supported! You can pass an HTTPS onCall function to `test.wrap`.
+feature - `test.storage.makeObjectMetadata` now automatically use the bucket from the Firebase configuration object that was used to initialize `firebase-functions-test`.
