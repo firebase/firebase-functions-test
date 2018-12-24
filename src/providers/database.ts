@@ -30,7 +30,7 @@ export function makeDataSnapshot(
   /** Value of data for the snapshot. */
   val: string | number | boolean | any[] | object,
   /** Full path of the reference (e.g. 'users/alovelace'). */
-  refPath: string,
+  refPath?: string,
   /** The Firebase app that the database belongs to.
    * The databaseURL supplied when initializing the app will be used for creating this snapshot.
    * You do not need to supply this parameter if you supplied Firebase config values when initializing

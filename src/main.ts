@@ -20,9 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { has, merge, random, get } from 'lodash';
+import { has, merge, random, get, differenceWith } from 'lodash';
 
 import { CloudFunction, EventContext, Change } from 'firebase-functions';
+import {makeDataSnapshot} from './providers/database';
+const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -97,14 +99,47 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
     } else {
       _checkOptionValidity(['eventId', 'timestamp', 'params', 'auth', 'authType'], options);
       let eventContextOptions = options as EventContextOptions;
+      const unsafeData = data as any;
+
+      if (typeof unsafeData === 'object' && unsafeData._path) {
+        // Remake the snapshot to standardize the path and remove extra slashes
+        const formattedSnapshotPath = _compiledWildcardPath(
+            unsafeData._path,
+            eventContextOptions ? eventContextOptions.params : null);
+        data = makeDataSnapshot(unsafeData._data, formattedSnapshotPath, unsafeData.app) as any;
+
+        // Ensure the path has no wildcards
+        if (unsafeData._path.match(wildcardRegex)) {
+          throw new Error(`Data path ("${unsafeData._path}") should not contain wildcards.`);
+        }
+
+        // Ensure that the same param wasn't specified by the path and the options.params bundle
+        const pathParams = _extractParamsFromPath(cloudFunction.__trigger.eventTrigger.resource, unsafeData._path);
+        const overlappingWildcards = differenceWith(
+          Object.keys(eventContextOptions.params),
+          Object.keys(pathParams),
+        );
+
+        if (overlappingWildcards.length) {
+          throw new Error(`The same context parameter (${overlappingWildcards.join(', ')}) \
+was supplied by the data path "${unsafeData._path}" and the options bundle "${JSON.stringify(options)}".`);
+        }
+
+        // Build final params bundle
+        eventContextOptions.params = {
+          ...eventContextOptions.params,
+          ...pathParams,
+        };
+      }
+
       const defaultContext: EventContext = {
-          eventId: _makeEventId(),
-          resource: cloudFunction.__trigger.eventTrigger && {
-              service: cloudFunction.__trigger.eventTrigger.service,
-              name: _makeResourceName(
-                cloudFunction.__trigger.eventTrigger.resource,
-                has(eventContextOptions, 'params') && eventContextOptions.params,
-              ),
+        eventId: _makeEventId(),
+        resource: cloudFunction.__trigger.eventTrigger && {
+          service: cloudFunction.__trigger.eventTrigger.service,
+          name: _compiledWildcardPath(
+            cloudFunction.__trigger.eventTrigger.resource,
+            has(eventContextOptions, 'params') && eventContextOptions.params,
+            ),
           },
           eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
           timestamp: (new Date()).toISOString(),
@@ -116,6 +151,13 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
         defaultContext.authType = 'UNAUTHENTICATED';
         defaultContext.auth = null;
       }
+
+      if (unsafeData._path &&
+        !_isValidWildcardMatch(cloudFunction.__trigger.eventTrigger.resource, unsafeData._path)) {
+        throw new Error(`Provided path ${_trimSlashes(unsafeData._path)} \
+does not match trigger template ${_trimSlashes(cloudFunction.__trigger.eventTrigger.resource)}`);
+      }
+
       context = merge({}, defaultContext, eventContextOptions);
     }
 
@@ -129,14 +171,54 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
 }
 
 /** @internal */
-export function _makeResourceName(triggerResource: string, params = {}): string {
-  const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
+export function _compiledWildcardPath(triggerResource: string, params = {}): string {
   let resourceName = triggerResource.replace(wildcardRegex, (wildcard) => {
     let wildcardNoBraces = wildcard.slice(1, -1); // .slice removes '{' and '}' from wildcard
     let sub = get(params, wildcardNoBraces);
     return sub || wildcardNoBraces + random(1, 9);
   });
-  return resourceName;
+
+  return _trimSlashes(resourceName);
+}
+
+export function _extractParamsFromPath(wildcardPath, snapshotPath) {
+  if (!_isValidWildcardMatch(wildcardPath, snapshotPath)) {
+    return {};
+  }
+
+  const wildcardKeyRegex = /{(.+)}/;
+  const wildcardChunks = _trimSlashes(wildcardPath).split('/');
+  const snapshotChucks = _trimSlashes(snapshotPath).split('/');
+  return wildcardChunks.slice(-snapshotChucks.length).reduce((params, chunk, index) => {
+    let match = wildcardKeyRegex.exec(chunk);
+    if (match) {
+        const wildcardKey = match[1];
+        const potentialWildcardValue = snapshotChucks[index];
+        if (!wildcardKeyRegex.exec(potentialWildcardValue)) {
+          params[wildcardKey] = potentialWildcardValue;
+        }
+    }
+    return params;
+  }, {});
+}
+
+export function _isValidWildcardMatch(wildcardPath, snapshotPath) {
+  const wildcardChunks = _trimSlashes(wildcardPath).split('/');
+  const snapshotChucks = _trimSlashes(snapshotPath).split('/');
+
+  if (snapshotChucks.length > wildcardChunks.length) {
+    return false;
+  }
+
+  const mismatchedChunks = wildcardChunks.slice(-snapshotChucks.length).filter((chunk, index) => {
+    return !(wildcardRegex.exec(chunk) || chunk === snapshotChucks[index]);
+  });
+
+  return !mismatchedChunks.length;
+}
+
+export function _trimSlashes(path: string) {
+  return path.split('/').filter((c) => c).join('/');
 }
 
 function _makeEventId(): string {

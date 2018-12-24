@@ -24,7 +24,16 @@ import { expect } from 'chai';
 import * as functions from 'firebase-functions';
 import { set } from 'lodash';
 
-import { mockConfig, makeChange, _makeResourceName, wrap } from '../src/main';
+import {
+    mockConfig,
+    makeChange,
+    _compiledWildcardPath,
+    wrap,
+    _isValidWildcardMatch,
+    _extractParamsFromPath,
+} from '../src/main';
+import { makeDataSnapshot } from '../src/providers/database';
+import { FirebaseFunctionsTest } from '../src/lifecycle';
 
 describe('main', () => {
   describe('#wrap', () => {
@@ -54,7 +63,7 @@ describe('main', () => {
       expect(typeof context.eventId).to.equal('string');
       expect(context.resource.service).to.equal('service');
       expect(/ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/
-        .test(context.resource.name)).to.be.true;
+      .test(context.resource.name)).to.be.true;
       expect(context.eventType).to.equal('event');
       expect(Date.parse(context.timestamp)).to.be.greaterThan(0);
       expect(context.params).to.deep.equal({});
@@ -106,11 +115,124 @@ describe('main', () => {
       expect(context.params).to.deep.equal(params);
       expect(context.resource.name).to.equal('ref/a/nested/b');
     });
+
+    it('should throw when snapshot path includes wildcards', () => {
+      const fft = new FirebaseFunctionsTest();
+      fft.init();
+
+      const snap = makeDataSnapshot(
+          'hello world',
+          '/ref/{wildcard}/nested/{anotherWildcard}',
+      );
+      const params = {
+          wildcard: 'at',
+          anotherWildcard: 'bat',
+      };
+      const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
+      expect(() => wrapped(snap, { params })).to.throw();
+    });
+
+    it('should set auto-fill params based on DataSnapshot path', () => {
+      const fft = new FirebaseFunctionsTest();
+      fft.init();
+
+      const snap = makeDataSnapshot(
+        'hello world',
+        '/ref/cat/nested/that',
+      );
+
+      const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
+      const result = wrapped(snap, {});
+
+      expect(result.data._path).to.equal('ref/cat/nested/that');
+      expect(result.data.key).to.equal('that');
+      expect(result.context.params.wildcard).to.equal('cat');
+      expect(result.context.resource.name).to.equal('ref/cat/nested/that');
+    });
+
+    it('should error when DataSnapshot path does not match trigger template', () => {
+      const fft = new FirebaseFunctionsTest();
+      fft.init();
+
+      const snap = makeDataSnapshot(
+          'hello world',
+          '/different/at/nested/bat',
+      );
+      const wrapped = wrap(constructCF('google.firebase.database.ref.write'));
+      expect(() => wrapped(snap, { params })).to.throw();
+    });
   });
 
-  describe('#_makeResourceName', () => {
+  describe('#_extractParamsFromPath', () => {
+    it('should match a path which fits a wildcard template', () => {
+      const params = _extractParamsFromPath(
+        'companies/{company}/users/{user}',
+                '/companies/firebase/users/abe');
+      expect(params).to.deep.equal({company: 'firebase', user: 'abe'});
+    });
+
+    it('should not match unfilled wildcards', () => {
+      const params = _extractParamsFromPath(
+          'companies/{company}/users/{user}',
+          'companies/{still_wild}/users/abe');
+      expect(params).to.deep.equal({user: 'abe'});
+    });
+
+    it('should not match a path which is too long', () => {
+      const params = _extractParamsFromPath(
+          'companies/{company}/users/{user}',
+          'companies/firebase/users/abe/boots');
+      expect(params).to.deep.equal({});
+    });
+
+    it('should not match a path which is too short', () => {
+      const params = _extractParamsFromPath(
+        'companies/{company}/users/{user}',
+        'companies/firebase/users/');
+      expect(params).to.deep.equal({});
+    });
+
+    it('should not match a path which has different chunks', () => {
+      const params = _extractParamsFromPath(
+        'locations/{company}/users/{user}',
+        'companies/firebase/users/{user}');
+      expect(params).to.deep.equal({});
+    });
+  });
+
+  describe('#_isValidWildcardMatch', () => {
+      it('should match a path which fits a wildcard template', () => {
+          const valid = _isValidWildcardMatch(
+              'companies/{company}/users/{user}',
+              '/companies/firebase/users/abe');
+          expect(valid).to.equal(true);
+      });
+
+      it('should not match a path which is too long', () => {
+          const tooLong = _isValidWildcardMatch(
+              'companies/{company}/users/{user}',
+              'companies/firebase/users/abe/boots');
+          expect(tooLong).to.equal(false);
+      });
+
+      it('should not match a path which is too short', () => {
+          const tooShort = _isValidWildcardMatch(
+              'companies/{company}/users/{user}',
+              'companies/firebase/users/');
+          expect(tooShort).to.equal(false);
+      });
+
+      it('should not match a path which has different chunks', () => {
+          const differentChunk = _isValidWildcardMatch(
+              'locations/{company}/users/{user}',
+              'companies/firebase/users/{user}');
+          expect(differentChunk).to.equal(false);
+      });
+  });
+
+  describe('#_compiledWildcardPath', () => {
     it('constructs the right resource name from params', () => {
-      const resource = _makeResourceName('companies/{company}/users/{user}', {
+      const resource = _compiledWildcardPath('companies/{company}/users/{user}', {
         company: 'Google',
         user: 'Lauren',
       });
