@@ -1,0 +1,2 @@
+fixed - Fixed bug where sample auth user data had an invalid lastSignInTime.
+fixed - Fixed bug where `wrap` failed with functions created with the `handler` namespace of firebase-functions.
