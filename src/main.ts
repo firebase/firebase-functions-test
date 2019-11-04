@@ -111,7 +111,7 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
           params: {},
       };
 
-      if (has(defaultContext, 'eventType') &&
+      if (has(defaultContext, 'eventType') && defaultContext.eventType !== undefined &&
         defaultContext.eventType.match(/firebase.database/)) {
         defaultContext.authType = 'UNAUTHENTICATED';
         defaultContext.auth = null;
