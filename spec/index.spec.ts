@@ -21,11 +21,11 @@
 // SOFTWARE.
 
 import 'mocha';
-import { expect } from 'chai';
+import {expect} from 'chai';
 
 describe('index', () => {
   /* tslint:disable-next-line:no-var-requires */
-  const indexExport = require('../src')({ projectId: 'fakeProject' }, 'fakeServiceAccount');
+  const indexExport = require('../src')({projectId: 'fakeProject'}, 'fakeServiceAccount');
   after(() => {
     // Call cleanup (handles case of cleanup function not existing)
     indexExport.cleanup && indexExport.cleanup();
@@ -48,7 +48,7 @@ describe('index', () => {
   });
 
   it('should set env variables based parameters SDK was initialized with', () => {
-    expect(process.env.FIREBASE_CONFIG).to.equal(JSON.stringify({ projectId: 'fakeProject' }));
+    expect(process.env.FIREBASE_CONFIG).to.equal(JSON.stringify({projectId: 'fakeProject'}));
     expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).to.equal('fakeServiceAccount');
   });
 
@@ -63,10 +63,10 @@ import './lifecycle.spec';
 import './main.spec';
 import './app.spec';
 import './providers/https.spec';
+import './providers/firestore.spec';
+import './providers/database.spec';
 // import './providers/analytics.spec';
 // import './providers/auth.spec';
-// import './providers/database.spec';
-// import './providers/firestore.spec';
 // import './providers/https.spec';
 // import './providers/pubsub.spec';
 // import './providers/storage.spec';

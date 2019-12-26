@@ -37,7 +37,7 @@
     "@types/chai": "~4.2.4",
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
-    "firebase-admin": "~8.6.1",
+    "firebase-admin": "~8.9.0",
     "firebase-functions": "^3.3.0",
     "mocha": "^6.2.2",
     "sinon": "^7.5.0",
@@ -45,8 +45,8 @@
     "typescript": "^3.6.4"
   },
   "peerDependencies": {
-    "firebase-functions": ">1.0.1",
-    "firebase-admin": ">5.12.0"
+    "firebase-functions": ">=2.0.0",
+    "firebase-admin": ">=6.0.0"
   },
   "engines": {
     "node": ">=6.0.0"
