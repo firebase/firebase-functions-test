@@ -28,7 +28,7 @@ import { testApp } from '../app';
 /** Create a DataSnapshot. */
 export function makeDataSnapshot(
   /** Value of data for the snapshot. */
-  val: string | number | boolean | any[] | object,
+  val: string | number | boolean | any[] | object | null,
   /** Full path of the reference (e.g. 'users/alovelace'). */
   refPath: string,
   /** The Firebase app that the database belongs to.

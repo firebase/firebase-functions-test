@@ -21,4 +21,10 @@ describe('providers/database', () => {
     expect(snapshot.val()).to.deep.equal({foo: 'bar'});
     expect(snapshot.ref.key).to.equal('path');
   });
+
+  it('should allow null value in makeDataSnapshot', async () => {
+    const snapshot = makeDataSnapshot(null, 'path');
+    expect(snapshot.val()).to.deep.equal(null);
+    expect(snapshot.ref.key).to.equal('path');
+  });
 });

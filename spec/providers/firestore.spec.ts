@@ -12,4 +12,11 @@ describe('providers/firestore', () => {
     });
     expect(snapshot.id).to.equal('doc-id');
   });
+
+  it('should allow empty document in makeDocumentSnapshot', async () => {
+    const test = fft();
+    const snapshot = test.firestore.makeDocumentSnapshot({}, 'collection/doc-id');
+    expect(snapshot.data()).to.deep.equal(undefined);
+    expect(snapshot.id).to.equal('doc-id');
+  });
 });
