@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {has, merge, random, get} from 'lodash';
+import { has, merge, random, get } from 'lodash';
 
-import {CloudFunction, EventContext, Change, https} from 'firebase-functions';
+import { CloudFunction, EventContext, Change, https } from 'firebase-functions';
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -191,6 +191,6 @@ export function makeChange<T>(before: T, after: T): Change<T> {
 }
 
 /** Mock values returned by `functions.config()`. */
-export function mockConfig(config: {[key: string]: {[key: string]: any}}) {
+export function mockConfig(config: { [key: string]: { [key: string]: any } }) {
   process.env.CLOUD_RUNTIME_CONFIG = JSON.stringify(config);
 }

@@ -1,9 +1,9 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 import * as functions from 'firebase-functions';
 import fft = require('../../src/index');
 
 const cfToUpperCaseOnRequest = functions.https.onRequest((req, res) => {
-  res.json({msg: req.params.message.toUpperCase()});
+  res.json({ msg: req.params.message.toUpperCase() });
 });
 
 const cfToUpperCaseOnCall = functions.https.onCall((data, context) => {
@@ -36,14 +36,18 @@ describe('providers/https', () => {
 
   it('should run the wrapped onCall function and return result', async () => {
     const test = fft();
-    const result = await test.wrap(cfToUpperCaseOnCall)({message: 'lowercase'});
-    expect(result).to.deep.equal({msg: 'LOWERCASE', from: 'anonymous'});
+
+    const result = await test.wrap(cfToUpperCaseOnCall)({ message: 'lowercase' });
+
+    expect(result).to.deep.equal({ msg: 'LOWERCASE', from: 'anonymous' });
   });
 
   it('should accept auth params', async () => {
     const test = fft();
     const options = {auth: {uid: 'abc'}};
-    const result = await test.wrap(cfToUpperCaseOnCall)({message: 'lowercase'}, options);
+
+    const result = await test.wrap(cfToUpperCaseOnCall)({ message: 'lowercase' }, options);
+
     expect(result).to.deep.equal({msg: 'LOWERCASE', from: 'abc'});
   });
 
@@ -54,15 +58,16 @@ describe('providers/https', () => {
       };
     };
     mockRequest.rawBody = Buffer.from('foobar');
-
     const test = fft();
     const options = {
       rawRequest: mockRequest,
     };
+
     const result = await test.wrap(cfToUpperCaseOnCall)(
-      {message: 'lowercase'},
+      { message: 'lowercase' },
       options,
     );
+
     expect(result).to.deep.equal({
       msg: 'LOWERCASE',
       from: 'anonymous',
