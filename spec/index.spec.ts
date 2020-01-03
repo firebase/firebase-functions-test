@@ -25,7 +25,10 @@ import { expect } from 'chai';
 
 describe('index', () => {
   /* tslint:disable-next-line:no-var-requires */
-  const indexExport = require('../src')({projectId: 'fakeProject'}, 'fakeServiceAccount');
+  const indexExport = require('../src')(
+    { projectId: 'fakeProject' },
+    'fakeServiceAccount'
+  );
   after(() => {
     // Call cleanup (handles case of cleanup function not existing)
     indexExport.cleanup && indexExport.cleanup();
@@ -48,8 +51,12 @@ describe('index', () => {
   });
 
   it('should set env variables based parameters SDK was initialized with', () => {
-    expect(process.env.FIREBASE_CONFIG).to.equal(JSON.stringify({projectId: 'fakeProject'}));
-    expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).to.equal('fakeServiceAccount');
+    expect(process.env.FIREBASE_CONFIG).to.equal(
+      JSON.stringify({ projectId: 'fakeProject' })
+    );
+    expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).to.equal(
+      'fakeServiceAccount'
+    );
   });
 
   it('should clean up env variables once cleanup is called', () => {

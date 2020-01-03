@@ -15,11 +15,14 @@ describe('providers/database', () => {
   });
 
   it('produces the right snapshot with makeDataSnapshot', async () => {
-    const snapshot = makeDataSnapshot({
-      foo: 'bar',
-    }, 'path');
+    const snapshot = makeDataSnapshot(
+      {
+        foo: 'bar',
+      },
+      'path'
+    );
 
-    expect(snapshot.val()).to.deep.equal({foo: 'bar'});
+    expect(snapshot.val()).to.deep.equal({ foo: 'bar' });
     expect(snapshot.ref.key).to.equal('path');
   });
 

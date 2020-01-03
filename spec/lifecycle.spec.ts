@@ -40,11 +40,13 @@ describe('lifecycle', () => {
 
     it('sets env variables appropriately if SDK initialized without parameters', () => {
       test.init();
-      expect(process.env.FIREBASE_CONFIG).to.equal(JSON.stringify({
-        databaseURL: 'https://not-a-project.firebaseio.com',
-        storageBucket: 'not-a-project.appspot.com',
-        projectId: 'not-a-project',
-      }));
+      expect(process.env.FIREBASE_CONFIG).to.equal(
+        JSON.stringify({
+          databaseURL: 'https://not-a-project.firebaseio.com',
+          storageBucket: 'not-a-project.appspot.com',
+          projectId: 'not-a-project',
+        })
+      );
       expect(process.env.GCLOUD_PROJECT).to.equal('not-a-project');
       expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).to.be.undefined;
     });
@@ -57,9 +59,13 @@ describe('lifecycle', () => {
       };
       test.init(firebaseConfig, 'path/to/key.json');
 
-      expect(process.env.FIREBASE_CONFIG).to.equal(JSON.stringify(firebaseConfig));
+      expect(process.env.FIREBASE_CONFIG).to.equal(
+        JSON.stringify(firebaseConfig)
+      );
       expect(process.env.GCLOUD_PROJECT).to.equal('my-project');
-      expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).to.equal('path/to/key.json');
+      expect(process.env.GOOGLE_APPLICATION_CREDENTIALS).to.equal(
+        'path/to/key.json'
+      );
     });
   });
 
@@ -81,7 +87,7 @@ describe('lifecycle', () => {
     it('deletes all the env variables if they did not previously exist', () => {
       let test = new FirebaseFunctionsTest();
       test.init();
-      mockConfig({ foo: {bar: 'faz '}});
+      mockConfig({ foo: { bar: 'faz ' } });
       test.cleanup();
       expect(process.env.FIREBASE_CONFIG).to.be.undefined;
       expect(process.env.GCLOUD_PROJECT).to.be.undefined;

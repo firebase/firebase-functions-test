@@ -33,7 +33,7 @@ export function testApp(): testApp.App {
 /** @internal */
 export namespace testApp {
   export let singleton: testApp.App;
-  export let init = () => singleton = new testApp.App();
+  export let init = () => (singleton = new testApp.App());
 
   export class App {
     appSingleton: firebase.app.App;
@@ -44,7 +44,7 @@ export namespace testApp {
         this.appSingleton = firebase.initializeApp(
           JSON.parse(process.env.FIREBASE_CONFIG),
           // Give this app a name so it does not conflict with apps that user initialized.
-          'firebase-functions-test',
+          'firebase-functions-test'
         );
       }
       return this.appSingleton;

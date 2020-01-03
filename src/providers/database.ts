@@ -36,16 +36,20 @@ export function makeDataSnapshot(
    * You do not need to supply this parameter if you supplied Firebase config values when initializing
    * firebase-functions-test.
    */
-  firebaseApp?: app.App,
+  firebaseApp?: app.App
 ): database.DataSnapshot {
-  return new database.DataSnapshot(val, refPath, firebaseApp || testApp().getApp());
+  return new database.DataSnapshot(
+    val,
+    refPath,
+    firebaseApp || testApp().getApp()
+  );
 }
 
 /** Fetch an example data snapshot already populated with data. Can be passed into a wrapped
  * database onCreate or onDelete function.
  */
 export function exampleDataSnapshot(): database.DataSnapshot {
-  return makeDataSnapshot({ foo: 'bar '}, 'messages/1234');
+  return makeDataSnapshot({ foo: 'bar ' }, 'messages/1234');
 }
 
 /** Fetch an example Change object of data snapshots already populated with data.
@@ -54,6 +58,6 @@ export function exampleDataSnapshot(): database.DataSnapshot {
 export function exampleDataSnapshotChange(): Change<database.DataSnapshot> {
   return Change.fromObjects(
     makeDataSnapshot({ foo: 'faz' }, 'messages/1234'),
-    makeDataSnapshot({ foo: 'bar' }, 'messages/1234'),
+    makeDataSnapshot({ foo: 'bar' }, 'messages/1234')
   );
 }
