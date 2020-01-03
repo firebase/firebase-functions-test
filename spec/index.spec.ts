@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import 'mocha';
-import {expect} from 'chai';
+import { expect } from 'chai';
 
 describe('index', () => {
   /* tslint:disable-next-line:no-var-requires */
