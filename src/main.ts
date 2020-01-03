@@ -22,7 +22,7 @@
 
 import { has, merge, random, get } from 'lodash';
 
-import { CloudFunction, EventContext, Change } from 'firebase-functions';
+import { CloudFunction, EventContext, Change, https } from 'firebase-functions';
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -33,7 +33,7 @@ export type EventContextOptions = {
   /** The values for the wildcards in the reference path that a database or Firestore function is listening to.
    * If omitted, random values will be generated.
    */
-  params?: { [option: string]: any };
+  params?: {[option: string]: any};
   /** (Only for database functions and https.onCall.) Firebase auth variable representing the user that triggered
    *  the function. Defaults to null.
    */
@@ -55,6 +55,11 @@ export type CallableContextOptions = {
    * An unverified token for a Firebase Instance ID.
    */
   instanceIdToken?: string;
+
+  /**
+   * The raw HTTP request object.
+   */
+  rawRequest?: https.Request;
 };
 
 /* Fields for both Event and Callable contexts, checked at runtime */
@@ -63,24 +68,36 @@ export type ContextOptions = EventContextOptions | CallableContextOptions;
 /** A function that can be called with test data and optional override values for the event context.
  * It will subsequently invoke the cloud function it wraps with the provided test data and a generated event context.
  */
-export type WrappedFunction = (data: any, options?: ContextOptions) => any | Promise<any>;
+export type WrappedFunction = (
+  data: any,
+  options?: ContextOptions,
+) => any | Promise<any>;
 
 /** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
 export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
   if (!has(cloudFunction, '__trigger')) {
-    throw new Error('Wrap can only be called on functions written with the firebase-functions SDK.');
+    throw new Error(
+      'Wrap can only be called on functions written with the firebase-functions SDK.',
+    );
   }
 
-  if (has(cloudFunction, '__trigger.httpsTrigger') &&
-      (get(cloudFunction, '__trigger.labels.deployment-callable') !== 'true')) {
-    throw new Error('Wrap function is only available for `onCall` HTTP functions, not `onRequest`.');
+  if (
+    has(cloudFunction, '__trigger.httpsTrigger') &&
+    get(cloudFunction, '__trigger.labels.deployment-callable') !== 'true'
+  ) {
+    throw new Error(
+      'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.',
+    );
   }
 
   if (!has(cloudFunction, 'run')) {
-    throw new Error('This library can only be used with functions written with firebase-functions v1.0.0 and above');
+    throw new Error(
+      'This library can only be used with functions written with firebase-functions v1.0.0 and above',
+    );
   }
 
-  const isCallableFunction = get(cloudFunction, '__trigger.labels.deployment-callable') === 'true';
+  const isCallableFunction =
+    get(cloudFunction, '__trigger.labels.deployment-callable') === 'true';
 
   let wrapped: WrappedFunction = (data: T, options: ContextOptions) => {
     // Although in Typescript we require `options` some of our JS samples do not pass it.
@@ -88,48 +105,53 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
     let context;
 
     if (isCallableFunction) {
-      _checkOptionValidity(['auth', 'instanceIdToken'], options);
+      _checkOptionValidity(['auth', 'instanceIdToken', 'rawRequest'], options);
       let callableContextOptions = options as CallableContextOptions;
       context = {
-          ...callableContextOptions,
-          rawRequest: 'rawRequest is not supported in firebase-functions-test',
+        ...callableContextOptions,
       };
     } else {
-      _checkOptionValidity(['eventId', 'timestamp', 'params', 'auth', 'authType'], options);
+      _checkOptionValidity(
+        ['eventId', 'timestamp', 'params', 'auth', 'authType'],
+        options,
+      );
       let eventContextOptions = options as EventContextOptions;
       const defaultContext: EventContext = {
-          eventId: _makeEventId(),
-          resource: cloudFunction.__trigger.eventTrigger && {
-              service: cloudFunction.__trigger.eventTrigger.service,
-              name: _makeResourceName(
-                cloudFunction.__trigger.eventTrigger.resource,
-                has(eventContextOptions, 'params') && eventContextOptions.params,
-              ),
-          },
-          eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
-          timestamp: (new Date()).toISOString(),
-          params: {},
+        eventId: _makeEventId(),
+        resource: cloudFunction.__trigger.eventTrigger && {
+          service: cloudFunction.__trigger.eventTrigger.service,
+          name: _makeResourceName(
+            cloudFunction.__trigger.eventTrigger.resource,
+            has(eventContextOptions, 'params') && eventContextOptions.params,
+          ),
+        },
+        eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
+        timestamp: new Date().toISOString(),
+        params: {},
       };
 
-      if (has(defaultContext, 'eventType') && defaultContext.eventType !== undefined &&
-        defaultContext.eventType.match(/firebase.database/)) {
+      if (
+        has(defaultContext, 'eventType') &&
+        defaultContext.eventType !== undefined &&
+        defaultContext.eventType.match(/firebase.database/)
+      ) {
         defaultContext.authType = 'UNAUTHENTICATED';
         defaultContext.auth = null;
       }
       context = merge({}, defaultContext, eventContextOptions);
     }
 
-    return cloudFunction.run(
-      data,
-      context,
-    );
+    return cloudFunction.run(data, context);
   };
 
   return wrapped;
 }
 
 /** @internal */
-export function _makeResourceName(triggerResource: string, params = {}): string {
+export function _makeResourceName(
+  triggerResource: string,
+  params = {},
+): string {
   const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
   let resourceName = triggerResource.replace(wildcardRegex, (wildcard) => {
     let wildcardNoBraces = wildcard.slice(1, -1); // .slice removes '{' and '}' from wildcard
@@ -140,15 +162,27 @@ export function _makeResourceName(triggerResource: string, params = {}): string 
 }
 
 function _makeEventId(): string {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random()
+      .toString(36)
+      .substring(2, 15) +
+    Math.random()
+      .toString(36)
+      .substring(2, 15)
+  );
 }
 
-function _checkOptionValidity(validFields: string[], options: {[s: string]: any}) {
-    Object.keys(options).forEach((key) => {
-        if (validFields.indexOf(key) === -1) {
-            throw new Error(`Options object ${JSON.stringify(options)} has invalid key "${key}"`);
-        }
-    });
+function _checkOptionValidity(
+  validFields: string[],
+  options: {[s: string]: any},
+) {
+  Object.keys(options).forEach((key) => {
+    if (validFields.indexOf(key) === -1) {
+      throw new Error(
+        `Options object ${JSON.stringify(options)} has invalid key "${key}"`,
+      );
+    }
+  });
 }
 
 /** Make a Change object to be used as test data for Firestore and real time database onWrite and onUpdate functions. */
