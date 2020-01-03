@@ -8,6 +8,12 @@
     "object-literal-sort-keys": false,
     "ordered-imports": false,
     "prefer-const": false,
+    "trailing-comma": [
+      true,
+      {
+        "functions": "never"
+      }
+    ],
     "whitespace": [true],
     "member-access": [false],
     "no-console": [false],
