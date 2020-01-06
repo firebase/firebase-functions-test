@@ -28,12 +28,11 @@ import { mockConfig, makeChange, _makeResourceName, wrap } from '../src/main';
 
 describe('main', () => {
   describe('#wrap', () => {
-
     const constructCF = (eventType?: string) => {
       const cloudFunction = (input) => input;
       set(cloudFunction, 'run', (data, context) => {
-          return { data, context };
-        });
+        return { data, context };
+      });
       set(cloudFunction, '__trigger', {
         eventTrigger: {
           resource: 'ref/{wildcard}/nested/{anotherWildcard}',
@@ -53,8 +52,11 @@ describe('main', () => {
       const context = wrap(constructCF())('data').context;
       expect(typeof context.eventId).to.equal('string');
       expect(context.resource.service).to.equal('service');
-      expect(/ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/
-        .test(context.resource.name)).to.be.true;
+      expect(
+        /ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/.test(
+          context.resource.name
+        )
+      ).to.be.true;
       expect(context.eventType).to.equal('event');
       expect(Date.parse(context.timestamp)).to.be.greaterThan(0);
       expect(context.params).to.deep.equal({});
@@ -73,7 +75,9 @@ describe('main', () => {
     });
 
     it('should generate auth and authType for database functions', () => {
-      const context = wrap(constructCF('google.firebase.database.ref.write'))('data').context;
+      const context = wrap(constructCF('google.firebase.database.ref.write'))(
+        'data'
+      ).context;
       expect(context.auth).to.equal(null);
       expect(context.authType).to.equal('UNAUTHENTICATED');
     });
@@ -90,10 +94,12 @@ describe('main', () => {
 
     it('should throw when passed invalid options', () => {
       const wrapped = wrap(constructCF());
-      expect(() => wrapped('data', {
+      expect(() =>
+        wrapped('data', {
           auth: { uid: 'abc' },
           isInvalid: true,
-      } as any)).to.throw();
+        } as any)
+      ).to.throw();
     });
 
     it('should generate the appropriate resource based on params', () => {

@@ -25,9 +25,10 @@ import { storage } from 'firebase-functions';
 /** Create an ObjectMetadata */
 export function makeObjectMetadata(
   /** Fields of ObjectMetadata that you'd like to specify. */
-  fields: { [key: string]: string },
+  fields: { [key: string]: string }
 ): storage.ObjectMetadata {
-  const configBucket = JSON.parse(process.env.FIREBASE_CONFIG || '{}').storageBucket;
+  const configBucket = JSON.parse(process.env.FIREBASE_CONFIG || '{}')
+    .storageBucket;
   const template = {
     kind: 'storage#object',
     id: '',
@@ -44,7 +45,7 @@ export function makeObjectMetadata(
 export function exampleObjectMetadata(): storage.ObjectMetadata {
   return {
     bucket: 'bucket',
-    contentDisposition: 'inline; filename*=utf-8\'\'my-file',
+    contentDisposition: "inline; filename*=utf-8''my-file",
     contentType: 'application/octet-stream',
     crc32c: 'pbXl9g==',
     etag: 'CK/F2KHP79kCEAE=',
@@ -52,9 +53,12 @@ export function exampleObjectMetadata(): storage.ObjectMetadata {
     id: 'bucket/my-file/1521161254347439',
     kind: 'storage#object',
     md5Hash: 'nvpapVwyoKYUTPwuxMe3Sg==',
-    mediaLink: 'https://www.googleapis.com/download/storage/v1/b/bucket/'
-      + 'o/my-file?generation=1521161254347439&alt=media',
-    metadata: { firebaseStorageDownloadTokens: 'fb577445-2f50-408b-80f2-c2f9991505b8' },
+    mediaLink:
+      'https://www.googleapis.com/download/storage/v1/b/bucket/' +
+      'o/my-file?generation=1521161254347439&alt=media',
+    metadata: {
+      firebaseStorageDownloadTokens: 'fb577445-2f50-408b-80f2-c2f9991505b8',
+    },
     metageneration: '1',
     name: 'my-file',
     selfLink: 'https://www.googleapis.com/storage/v1/b/bucket/o/my-file',

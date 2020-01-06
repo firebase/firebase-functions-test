@@ -27,7 +27,7 @@ export function makeMessage(
   /** Content of message. */
   json: { [key: string]: any },
   /** Optional Pubsub message attributes. */
-  attributes?: { [key: string]: string },
+  attributes?: { [key: string]: string }
 ): pubsub.Message;
 
 /** Create a Message from a base-64 encoded string. */
@@ -35,19 +35,21 @@ export function makeMessage(
   /** Base-64 encoded message string. */
   encodedString: string,
   /** Optional Pubsub message attributes. */
-  attributes?: { [key: string]: string },
+  attributes?: { [key: string]: string }
 ): pubsub.Message;
 
 export function makeMessage(
   jsonOrEncodedString: { [key: string]: any } | string,
-  attributes?: { [key: string]: string },
+  attributes?: { [key: string]: string }
 ): pubsub.Message {
   let data = jsonOrEncodedString;
   if (typeof data !== 'string') {
     try {
       data = new Buffer(JSON.stringify(data)).toString('base64');
     } catch (e) {
-      throw new Error ('Please provide either a JSON object or a base 64 encoded string.');
+      throw new Error(
+        'Please provide either a JSON object or a base 64 encoded string.'
+      );
     }
   }
   return new pubsub.Message({

@@ -25,7 +25,7 @@ import { auth } from 'firebase-functions';
 /** Create a UserRecord. */
 export function makeUserRecord(
   /** Fields of AuthRecord that you'd like to specify. */
-  fields: { [key: string]: string | boolean },
+  fields: { [key: string]: string | boolean }
 ): auth.UserRecord {
   return auth.userRecordConstructor(Object.assign({ uid: '' }, fields));
 }

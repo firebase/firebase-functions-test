@@ -35,29 +35,29 @@ export class FirebaseFunctionsTest {
 
   /** Initialize the SDK. */
   init(
-      /** Firebase config values for initializing a Firebase app for your test code to
-       * interact with (e.g. making database writes). It is recommended that you use
-       * a project that is specifically for testing. If omitted, mock config values will
-       * be used and your tests will not interact with a real Firebase app, and all Firebase
-       * methods need to be stubbed, otherwise they will fail.
-       */
-      firebaseConfig?: AppOptions,
-      /** Path to a service account key file to be used when initializing the Firebase app. */
-      pathToServiceAccountKey?: string,
-    ) {
-
+    /** Firebase config values for initializing a Firebase app for your test code to
+     * interact with (e.g. making database writes). It is recommended that you use
+     * a project that is specifically for testing. If omitted, mock config values will
+     * be used and your tests will not interact with a real Firebase app, and all Firebase
+     * methods need to be stubbed, otherwise they will fail.
+     */
+    firebaseConfig?: AppOptions,
+    /** Path to a service account key file to be used when initializing the Firebase app. */
+    pathToServiceAccountKey?: string
+  ) {
     this._oldEnv = {
       FIREBASE_CONFIG: process.env.FIREBASE_CONFIG,
-      GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+      GOOGLE_APPLICATION_CREDENTIALS:
+        process.env.GOOGLE_APPLICATION_CREDENTIALS,
       GCLOUD_PROJECT: process.env.GCLOUD_PROJECT,
       CLOUD_RUNTIME_CONFIG: process.env.CLOUD_RUNTIME_CONFIG,
     };
 
     if (isEmpty(firebaseConfig)) {
       process.env.FIREBASE_CONFIG = JSON.stringify({
-          databaseURL: 'https://not-a-project.firebaseio.com',
-          storageBucket: 'not-a-project.appspot.com',
-          projectId: 'not-a-project',
+        databaseURL: 'https://not-a-project.firebaseio.com',
+        storageBucket: 'not-a-project.appspot.com',
+        projectId: 'not-a-project',
       });
     } else {
       process.env.FIREBASE_CONFIG = JSON.stringify(firebaseConfig);
@@ -65,7 +65,9 @@ export class FirebaseFunctionsTest {
         process.env.GOOGLE_APPLICATION_CREDENTIALS = pathToServiceAccountKey;
       }
     }
-    process.env.GCLOUD_PROJECT = JSON.parse(process.env.FIREBASE_CONFIG).projectId;
+    process.env.GCLOUD_PROJECT = JSON.parse(
+      process.env.FIREBASE_CONFIG
+    ).projectId;
   }
 
   /** Complete clean up tasks. */

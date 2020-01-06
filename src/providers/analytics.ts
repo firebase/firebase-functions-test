@@ -25,7 +25,7 @@ import { analytics } from 'firebase-functions';
 /** Create an AnalyticsEvent */
 export function makeAnalyticsEvent(
   /** Fields of AnalyticsEvent that you'd like to specify. */
-  fields: { [key: string]: string },
+  fields: { [key: string]: string }
 ): analytics.AnalyticsEvent {
   const template = {
     reportingDate: '',

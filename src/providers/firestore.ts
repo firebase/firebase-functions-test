@@ -49,7 +49,7 @@ export function makeDocumentSnapshot(
   data: { [key: string]: any },
   /** Full path of the reference (e.g. 'users/alovelace') */
   refPath: string,
-  options?: DocumentSnapshotOptions,
+  options?: DocumentSnapshotOptions
 ) {
   let firestoreService;
   let project;
@@ -62,14 +62,22 @@ export function makeDocumentSnapshot(
   }
 
   const resource = `projects/${project}/databases/(default)/documents/${refPath}`;
-  const proto = isEmpty(data) ? resource : {
-    fields: objectToValueProto(data),
-    createTime: dateToTimestampProto(get(options, 'createTime', new Date().toISOString())),
-    updateTime: dateToTimestampProto(get(options, 'updateTime', new Date().toISOString())),
-    name: resource,
-  };
+  const proto = isEmpty(data)
+    ? resource
+    : {
+        fields: objectToValueProto(data),
+        createTime: dateToTimestampProto(
+          get(options, 'createTime', new Date().toISOString())
+        ),
+        updateTime: dateToTimestampProto(
+          get(options, 'updateTime', new Date().toISOString())
+        ),
+        name: resource,
+      };
 
-  const readTimeProto = dateToTimestampProto(get(options, 'readTime') || new Date().toISOString());
+  const readTimeProto = dateToTimestampProto(
+    get(options, 'readTime') || new Date().toISOString()
+  );
   return firestoreService.snapshot_(proto, readTimeProto, 'json');
 }
 
@@ -77,35 +85,46 @@ export function makeDocumentSnapshot(
  * Firestore onCreate or onDelete function.
  */
 export function exampleDocumentSnapshot(): firestore.DocumentSnapshot {
-  return makeDocumentSnapshot({
-    aString: 'foo',
-    anObject: {
-      a: 'bar',
-      b: 'faz',
+  return makeDocumentSnapshot(
+    {
+      aString: 'foo',
+      anObject: {
+        a: 'bar',
+        b: 'faz',
+      },
+      aNumber: 7,
     },
-    aNumber: 7,
-  }, 'records/1234');
+    'records/1234'
+  );
 }
 
 /** Fetch an example Change object of document snapshots already populated with data.
  * Can be passed into a wrapped Firestore onUpdate or onWrite function.
  */
-export function exampleDocumentSnapshotChange(): Change<firestore.DocumentSnapshot> {
+export function exampleDocumentSnapshotChange(): Change<
+  firestore.DocumentSnapshot
+> {
   return Change.fromObjects(
-    makeDocumentSnapshot({
-      anObject: {
-        a: 'bar',
+    makeDocumentSnapshot(
+      {
+        anObject: {
+          a: 'bar',
+        },
+        aNumber: 7,
       },
-      aNumber: 7,
-    }, 'records/1234'),
-    makeDocumentSnapshot({
-      aString: 'foo',
-      anObject: {
-        a: 'qux',
-        b: 'faz',
+      'records/1234'
+    ),
+    makeDocumentSnapshot(
+      {
+        aString: 'foo',
+        anObject: {
+          a: 'qux',
+          b: 'faz',
+        },
+        aNumber: 7,
       },
-      aNumber: 7,
-    }, 'records/1234'),
+      'records/1234'
+    )
   );
 }
 
@@ -165,8 +184,10 @@ export function objectToValueProto(data: object) {
       const projectId: string = get(val, '_referencePath.projectId');
       const database: string = get(val, '_referencePath.databaseId');
       const referenceValue: string = [
-        'projects', projectId,
-        'databases', database,
+        'projects',
+        projectId,
+        'databases',
+        database,
         val.path,
       ].join('/');
       return { referenceValue };
@@ -184,8 +205,11 @@ export function objectToValueProto(data: object) {
       };
     }
     throw new Error(
-      'Cannot encode ' + val + 'to a Firestore Value.' +
-      ' Local testing does not yet support Firestore geo points.');
+      'Cannot encode ' +
+        val +
+        'to a Firestore Value.' +
+        ' Local testing does not yet support Firestore geo points.'
+    );
   };
 
   return mapValues(data, encodeHelper);

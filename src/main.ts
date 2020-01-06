@@ -33,7 +33,7 @@ export type EventContextOptions = {
   /** The values for the wildcards in the reference path that a database or Firestore function is listening to.
    * If omitted, random values will be generated.
    */
-  params?: {[option: string]: any};
+  params?: { [option: string]: any };
   /** (Only for database functions and https.onCall.) Firebase auth variable representing the user that triggered
    *  the function. Defaults to null.
    */
@@ -70,14 +70,14 @@ export type ContextOptions = EventContextOptions | CallableContextOptions;
  */
 export type WrappedFunction = (
   data: any,
-  options?: ContextOptions,
+  options?: ContextOptions
 ) => any | Promise<any>;
 
 /** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
 export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
   if (!has(cloudFunction, '__trigger')) {
     throw new Error(
-      'Wrap can only be called on functions written with the firebase-functions SDK.',
+      'Wrap can only be called on functions written with the firebase-functions SDK.'
     );
   }
 
@@ -86,13 +86,13 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
     get(cloudFunction, '__trigger.labels.deployment-callable') !== 'true'
   ) {
     throw new Error(
-      'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.',
+      'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.'
     );
   }
 
   if (!has(cloudFunction, 'run')) {
     throw new Error(
-      'This library can only be used with functions written with firebase-functions v1.0.0 and above',
+      'This library can only be used with functions written with firebase-functions v1.0.0 and above'
     );
   }
 
@@ -113,7 +113,7 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
     } else {
       _checkOptionValidity(
         ['eventId', 'timestamp', 'params', 'auth', 'authType'],
-        options,
+        options
       );
       let eventContextOptions = options as EventContextOptions;
       const defaultContext: EventContext = {
@@ -122,7 +122,7 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
           service: cloudFunction.__trigger.eventTrigger.service,
           name: _makeResourceName(
             cloudFunction.__trigger.eventTrigger.resource,
-            has(eventContextOptions, 'params') && eventContextOptions.params,
+            has(eventContextOptions, 'params') && eventContextOptions.params
           ),
         },
         eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
@@ -150,7 +150,7 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
 /** @internal */
 export function _makeResourceName(
   triggerResource: string,
-  params = {},
+  params = {}
 ): string {
   const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
   let resourceName = triggerResource.replace(wildcardRegex, (wildcard) => {
@@ -174,12 +174,12 @@ function _makeEventId(): string {
 
 function _checkOptionValidity(
   validFields: string[],
-  options: {[s: string]: any},
+  options: { [s: string]: any }
 ) {
   Object.keys(options).forEach((key) => {
     if (validFields.indexOf(key) === -1) {
       throw new Error(
-        `Options object ${JSON.stringify(options)} has invalid key "${key}"`,
+        `Options object ${JSON.stringify(options)} has invalid key "${key}"`
       );
     }
   });

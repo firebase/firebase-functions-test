@@ -37,24 +37,29 @@ describe('providers/https', () => {
   it('should run the wrapped onCall function and return result', async () => {
     const test = fft();
 
-    const result = await test.wrap(cfToUpperCaseOnCall)({ message: 'lowercase' });
+    const result = await test.wrap(cfToUpperCaseOnCall)({
+      message: 'lowercase',
+    });
 
     expect(result).to.deep.equal({ msg: 'LOWERCASE', from: 'anonymous' });
   });
 
   it('should accept auth params', async () => {
     const test = fft();
-    const options = {auth: {uid: 'abc'}};
+    const options = { auth: { uid: 'abc' } };
 
-    const result = await test.wrap(cfToUpperCaseOnCall)({ message: 'lowercase' }, options);
+    const result = await test.wrap(cfToUpperCaseOnCall)(
+      { message: 'lowercase' },
+      options
+    );
 
-    expect(result).to.deep.equal({msg: 'LOWERCASE', from: 'abc'});
+    expect(result).to.deep.equal({ msg: 'LOWERCASE', from: 'abc' });
   });
 
   it('should accept raw request', async () => {
     const mockRequest: any = (sessionData) => {
       return {
-        session: {data: sessionData},
+        session: { data: sessionData },
       };
     };
     mockRequest.rawBody = Buffer.from('foobar');
@@ -65,7 +70,7 @@ describe('providers/https', () => {
 
     const result = await test.wrap(cfToUpperCaseOnCall)(
       { message: 'lowercase' },
-      options,
+      options
     );
 
     expect(result).to.deep.equal({

@@ -25,7 +25,7 @@ import { crashlytics } from 'firebase-functions';
 /** Create an Issue */
 export function makeIssue(
   /** Fields of Issue that you'd like to specify. */
-  fields: { [key: string]: string },
+  fields: { [key: string]: string }
 ): crashlytics.Issue {
   const template = {
     issueId: '',
