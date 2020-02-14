@@ -73,12 +73,38 @@ export type WrappedFunction = (
   options?: ContextOptions
 ) => any | Promise<any>;
 
+/** A scheduled function that can be called with optional override values for the event context.
+ * It will subsequently invoke the cloud function it wraps with a generated event context.
+ */
+export type WrappedScheduledFunction = (
+  options?: ContextOptions
+) => any | Promise<any>;
+
 /** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
-export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
+export function wrap<T>(
+  cloudFunction: CloudFunction<T>
+): WrappedScheduledFunction | WrappedFunction {
   if (!has(cloudFunction, '__trigger')) {
     throw new Error(
       'Wrap can only be called on functions written with the firebase-functions SDK.'
     );
+  }
+
+  if (get(cloudFunction, '__trigger.labels.deployment-scheduled') === 'true') {
+    const scheduledWrapped: WrappedScheduledFunction = (
+      options: ContextOptions
+    ) => {
+      // Although in Typescript we require `options` some of our JS samples do not pass it.
+      options = options || {};
+
+      _checkOptionValidity(['eventId', 'timestamp'], options);
+      const defaultContext = _makeDefaultContext(cloudFunction, options);
+      const context = merge({}, defaultContext, options);
+
+      // @ts-ignore
+      return cloudFunction.run(context);
+    };
+    return scheduledWrapped;
   }
 
   if (
@@ -115,20 +141,7 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
         ['eventId', 'timestamp', 'params', 'auth', 'authType'],
         options
       );
-      let eventContextOptions = options as EventContextOptions;
-      const defaultContext: EventContext = {
-        eventId: _makeEventId(),
-        resource: cloudFunction.__trigger.eventTrigger && {
-          service: cloudFunction.__trigger.eventTrigger.service,
-          name: _makeResourceName(
-            cloudFunction.__trigger.eventTrigger.resource,
-            has(eventContextOptions, 'params') && eventContextOptions.params
-          ),
-        },
-        eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
-        timestamp: new Date().toISOString(),
-        params: {},
-      };
+      const defaultContext = _makeDefaultContext(cloudFunction, options);
 
       if (
         has(defaultContext, 'eventType') &&
@@ -138,7 +151,7 @@ export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedFunction {
         defaultContext.authType = 'UNAUTHENTICATED';
         defaultContext.auth = null;
       }
-      context = merge({}, defaultContext, eventContextOptions);
+      context = merge({}, defaultContext, options);
     }
 
     return cloudFunction.run(data, context);
@@ -183,6 +196,27 @@ function _checkOptionValidity(
       );
     }
   });
+}
+
+function _makeDefaultContext<T>(
+  cloudFunction: CloudFunction<T>,
+  options: ContextOptions
+): EventContext {
+  let eventContextOptions = options as EventContextOptions;
+  const defaultContext: EventContext = {
+    eventId: _makeEventId(),
+    resource: cloudFunction.__trigger.eventTrigger && {
+      service: cloudFunction.__trigger.eventTrigger.service,
+      name: _makeResourceName(
+        cloudFunction.__trigger.eventTrigger.resource,
+        has(eventContextOptions, 'params') && eventContextOptions.params
+      ),
+    },
+    eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
+    timestamp: new Date().toISOString(),
+    params: {},
+  };
+  return defaultContext;
 }
 
 /** Make a Change object to be used as test data for Firestore and real time database onWrite and onUpdate functions. */
