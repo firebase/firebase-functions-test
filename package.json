@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npm i && node_modules/.bin/tsc -p tsconfig.release.json",
     "build:pack": "npm prune --production && rm -rf lib && npm install && node_modules/.bin/tsc -p tsconfig.release.json && npm pack && npm install",
-    "build:release": "npm install --production && npm install typescript firebase-functions firebase-admin && node_modules/.bin/tsc -p tsconfig.release.json",
+    "build:release": "npm install --production && npm install --no-save typescript firebase-functions firebase-admin && node_modules/.bin/tsc -p tsconfig.release.json",
     "lint": "node_modules/.bin/tslint src/{**/*,*}.ts spec/{**/*,*}.ts",
     "pretest": "node_modules/.bin/tsc",
     "test": "mocha .tmp/spec/index.spec.js",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/firebase/firebase-functions-test.git"
+    "url": "https://github.com/firebase/firebase-functions-test.git"
   },
   "keywords": [
     "firebase",
@@ -29,6 +29,9 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/firebase/firebase-functions-test/issues"
+  },
+  "publishConfig": {
+    "registry": "https://wombat-dressing-room.appspot.com"
   },
   "homepage": "https://github.com/firebase/firebase-functions-test#readme",
   "dependencies": {
@@ -52,7 +55,7 @@
     "firebase-admin": ">=6.0.0"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=8.0.0"
   },
   "typings": "lib/index.d.ts"
 }
