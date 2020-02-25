@@ -72,6 +72,7 @@ import './app.spec';
 import './providers/https.spec';
 import './providers/firestore.spec';
 import './providers/database.spec';
+import './providers/scheduled.spec';
 // import './providers/analytics.spec';
 // import './providers/auth.spec';
 // import './providers/https.spec';
