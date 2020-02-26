@@ -46,7 +46,7 @@ echo "Checked for commands."
 
 echo "Checking for Twitter credentials..."
 trap "echo 'Missing Twitter credentials.'; exit 1" ERR
-test -f "${WDIR}/scripts/publish/twitter.json"
+test -f "${WDIR}/scripts/twitter.json"
 trap - ERR
 echo "Checked for Twitter credentials..."
 
@@ -130,7 +130,7 @@ echo "Published release notes."
 
 echo "Making the tweet..."
 npm install --no-save twitter@1.7.1
-cp -v "${WDIR}/scripts/publish/twitter.json" "${TEMPDIR}/${REPOSITORY_NAME}/scripts/"
-node ./scripts/publish/tweet.js ${NEW_VERSION}
+cp -v "${WDIR}/scripts/twitter.json" "${TEMPDIR}/${REPOSITORY_NAME}/scripts/"
+node ./scripts/tweet.js ${NEW_VERSION}
 echo "Made the tweet."
 

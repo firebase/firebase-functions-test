@@ -79,7 +79,7 @@ steps:
   - name: 'gcr.io/$PROJECT_ID/fft-package-builder'
     entrypoint: 'cp'
     args:
-      ['-v', 'twitter.json', '${_REPOSITORY_NAME}/scripts/publish/twitter.json']
+      ['-v', 'twitter.json', '${_REPOSITORY_NAME}/scripts/twitter.json']
 
   # Set up the npm credentials.
   - name: 'gcr.io/$PROJECT_ID/fft-package-builder'
