@@ -11,3 +11,4 @@ tslint.*
 src
 spec
 *.tgz
+scripts
