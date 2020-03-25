@@ -138,7 +138,7 @@ export function wrap<T>(
       };
     } else {
       _checkOptionValidity(
-        ['eventId', 'timestamp', 'params', 'auth', 'authType'],
+        ['eventId', 'timestamp', 'params', 'auth', 'authType', 'resource'],
         options
       );
       const defaultContext = _makeDefaultContext(cloudFunction, options);
