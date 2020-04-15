@@ -42,6 +42,18 @@ export type EventContextOptions = {
    * Default is 'UNAUTHENTICATED'.
    */
   authType?: 'ADMIN' | 'USER' | 'UNAUTHENTICATED';
+
+  /** Resource is a standard format for defining a resource (google.rpc.context.AttributeContext.Resource).
+   * In Cloud Functions, it is the resource that triggered the function - such as a storage bucket.
+   */
+  resource?: {
+    service: string;
+    name: string;
+    type?: string;
+    labels?: {
+      [tag: string]: string;
+    };
+  };
 };
 
 /** Fields of the callable context that can be overridden/customized. */
@@ -138,7 +150,7 @@ export function wrap<T>(
       };
     } else {
       _checkOptionValidity(
-        ['eventId', 'timestamp', 'params', 'auth', 'authType'],
+        ['eventId', 'timestamp', 'params', 'auth', 'authType', 'resource'],
         options
       );
       const defaultContext = _makeDefaultContext(cloudFunction, options);
