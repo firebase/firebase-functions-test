@@ -143,5 +143,11 @@ describe('main', () => {
       mockConfig(config);
       expect(functions.config()).to.deep.equal(config);
     });
+
+    it('should allow multiple mock configurations', () => {
+      const config = { baz: { qux: 'quxx ' } };
+      mockConfig(config);
+      expect(functions.config()).to.deep.equal(config);
+    });
   });
 });
