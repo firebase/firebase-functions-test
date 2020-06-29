@@ -134,8 +134,9 @@ describe('main', () => {
   });
 
   describe('#mockConfig', () => {
-    after(() => {
+    afterEach(() => {
       delete process.env.CLOUD_RUNTIME_CONFIG;
+      delete functions.config.singleton;
     });
 
     it('should mock functions.config()', () => {
