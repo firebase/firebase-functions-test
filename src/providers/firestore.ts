@@ -236,6 +236,9 @@ export type ClearFirestoreDataOptions = {
  */
 export function clearFirestoreData(options: ClearFirestoreDataOptions) {
   return new Promise((resolve, reject) => {
+    if (!options.projectId) {
+      throw new Error('projectId not specified');
+    }
     const config = {
       method: 'DELETE',
       hostname: 'localhost',
