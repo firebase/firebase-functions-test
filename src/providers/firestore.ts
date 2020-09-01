@@ -228,22 +228,25 @@ const FIRESTORE_ADDRESS = FIRESTORE_ADDRESS_ENVS.reduce(
 );
 const FIRESTORE_PORT = FIRESTORE_ADDRESS.split(':')[1];
 
-export type ClearFirestoreDataOptions = {
-  projectId: string;
-};
-
 /** Clears all data in firestore. Works only in offline mode.
  */
-export function clearFirestoreData(options: ClearFirestoreDataOptions) {
+export function clearFirestoreData(options: { projectId: string } | string) {
   return new Promise((resolve, reject) => {
-    if (!options.projectId) {
+    let projectId;
+
+    if (typeof options === 'string') {
+      projectId = options;
+    } else if (typeof options === 'object' && has(options, 'projectId')) {
+      projectId = options.projectId;
+    } else {
       throw new Error('projectId not specified');
     }
+    
     const config = {
       method: 'DELETE',
       hostname: 'localhost',
       port: FIRESTORE_PORT,
-      path: `/emulator/v1/projects/${options.projectId}/databases/(default)/documents`,
+      path: `/emulator/v1/projects/${projectId}/databases/(default)/documents`,
     };
 
     const req = http.request(config, (res) => {
@@ -259,7 +262,7 @@ export function clearFirestoreData(options: ClearFirestoreDataOptions) {
     });
 
     const postData = JSON.stringify({
-      database: `projects/${options.projectId}/databases/(default)`,
+      database: `projects/${projectId}/databases/(default)`,
     });
 
     req.setHeader('Content-Length', postData.length);
