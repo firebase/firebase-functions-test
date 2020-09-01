@@ -241,7 +241,7 @@ export function clearFirestoreData(options: { projectId: string } | string) {
     } else {
       throw new Error('projectId not specified');
     }
-    
+
     const config = {
       method: 'DELETE',
       hostname: 'localhost',
