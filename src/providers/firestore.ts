@@ -27,6 +27,8 @@ import { has, get, isEmpty, isPlainObject, mapValues } from 'lodash';
 
 import { testApp } from '../app';
 
+import * as http from 'http';
+
 /** Optional parameters for creating a DocumentSnapshot. */
 export interface DocumentSnapshotOptions {
   /** ISO timestamp string for the snapshot was read, default is current time.  */
@@ -213,4 +215,53 @@ export function objectToValueProto(data: object) {
   };
 
   return mapValues(data, encodeHelper);
+}
+
+const FIRESTORE_ADDRESS_ENVS = [
+  'FIRESTORE_EMULATOR_HOST',
+  'FIREBASE_FIRESTORE_EMULATOR_ADDRESS',
+];
+
+const FIRESTORE_ADDRESS = FIRESTORE_ADDRESS_ENVS.reduce(
+  (addr, name) => process.env[name] || addr,
+  'localhost:8080'
+);
+const FIRESTORE_PORT = FIRESTORE_ADDRESS.split(':')[1];
+
+export type ClearFirestoreDataOptions = {
+  projectId: string;
+};
+
+/** Clears all data in firestore. Works only in offline mode.
+ */
+export function clearFirestoreData(options: ClearFirestoreDataOptions) {
+  return new Promise((resolve, reject) => {
+    const config = {
+      method: 'DELETE',
+      hostname: 'localhost',
+      port: FIRESTORE_PORT,
+      path: `/emulator/v1/projects/${options.projectId}/databases/(default)/documents`,
+    };
+
+    const req = http.request(config, (res) => {
+      if (res.statusCode !== 200) {
+        reject(new Error(`statusCode: ${res.statusCode}`));
+      }
+      res.on('data', () => {});
+      res.on('end', resolve);
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    const postData = JSON.stringify({
+      database: `projects/${options.projectId}/databases/(default)`,
+    });
+
+    req.setHeader('Content-Length', postData.length);
+
+    req.write(postData);
+    req.end();
+  });
 }
