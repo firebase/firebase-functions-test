@@ -2,11 +2,11 @@ import { expect } from 'chai';
 import { firestore, initializeApp } from 'firebase-admin';
 import fft = require('../../../src/index');
 
-before(() => {
-  initializeApp();
-});
-
 describe('providers/firestore', () => {
+  before(() => {
+    initializeApp();
+  });
+
   it('clears database with clearFirestoreData', async () => {
     const test = fft({ projectId: 'not-a-project' });
     const db = firestore();
