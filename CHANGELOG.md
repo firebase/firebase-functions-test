@@ -1,1 +1,2 @@
-
+- Adds `clearFirestoreData` to clear all Firestore data in the Firestore emulator (#71).
+- Adds ability to create DataSnapshots for multiple RTDB instances (#72).
