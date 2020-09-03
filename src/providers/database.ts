@@ -36,12 +36,18 @@ export function makeDataSnapshot(
    * You do not need to supply this parameter if you supplied Firebase config values when initializing
    * firebase-functions-test.
    */
-  firebaseApp?: app.App
+  firebaseApp?: app.App,
+  /**
+   * The RTDB instance to use when creating snapshot. This will override the `firebaseApp` parameter.
+   * If omitted the default RTDB instance is used.
+   */
+  instance?: string
 ): database.DataSnapshot {
   return new database.DataSnapshot(
     val,
     refPath,
-    firebaseApp || testApp().getApp()
+    firebaseApp || testApp().getApp(),
+    instance
   );
 }
 

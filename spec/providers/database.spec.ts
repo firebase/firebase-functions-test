@@ -32,4 +32,25 @@ describe('providers/database', () => {
     expect(snapshot.val()).to.deep.equal(null);
     expect(snapshot.ref.key).to.equal('path');
   });
+
+  it('should use the default test apps databaseURL if no instance is specified in makeDataSnapshot', async () => {
+    const snapshot = makeDataSnapshot(null, 'path', null);
+
+    expect(snapshot.ref.toString()).to.equal(
+      'https://not-a-project.firebaseio.com/path'
+    );
+  });
+
+  it('should allow different DB instance to be specified in makeDataSnapshot', async () => {
+    const snapshot = makeDataSnapshot(
+      null,
+      'path',
+      null,
+      'https://another-instance.firebaseio.com'
+    );
+
+    expect(snapshot.ref.toString()).to.equal(
+      'https://another-instance.firebaseio.com/path'
+    );
+  });
 });
