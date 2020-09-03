@@ -11,6 +11,9 @@
     "pretest": "node_modules/.bin/tsc",
     "test": "mocha .tmp/spec/index.spec.js",
     "posttest": "npm run lint && rm -rf .tmp",
+    "preintegrationTest": "node_modules/.bin/tsc",
+    "integrationTest": "firebase emulators:exec --project=not-a-project --only firestore 'mocha .tmp/spec/integration/**/*.spec.js'",
+    "postintegrationTest": "rm -rf .tmp",
     "format": "prettier --check '**/*.{json,ts,yml,yaml}'",
     "format:fix": "prettier --write '**/*.{json,ts,yml,yaml}'"
   },
@@ -44,6 +47,7 @@
     "chai": "^4.2.0",
     "firebase-admin": "~8.9.0",
     "firebase-functions": "^3.3.0",
+    "firebase-tools": "^8.9.2",
     "mocha": "^6.2.2",
     "prettier": "^1.19.1",
     "sinon": "^7.5.0",

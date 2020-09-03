@@ -5,3 +5,4 @@ lib
 .vscode
 *.tgz
 .tmp
+*.log
