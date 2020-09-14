@@ -134,14 +134,33 @@ describe('main', () => {
   });
 
   describe('#mockConfig', () => {
-    after(() => {
+    let config: Record<string, unknown>;
+
+    beforeEach(() => {
+      config = { foo: { bar: 'faz ' } };
+    });
+
+    afterEach(() => {
       delete process.env.CLOUD_RUNTIME_CONFIG;
     });
 
     it('should mock functions.config()', () => {
-      const config = { foo: { bar: 'faz ' } };
       mockConfig(config);
       expect(functions.config()).to.deep.equal(config);
+    });
+
+    it('should purge singleton config object when it is present', () => {
+      mockConfig(config);
+      config.foo = { baz: 'qux' };
+      mockConfig(config);
+
+      expect(functions.config()).to.deep.equal(config);
+    });
+
+    it('should not throw an error when functions.config.singleton is missing', () => {
+      delete functions.config.singleton;
+
+      expect(() => mockConfig(config)).to.not.throw(Error);
     });
   });
 });
