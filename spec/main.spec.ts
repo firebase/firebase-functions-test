@@ -74,17 +74,6 @@ describe('main', () => {
       expect(context.timestamp).to.equal('2018-03-28T18:58:50.370Z');
     });
 
-    it('should create context params and resource from contextOptions on firestore event', async () => {
-      const params = {
-        wildcard: 'a',
-        anotherWildcard: 'b',
-      };
-      const wrapped = wrap(constructCF());
-      const context = wrapped('data', { params }).context;
-      expect(context.params).to.deep.equal(params);
-      expect(context.resource.name).to.equal('ref/a/nested/b');
-    });
-
     it('should generate auth and authType for database functions', () => {
       const context = wrap(constructCF('google.firebase.database.ref.write'))(
         'data'
