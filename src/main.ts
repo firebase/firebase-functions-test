@@ -232,6 +232,7 @@ function _makeDefaultContext<T>(
   data?: T
 ): EventContext {
   let eventContextOptions = options as EventContextOptions;
+  let isDocumentResourceName = false;
   const resource = cloudFunction.__trigger.eventTrigger && {
     service: cloudFunction.__trigger.eventTrigger.service,
     name: ''
@@ -239,6 +240,7 @@ function _makeDefaultContext<T>(
   if(cloudFunction.__trigger.eventTrigger.service == "firestore.googleapis.com" && !has(eventContextOptions, 'params')) {
     try {
       cloudFunction.__trigger.eventTrigger.resource.substring(0, cloudFunction.__trigger.eventTrigger.resource.indexOf("documents")) + "documents/" + (data as unknown as QueryDocumentSnapshot).ref.path;
+      isDocumentResourceName = true;
     } catch(error) {
       resource.name = _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, has(eventContextOptions, 'params') && eventContextOptions.params);
     }
@@ -250,7 +252,7 @@ function _makeDefaultContext<T>(
     resource: resource,
     eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
     timestamp: new Date().toISOString(),
-    params: _makeDefaultParams(cloudFunction.__trigger.eventTrigger.resource, resource.name),
+    params: isDocumentResourceName? _makeDefaultParams(cloudFunction.__trigger.eventTrigger.resource, resource.name) : {}
   };
   return defaultContext;
 }
