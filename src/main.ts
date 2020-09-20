@@ -20,9 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { has, merge, random, get } from 'lodash';
+import { has, merge, random, get, forEach, split, indexOf } from 'lodash';
 
 import { CloudFunction, EventContext, Change, https } from 'firebase-functions';
+import { QueryDocumentSnapshot } from 'firebase-functions/lib/providers/firestore';
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -153,7 +154,7 @@ export function wrap<T>(
         ['eventId', 'timestamp', 'params', 'auth', 'authType', 'resource'],
         options
       );
-      const defaultContext = _makeDefaultContext(cloudFunction, options);
+      const defaultContext = _makeDefaultContext(cloudFunction, options, data);
 
       if (
         has(defaultContext, 'eventType') &&
@@ -186,6 +187,21 @@ export function _makeResourceName(
   return resourceName;
 }
 
+function _makeDefaultParams(triggerResource, name) {
+  const wildcards = triggerResource.match(new RegExp('{[^/{}]*}', 'g'));
+  const params = {};
+  if (wildcards) {
+      const triggerResourceParts = split(triggerResource, '/');
+      const eventResourceParts = split(name, '/');
+      forEach(wildcards, (wildcard) => {
+          const wildcardNoBraces = wildcard.slice(1, -1);
+          const position = indexOf(triggerResourceParts, wildcard);
+          params[wildcardNoBraces] = eventResourceParts[position];
+      });
+  }
+  return params;
+}
+
 function _makeEventId(): string {
   return (
     Math.random()
@@ -212,21 +228,39 @@ function _checkOptionValidity(
 
 function _makeDefaultContext<T>(
   cloudFunction: CloudFunction<T>,
-  options: ContextOptions
+  options: ContextOptions,
+  data?: T
 ): EventContext {
   let eventContextOptions = options as EventContextOptions;
+  let isDocumentResourceName = false;
+  const resource = cloudFunction.__trigger.eventTrigger && {
+    service: cloudFunction.__trigger.eventTrigger.service,
+    name: ''
+  };
+  if(cloudFunction.__trigger.eventTrigger.service === 'firestore.googleapis.com'
+  && !has(eventContextOptions, 'params')) {
+    try {
+      cloudFunction.__trigger.eventTrigger.resource.substring(0, cloudFunction.__trigger.eventTrigger.resource.indexOf('documents'))
+      + 'documents/'
+      + (data as unknown as QueryDocumentSnapshot).ref.path;
+      isDocumentResourceName = true;
+    } catch(error) {
+      resource.name = _makeResourceName(cloudFunction.__trigger.eventTrigger.resource
+      , has(eventContextOptions, 'params')
+      && eventContextOptions.params);
+    }
+  } else {
+    resource.name = _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, has(eventContextOptions, 'params')
+    && eventContextOptions.params);
+  }
   const defaultContext: EventContext = {
     eventId: _makeEventId(),
-    resource: cloudFunction.__trigger.eventTrigger && {
-      service: cloudFunction.__trigger.eventTrigger.service,
-      name: _makeResourceName(
-        cloudFunction.__trigger.eventTrigger.resource,
-        has(eventContextOptions, 'params') && eventContextOptions.params
-      ),
-    },
+    resource,
     eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
     timestamp: new Date().toISOString(),
-    params: {},
+    params: isDocumentResourceName
+    ? _makeDefaultParams(cloudFunction.__trigger.eventTrigger.resource, resource.name)
+    : {}
   };
   return defaultContext;
 }
