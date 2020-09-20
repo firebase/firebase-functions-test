@@ -237,22 +237,30 @@ function _makeDefaultContext<T>(
     service: cloudFunction.__trigger.eventTrigger.service,
     name: ''
   };
-  if(cloudFunction.__trigger.eventTrigger.service == "firestore.googleapis.com" && !has(eventContextOptions, 'params')) {
+  if(cloudFunction.__trigger.eventTrigger.service === 'firestore.googleapis.com'
+  && !has(eventContextOptions, 'params')) {
     try {
-      cloudFunction.__trigger.eventTrigger.resource.substring(0, cloudFunction.__trigger.eventTrigger.resource.indexOf("documents")) + "documents/" + (data as unknown as QueryDocumentSnapshot).ref.path;
+      cloudFunction.__trigger.eventTrigger.resource.substring(0, cloudFunction.__trigger.eventTrigger.resource.indexOf('documents'))
+      + 'documents/'
+      + (data as unknown as QueryDocumentSnapshot).ref.path;
       isDocumentResourceName = true;
     } catch(error) {
-      resource.name = _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, has(eventContextOptions, 'params') && eventContextOptions.params);
+      resource.name = _makeResourceName(cloudFunction.__trigger.eventTrigger.resource
+      , has(eventContextOptions, 'params')
+      && eventContextOptions.params);
     }
   } else {
-    resource.name = _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, has(eventContextOptions, 'params') && eventContextOptions.params);
+    resource.name = _makeResourceName(cloudFunction.__trigger.eventTrigger.resource, has(eventContextOptions, 'params')
+    && eventContextOptions.params);
   }
   const defaultContext: EventContext = {
     eventId: _makeEventId(),
-    resource: resource,
+    resource,
     eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
     timestamp: new Date().toISOString(),
-    params: isDocumentResourceName? _makeDefaultParams(cloudFunction.__trigger.eventTrigger.resource, resource.name) : {}
+    params: isDocumentResourceName
+    ? _makeDefaultParams(cloudFunction.__trigger.eventTrigger.resource, resource.name)
+    : {}
   };
   return defaultContext;
 }
