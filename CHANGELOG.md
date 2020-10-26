@@ -1,1 +1,0 @@
-- Fixes a bug where `functions.config()` would return old config values if `process.env.CLOUD_RUNTIME_CONFIG` was changed after the first call to `functions.config()`.
