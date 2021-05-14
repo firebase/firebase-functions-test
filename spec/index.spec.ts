@@ -39,7 +39,6 @@ describe('index', () => {
       'analytics',
       'auth',
       'cleanup',
-      'crashlytics',
       'database',
       'firestore',
       'makeChange',
@@ -78,4 +77,3 @@ import './providers/scheduled.spec';
 // import './providers/https.spec';
 // import './providers/pubsub.spec';
 // import './providers/storage.spec';
-// import './providers/crashlytics.spec';
