@@ -1,1 +1,0 @@
-- Remove support for crashlytics (#98)
