@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as firebase from 'firebase-admin';
 import fft = require('../../src/index');
 
 describe('providers/firestore', () => {
@@ -28,5 +29,48 @@ describe('providers/firestore', () => {
 
     expect(snapshot.data()).to.deep.equal(undefined);
     expect(snapshot.id).to.equal('doc-id');
+  });
+
+  it('should allow geopoints with makeDocumentSnapshot', () => {
+    const test = fft();
+
+    const hq = new firebase.firestore.GeoPoint(47.6703, 122.1971);
+    const snapshot = test.firestore.makeDocumentSnapshot(
+      { geopoint: hq },
+      'collection/doc-id'
+    );
+
+    expect(snapshot.data()).to.deep.equal({ geopoint: hq });
+  });
+
+  it('should allow timestmaps with makeDocumentSnapshot', () => {
+    const test = fft();
+
+    const time = new Date();
+    const snapshot = test.firestore.makeDocumentSnapshot(
+      { time },
+      'collection/doc-id'
+    );
+
+    expect(snapshot.data().time).to.be.instanceof(firebase.firestore.Timestamp);
+    expect(snapshot.data().time.toDate()).to.deep.equal(time);
+  });
+
+  it('should allow references with makeDocumentSnapshot', () => {
+    const test = fft();
+    firebase.initializeApp({
+      projectId: 'not-a-project',
+    });
+
+    const ref = firebase.firestore().doc('collection/doc-id');
+    const snapshot = test.firestore.makeDocumentSnapshot(
+      { ref },
+      'collection/doc-id'
+    );
+
+    expect(snapshot.data().ref).to.be.instanceOf(
+      firebase.firestore.DocumentReference
+    );
+    expect(snapshot.data().ref.toString()).to.equal(ref.toString());
   });
 });
