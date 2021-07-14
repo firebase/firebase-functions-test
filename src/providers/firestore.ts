@@ -173,6 +173,10 @@ export function objectToValueProto(data: object) {
       };
     }
     if (val === null) {
+      // TODO: Look this up. This is a google.protobuf.NulLValue,
+      // and everything in google.protobuf has a customized JSON encoder.
+      // OTOH, Firestore's generated .d.ts files don't take this into
+      // account and have the default proto layout.
       return {
         nullValue: 'NULL_VALUE',
       };
@@ -197,6 +201,14 @@ export function objectToValueProto(data: object) {
     if (val instanceof firestore.Timestamp) {
       return {
         timestampValue: val.toDate().toISOString(),
+      };
+    }
+    if (val instanceof firestore.GeoPoint) {
+      return {
+        geoPointValue: {
+          latitude: val.latitude,
+          longitude: val.longitude,
+        },
       };
     }
     if (isPlainObject(val)) {

@@ -22,7 +22,13 @@
 
 import { has, merge, random, get } from 'lodash';
 
-import { CloudFunction, EventContext, Change, https, config } from 'firebase-functions';
+import {
+  CloudFunction,
+  EventContext,
+  Change,
+  https,
+  config,
+} from 'firebase-functions';
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {

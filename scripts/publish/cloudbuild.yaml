@@ -78,8 +78,7 @@ steps:
   # Set up the Twitter credentials.
   - name: 'gcr.io/$PROJECT_ID/fft-package-builder'
     entrypoint: 'cp'
-    args:
-      ['-v', 'twitter.json', '${_REPOSITORY_NAME}/scripts/twitter.json']
+    args: ['-v', 'twitter.json', '${_REPOSITORY_NAME}/scripts/twitter.json']
 
   # Set up the npm credentials.
   - name: 'gcr.io/$PROJECT_ID/fft-package-builder'
@@ -112,4 +111,3 @@ substitutions:
   _KEY_NAME: 'publish'
   _REPOSITORY_ORG: 'firebase'
   _REPOSITORY_NAME: 'firebase-functions-test'
-
