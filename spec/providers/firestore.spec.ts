@@ -1,11 +1,16 @@
 import { expect } from 'chai';
 import * as firebase from 'firebase-admin';
+import { FeaturesList } from '../../src/features';
 import fft = require('../../src/index');
 
 describe('providers/firestore', () => {
-  it('produces the right snapshot with makeDocumentSnapshot', async () => {
-    const test = fft();
+  let test: FeaturesList;
 
+  beforeEach(() => {
+    test = fft();
+  });
+
+  it('produces the right snapshot with makeDocumentSnapshot', async () => {
     const snapshot = test.firestore.makeDocumentSnapshot(
       {
         email_address: 'test@test.com',
@@ -20,8 +25,6 @@ describe('providers/firestore', () => {
   });
 
   it('should allow empty document in makeDocumentSnapshot', async () => {
-    const test = fft();
-
     const snapshot = test.firestore.makeDocumentSnapshot(
       {},
       'collection/doc-id'
@@ -32,8 +35,6 @@ describe('providers/firestore', () => {
   });
 
   it('should allow geopoints with makeDocumentSnapshot', () => {
-    const test = fft();
-
     const hq = new firebase.firestore.GeoPoint(47.6703, 122.1971);
     const snapshot = test.firestore.makeDocumentSnapshot(
       { geopoint: hq },
@@ -43,9 +44,7 @@ describe('providers/firestore', () => {
     expect(snapshot.data()).to.deep.equal({ geopoint: hq });
   });
 
-  it('should allow timestmaps with makeDocumentSnapshot', () => {
-    const test = fft();
-
+  it('should allow timestamps with makeDocumentSnapshot', () => {
     const time = new Date();
     const snapshot = test.firestore.makeDocumentSnapshot(
       { time },
@@ -57,7 +56,6 @@ describe('providers/firestore', () => {
   });
 
   it('should allow references with makeDocumentSnapshot', () => {
-    const test = fft();
     firebase.initializeApp({
       projectId: 'not-a-project',
     });
