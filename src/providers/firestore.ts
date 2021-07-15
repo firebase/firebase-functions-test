@@ -222,7 +222,7 @@ export function objectToValueProto(data: object) {
       'Cannot encode ' +
         val +
         'to a Firestore Value.' +
-        ' Local testing does not yet support Firestore geo points.'
+        ` Local testing does not yet support objects of type ${val?.constructor?.name}.`
     );
   };
 
