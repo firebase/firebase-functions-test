@@ -1,2 +1,0 @@
-- Add support for GeoPoints in Firestore tests
-- Improve error message for unsupported types in Firestore tests
