@@ -22,10 +22,19 @@
 
 import { auth } from 'firebase-functions';
 
+type PartialWithoutToJSON<T> = Partial<Omit<T, 'toJSON'>>;
+type PartialUserRecord = Omit<
+  PartialWithoutToJSON<auth.UserRecord>,
+  'metadata' | 'providerData'
+> & {
+  metadata?: PartialWithoutToJSON<auth.UserRecordMetadata>;
+  providerData?: Array<PartialWithoutToJSON<auth.UserInfo>>;
+};
+
 /** Create a UserRecord. */
 export function makeUserRecord(
   /** Fields of AuthRecord that you'd like to specify. */
-  fields: { [key: string]: string | boolean }
+  fields: PartialUserRecord
 ): auth.UserRecord {
   return auth.userRecordConstructor(Object.assign({ uid: '' }, fields));
 }
