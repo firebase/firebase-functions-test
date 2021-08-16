@@ -21,13 +21,27 @@
 // SOFTWARE.
 
 import { Change } from 'firebase-functions';
-import { dateToTimestampProto } from 'firebase-functions/lib/encoder';
 import { firestore, app } from 'firebase-admin';
 import { has, get, isEmpty, isPlainObject, mapValues } from 'lodash';
 
 import { testApp } from '../app';
 
 import * as http from 'http';
+
+function dateToTimestampProto(timeString?: string) {
+  if (typeof timeString === 'undefined') {
+    return;
+  }
+  const date = new Date(timeString);
+  const seconds = Math.floor(date.getTime() / 1000);
+  let nanos = 0;
+  if (timeString.length > 20) {
+    const nanoString = timeString.substring(20, timeString.length - 1);
+    const trailingZeroes = 9 - nanoString.length;
+    nanos = parseInt(nanoString, 10) * Math.pow(10, trailingZeroes);
+  }
+  return { seconds, nanos };
+}
 
 /** Optional parameters for creating a DocumentSnapshot. */
 export interface DocumentSnapshotOptions {
