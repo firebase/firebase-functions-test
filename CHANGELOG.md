@@ -1,1 +1,0 @@
-- Fix problem with missing import in the firebase-functions SDK
