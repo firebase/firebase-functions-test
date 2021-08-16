@@ -28,7 +28,7 @@ import { testApp } from '../app';
 
 import * as http from 'http';
 
-function dateToTimestampProto(timeString?: string) {
+function dateToTimestampProto(timeString?: string): { seconds: number, nanos: number } | undefined {
   if (typeof timeString === 'undefined') {
     return;
   }
