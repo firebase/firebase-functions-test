@@ -65,6 +65,11 @@ export type EventContextOptions = {
 /** Fields of the callable context that can be overridden/customized. */
 export type CallableContextOptions = {
   /**
+   * The result of decoding and verifying a Firebase AppCheck token.
+   */
+  app?: any;
+
+  /**
    * The result of decoding and verifying a Firebase Auth ID token.
    */
   auth?: any;
@@ -149,7 +154,7 @@ export function wrap<T>(
     let context;
 
     if (isCallableFunction) {
-      _checkOptionValidity(['auth', 'instanceIdToken', 'rawRequest'], options);
+      _checkOptionValidity(['app', 'auth', 'instanceIdToken', 'rawRequest'], options);
       let callableContextOptions = options as CallableContextOptions;
       context = {
         ...callableContextOptions,
