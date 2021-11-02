@@ -62,9 +62,9 @@ describe('main', () => {
         expect(typeof context.eventId).to.equal('string');
         expect(context.resource.service).to.equal('service');
         expect(
-            /ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/.test(
-                context.resource.name
-            )
+          /ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/.test(
+            context.resource.name
+          )
         ).to.be.true;
         expect(context.eventType).to.equal('event');
         expect(Date.parse(context.timestamp)).to.be.greaterThan(0);
@@ -122,10 +122,10 @@ describe('main', () => {
       it('should throw when passed invalid options', () => {
         const wrapped = wrap(constructBackgroundCF());
         expect(() =>
-            wrapped('data', {
-              auth: { uid: 'abc' },
-              isInvalid: true,
-            } as any)
+          wrapped('data', {
+            auth: { uid: 'abc' },
+            isInvalid: true,
+          } as any)
         ).to.throw();
       });
 
@@ -252,23 +252,22 @@ describe('main', () => {
           auth: { uid: 'abc' },
           app: { appId: 'efg' },
           instanceIdToken: '123',
-          rawRequest: { body: 'hello' }
+          rawRequest: { body: 'hello' },
         }).context;
         expect(context.auth).to.deep.equal({ uid: 'abc' });
         expect(context.app).to.deep.equal({ appId: 'efg' });
         expect(context.instanceIdToken).to.equal('123');
-        expect(context.rawRequest).to.deep.equal({ body: 'hello'});
+        expect(context.rawRequest).to.deep.equal({ body: 'hello' });
       });
 
       it('should throw when passed invalid options', () => {
         expect(() =>
-            wrappedCF('data', {
-              auth: { uid: 'abc' },
-              isInvalid: true,
-            } as any)
+          wrappedCF('data', {
+            auth: { uid: 'abc' },
+            isInvalid: true,
+          } as any)
         ).to.throw();
       });
-
     });
   });
 
