@@ -24,7 +24,15 @@ import { expect } from 'chai';
 import * as functions from 'firebase-functions';
 import { set } from 'lodash';
 
-import { mockConfig, makeChange, _makeResourceName, wrap } from '../src/main';
+import {
+  mockConfig,
+  makeChange,
+  _makeResourceName,
+  _extractParams,
+  wrap,
+} from '../src/main';
+import { features } from '../src/features';
+import { FirebaseFunctionsTest } from '../src/lifecycle';
 
 describe('main', () => {
   describe('#wrap', () => {
@@ -54,9 +62,9 @@ describe('main', () => {
         expect(typeof context.eventId).to.equal('string');
         expect(context.resource.service).to.equal('service');
         expect(
-            /ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/.test(
-                context.resource.name
-            )
+          /ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/.test(
+            context.resource.name
+          )
         ).to.be.true;
         expect(context.eventType).to.equal('event');
         expect(Date.parse(context.timestamp)).to.be.greaterThan(0);
@@ -75,31 +83,49 @@ describe('main', () => {
         expect(context.timestamp).to.equal('2018-03-28T18:58:50.370Z');
       });
 
-      it('should generate auth and authType for database functions', () => {
-        const context = wrap(constructBackgroundCF('google.firebase.database.ref.write'))(
-            'data'
-        ).context;
-        expect(context.auth).to.equal(null);
-        expect(context.authType).to.equal('UNAUTHENTICATED');
-      });
+      describe('database functions', () => {
+        let test;
+        let change;
 
-      it('should allow auth and authType to be specified for database functions', () => {
-        const wrapped = wrap(constructBackgroundCF('google.firebase.database.ref.write'));
-        const context = wrapped('data', {
-          auth: { uid: 'abc' },
-          authType: 'USER',
-        }).context;
-        expect(context.auth).to.deep.equal({ uid: 'abc' });
-        expect(context.authType).to.equal('USER');
+        beforeEach(() => {
+          test = new FirebaseFunctionsTest();
+          test.init();
+          change = features.database.exampleDataSnapshotChange();
+        });
+
+        afterEach(() => {
+          test.cleanup();
+        });
+
+        it('should generate auth and authType', () => {
+          const wrapped = wrap(
+            constructBackgroundCF('google.firebase.database.ref.write')
+          );
+          const context = wrapped(change).context;
+          expect(context.auth).to.equal(null);
+          expect(context.authType).to.equal('UNAUTHENTICATED');
+        });
+
+        it('should allow auth and authType to be specified', () => {
+          const wrapped = wrap(
+            constructBackgroundCF('google.firebase.database.ref.write')
+          );
+          const context = wrapped(change, {
+            auth: { uid: 'abc' },
+            authType: 'USER',
+          }).context;
+          expect(context.auth).to.deep.equal({ uid: 'abc' });
+          expect(context.authType).to.equal('USER');
+        });
       });
 
       it('should throw when passed invalid options', () => {
         const wrapped = wrap(constructBackgroundCF());
         expect(() =>
-            wrapped('data', {
-              auth: { uid: 'abc' },
-              isInvalid: true,
-            } as any)
+          wrapped('data', {
+            auth: { uid: 'abc' },
+            isInvalid: true,
+          } as any)
         ).to.throw();
       });
 
@@ -112,6 +138,91 @@ describe('main', () => {
         const context = wrapped('data', { params }).context;
         expect(context.params).to.deep.equal(params);
         expect(context.resource.name).to.equal('ref/a/nested/b');
+      });
+
+      describe('Params extraction', () => {
+        let test;
+
+        beforeEach(() => {
+          test = new FirebaseFunctionsTest();
+          test.init();
+        });
+
+        afterEach(() => {
+          test.cleanup();
+        });
+
+        it('should extract the appropriate params for database function trigger', () => {
+          const cf = constructBackgroundCF(
+            'google.firebase.database.ref.create'
+          );
+          cf.__trigger.eventTrigger.resource =
+            'companies/{company}/users/{user}';
+          const wrapped = wrap(cf);
+          const context = wrapped(
+            features.database.makeDataSnapshot(
+              { foo: 'bar' },
+              'companies/Google/users/Lauren'
+            )
+          ).context;
+          expect(context.params).to.deep.equal({
+            company: 'Google',
+            user: 'Lauren',
+          });
+          expect(context.resource.name).to.equal(
+            'companies/Google/users/Lauren'
+          );
+        });
+
+        it('should extract the appropriate params for Firestore function trigger', () => {
+          const cf = constructBackgroundCF('google.firestore.document.create');
+          cf.__trigger.eventTrigger.resource =
+            'databases/(default)/documents/companies/{company}/users/{user}';
+          const wrapped = wrap(cf);
+          const context = wrapped(
+            features.firestore.makeDocumentSnapshot(
+              { foo: 'bar' },
+              'companies/Google/users/Lauren'
+            )
+          ).context;
+          expect(context.params).to.deep.equal({
+            company: 'Google',
+            user: 'Lauren',
+          });
+          expect(context.resource.name).to.equal(
+            'databases/(default)/documents/companies/Google/users/Lauren'
+          );
+        });
+
+        it('should prefer provided context.params over the extracted params', () => {
+          const cf = constructBackgroundCF(
+            'google.firebase.database.ref.create'
+          );
+          cf.__trigger.eventTrigger.resource =
+            'companies/{company}/users/{user}';
+          const wrapped = wrap(cf);
+          const context = wrapped(
+            features.database.makeDataSnapshot(
+              { foo: 'bar' },
+              'companies/Google/users/Lauren'
+            ),
+            {
+              params: {
+                company: 'Alphabet',
+                user: 'Lauren',
+                foo: 'bar',
+              },
+            }
+          ).context;
+          expect(context.params).to.deep.equal({
+            company: 'Alphabet',
+            user: 'Lauren',
+            foo: 'bar',
+          });
+          expect(context.resource.name).to.equal(
+            'companies/Alphabet/users/Lauren'
+          );
+        });
       });
     });
 
@@ -141,23 +252,22 @@ describe('main', () => {
           auth: { uid: 'abc' },
           app: { appId: 'efg' },
           instanceIdToken: '123',
-          rawRequest: { body: 'hello' }
+          rawRequest: { body: 'hello' },
         }).context;
         expect(context.auth).to.deep.equal({ uid: 'abc' });
         expect(context.app).to.deep.equal({ appId: 'efg' });
         expect(context.instanceIdToken).to.equal('123');
-        expect(context.rawRequest).to.deep.equal({ body: 'hello'});
+        expect(context.rawRequest).to.deep.equal({ body: 'hello' });
       });
 
       it('should throw when passed invalid options', () => {
         expect(() =>
-            wrappedCF('data', {
-              auth: { uid: 'abc' },
-              isInvalid: true,
-            } as any)
+          wrappedCF('data', {
+            auth: { uid: 'abc' },
+            isInvalid: true,
+          } as any)
         ).to.throw();
       });
-
     });
   });
 
@@ -168,6 +278,24 @@ describe('main', () => {
         user: 'Lauren',
       });
       expect(resource).to.equal('companies/Google/users/Lauren');
+    });
+  });
+
+  describe('#_extractParams', () => {
+    it('should not extract any params', () => {
+      const params = _extractParams('users/foo', 'users/foo');
+      expect(params).to.deep.equal({});
+    });
+
+    it('should extract params', () => {
+      const params = _extractParams(
+        'companies/{company}/users/{user}',
+        'companies/Google/users/Lauren'
+      );
+      expect(params).to.deep.equal({
+        company: 'Google',
+        user: 'Lauren',
+      });
     });
   });
 

@@ -28,6 +28,8 @@ import {
   Change,
   https,
   config,
+  database,
+  firestore,
 } from 'firebase-functions';
 
 /** Fields of the event context that can be overridden/customized. */
@@ -154,7 +156,10 @@ export function wrap<T>(
     let context;
 
     if (isCallableFunction) {
-      _checkOptionValidity(['app', 'auth', 'instanceIdToken', 'rawRequest'], options);
+      _checkOptionValidity(
+        ['app', 'auth', 'instanceIdToken', 'rawRequest'],
+        options
+      );
       let callableContextOptions = options as CallableContextOptions;
       context = {
         ...callableContextOptions,
@@ -164,7 +169,7 @@ export function wrap<T>(
         ['eventId', 'timestamp', 'params', 'auth', 'authType', 'resource'],
         options
       );
-      const defaultContext = _makeDefaultContext(cloudFunction, options);
+      const defaultContext = _makeDefaultContext(cloudFunction, options, data);
 
       if (
         has(defaultContext, 'eventType') &&
@@ -223,23 +228,102 @@ function _checkOptionValidity(
 
 function _makeDefaultContext<T>(
   cloudFunction: CloudFunction<T>,
-  options: ContextOptions
+  options: ContextOptions,
+  triggerData?: T
 ): EventContext {
   let eventContextOptions = options as EventContextOptions;
+  const eventResource = cloudFunction.__trigger.eventTrigger?.resource;
+  const eventType = cloudFunction.__trigger.eventTrigger?.eventType;
+
+  const optionsParams = eventContextOptions.params ?? {};
+  let triggerParams = {};
+  if (eventResource && eventType && triggerData) {
+    if (eventType.startsWith('google.firebase.database.ref.')) {
+      let data: database.DataSnapshot;
+      if (eventType.endsWith('.write')) {
+        // Triggered with change
+        if (!(triggerData instanceof Change)) {
+          throw new Error('Must be triggered by database change');
+        }
+        data = triggerData.before;
+      } else {
+        data = triggerData as any;
+      }
+      triggerParams = _extractDatabaseParams(eventResource, data);
+    } else if (eventType.startsWith('google.firestore.document.')) {
+      let data: firestore.DocumentSnapshot;
+      if (eventType.endsWith('.write')) {
+        // Triggered with change
+        if (!(triggerData instanceof Change)) {
+          throw new Error('Must be triggered by firestore document change');
+        }
+        data = triggerData.before;
+      } else {
+        data = triggerData as any;
+      }
+      triggerParams = _extractFirestoreDocumentParams(eventResource, data);
+    }
+  }
+  const params = { ...triggerParams, ...optionsParams };
+
   const defaultContext: EventContext = {
     eventId: _makeEventId(),
-    resource: cloudFunction.__trigger.eventTrigger && {
-      service: cloudFunction.__trigger.eventTrigger.service,
-      name: _makeResourceName(
-        cloudFunction.__trigger.eventTrigger.resource,
-        has(eventContextOptions, 'params') && eventContextOptions.params
-      ),
+    resource: eventResource && {
+      service: cloudFunction.__trigger.eventTrigger?.service,
+      name: _makeResourceName(eventResource, params),
     },
-    eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
+    eventType,
     timestamp: new Date().toISOString(),
-    params: {},
+    params,
   };
   return defaultContext;
+}
+
+function _extractDatabaseParams(
+  triggerResource: string,
+  data: database.DataSnapshot
+): EventContext['params'] {
+  const path = data.ref.toString().replace(data.ref.root.toString(), '');
+  return _extractParams(triggerResource, path);
+}
+
+function _extractFirestoreDocumentParams(
+  triggerResource: string,
+  data: firestore.DocumentSnapshot
+): EventContext['params'] {
+  // Resource format: databases/(default)/documents/<path>
+  return _extractParams(
+    triggerResource.replace(/^databases\/[^\/]+\/documents\//, ''),
+    data.ref.path
+  );
+}
+
+/**
+ * Extracts the `{wildcard}` values from `dataPath`.
+ * E.g. A wildcard path of `users/{userId}` with `users/FOO` would result in `{ userId: 'FOO' }`.
+ * @internal
+ */
+export function _extractParams(
+  wildcardTriggerPath: string,
+  dataPath: string
+): EventContext['params'] {
+  // Trim start and end / and split into path components
+  const wildcardPaths = wildcardTriggerPath
+    .replace(/^\/?(.*?)\/?$/, '$1')
+    .split('/');
+  const dataPaths = dataPath.replace(/^\/?(.*?)\/?$/, '$1').split('/');
+  const params = {};
+  if (wildcardPaths.length === dataPaths.length) {
+    for (let idx = 0; idx < wildcardPaths.length; idx++) {
+      const wildcardPath = wildcardPaths[idx];
+      const name = wildcardPath.replace(/^{([^/{}]*)}$/, '$1');
+      if (name !== wildcardPath) {
+        // Wildcard parameter
+        params[name] = dataPaths[idx];
+      }
+    }
+  }
+  return params;
 }
 
 /** Make a Change object to be used as test data for Firestore and real time database onWrite and onUpdate functions. */
