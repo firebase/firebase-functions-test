@@ -93,22 +93,22 @@ export type ContextOptions = EventContextOptions | CallableContextOptions;
 /** A function that can be called with test data and optional override values for the event context.
  * It will subsequently invoke the cloud function it wraps with the provided test data and a generated event context.
  */
-export type WrappedFunction = (
+export type WrappedFunction<T = any> = (
   data: any,
   options?: ContextOptions
-) => any | Promise<any>;
+) => T;
 
 /** A scheduled function that can be called with optional override values for the event context.
  * It will subsequently invoke the cloud function it wraps with a generated event context.
  */
-export type WrappedScheduledFunction = (
+export type WrappedScheduledFunction<T = any> = (
   options?: ContextOptions
-) => any | Promise<any>;
+) => T;
 
 /** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
 export function wrap<T>(
   cloudFunction: CloudFunction<T>
-): WrappedScheduledFunction | WrappedFunction {
+): WrappedScheduledFunction<T> | WrappedFunction<T> {
   if (!has(cloudFunction, '__trigger')) {
     throw new Error(
       'Wrap can only be called on functions written with the firebase-functions SDK.'
