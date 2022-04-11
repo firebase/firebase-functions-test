@@ -264,7 +264,7 @@ export function clearFirestoreData(options: { projectId: string } | string) {
 
     if (typeof options === 'string') {
       projectId = options;
-    } else if (typeof options === 'object' && has(options, 'projectId')) {
+    } else if (typeof options === 'object' && !!options.projectId) {
       projectId = options.projectId;
     } else {
       throw new Error('projectId not specified');

@@ -20,8 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { has, merge, random, get } from 'lodash';
-
 import {
   CloudFunction,
   EventContext,
@@ -31,6 +29,11 @@ import {
   database,
   firestore,
 } from 'firebase-functions';
+
+// Replacement for previous _.random usage
+const random = (lower, upper) => {
+  return Math.round((Math.random() * (upper - lower)) + lower);
+};
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -109,13 +112,13 @@ export type WrappedScheduledFunction = (
 export function wrap<T>(
   cloudFunction: CloudFunction<T>
 ): WrappedScheduledFunction | WrappedFunction {
-  if (!has(cloudFunction, '__trigger')) {
+  if (!cloudFunction.__trigger) {
     throw new Error(
       'Wrap can only be called on functions written with the firebase-functions SDK.'
     );
   }
 
-  if (get(cloudFunction, '__trigger.labels.deployment-scheduled') === 'true') {
+  if (cloudFunction?.__trigger?.labels && cloudFunction?.__trigger?.labels['deployment-scheduled'] === 'true') {
     const scheduledWrapped: WrappedScheduledFunction = (
       options: ContextOptions
     ) => {
@@ -124,7 +127,7 @@ export function wrap<T>(
 
       _checkOptionValidity(['eventId', 'timestamp'], options);
       const defaultContext = _makeDefaultContext(cloudFunction, options);
-      const context = merge({}, defaultContext, options);
+      const context = {...defaultContext, ...options};
 
       // @ts-ignore
       return cloudFunction.run(context);
@@ -133,22 +136,23 @@ export function wrap<T>(
   }
 
   if (
-    has(cloudFunction, '__trigger.httpsTrigger') &&
-    get(cloudFunction, '__trigger.labels.deployment-callable') !== 'true'
+    !!cloudFunction?.__trigger?.httpsTrigger &&
+    cloudFunction?.__trigger?.labels['deployment-callable'] !== 'true'
   ) {
     throw new Error(
       'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.'
     );
   }
 
-  if (!has(cloudFunction, 'run')) {
+  if (!cloudFunction.run) {
     throw new Error(
       'This library can only be used with functions written with firebase-functions v1.0.0 and above'
     );
   }
 
   const isCallableFunction =
-    get(cloudFunction, '__trigger.labels.deployment-callable') === 'true';
+    cloudFunction?.__trigger?.labels &&
+    cloudFunction?.__trigger?.labels['deployment-callable'] === 'true';
 
   let wrapped: WrappedFunction = (data: T, options: ContextOptions) => {
     // Although in Typescript we require `options` some of our JS samples do not pass it.
@@ -172,14 +176,13 @@ export function wrap<T>(
       const defaultContext = _makeDefaultContext(cloudFunction, options, data);
 
       if (
-        has(defaultContext, 'eventType') &&
-        defaultContext.eventType !== undefined &&
+        !!defaultContext.eventType &&
         defaultContext.eventType.match(/firebase.database/)
       ) {
         defaultContext.authType = 'UNAUTHENTICATED';
         defaultContext.auth = null;
       }
-      context = merge({}, defaultContext, options);
+      context = {...defaultContext, ...options};
     }
 
     return cloudFunction.run(data, context);
@@ -195,8 +198,8 @@ export function _makeResourceName(
 ): string {
   const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
   let resourceName = triggerResource.replace(wildcardRegex, (wildcard) => {
-    let wildcardNoBraces = wildcard.slice(1, -1); // .slice removes '{' and '}' from wildcard
-    let sub = get(params, wildcardNoBraces);
+    const wildcardNoBraces = wildcard.slice(1, -1); // .slice removes '{' and '}' from wildcard
+    const sub = params[wildcardNoBraces];
     return sub || wildcardNoBraces + random(1, 9);
   });
   return resourceName;
@@ -264,7 +267,7 @@ function _makeDefaultContext<T>(
       triggerParams = _extractFirestoreDocumentParams(eventResource, data);
     }
   }
-  const params = { ...triggerParams, ...optionsParams };
+  const params = {...triggerParams, ...optionsParams};
 
   const defaultContext: EventContext = {
     eventId: _makeEventId(),

@@ -22,7 +22,6 @@
 
 import { isEmpty } from 'lodash';
 import { AppOptions } from 'firebase-admin';
-import { forEach } from 'lodash';
 
 import { testApp } from './app';
 
@@ -72,7 +71,7 @@ export class FirebaseFunctionsTest {
 
   /** Complete clean up tasks. */
   cleanup() {
-    forEach(this._oldEnv, (val, varName) => {
+    Object.entries(this._oldEnv).forEach(([varName, val]) => {
       if (typeof val !== 'undefined') {
         process.env[varName] = val;
       } else {

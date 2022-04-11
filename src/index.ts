@@ -20,20 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { AppOptions } from 'firebase-admin';
-import { merge } from 'lodash';
+import {AppOptions} from 'firebase-admin';
 
-import { FirebaseFunctionsTest } from './lifecycle';
-import { features as lazyFeatures, FeaturesList } from './features';
+import {FirebaseFunctionsTest} from './lifecycle';
+import {features as lazyFeatures, FeaturesList} from './features';
 
 export = (firebaseConfig?: AppOptions, pathToServiceAccountKey?: string) => {
   const test = new FirebaseFunctionsTest();
   test.init(firebaseConfig, pathToServiceAccountKey);
   // Ensure other files get loaded after init function, since they load `firebase-functions`
   // which will issue warning if process.env.FIREBASE_CONFIG is not yet set.
-  let features = require('./features').features as typeof lazyFeatures;
-  features = merge({}, features, {
-    cleanup: () => test.cleanup(),
-  });
+  const features = {
+    ...(require('./features').features as typeof lazyFeatures),
+    cleanup: () => test.cleanup()
+  } as typeof lazyFeatures;
   return features as FeaturesList;
 };
