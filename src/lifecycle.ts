@@ -20,10 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { isEmpty } from 'lodash';
-import { AppOptions } from 'firebase-admin';
+import {AppOptions} from 'firebase-admin';
 
-import { testApp } from './app';
+import {testApp} from './app';
 
 export class FirebaseFunctionsTest {
   private _oldEnv: { [key: string]: string };
@@ -47,12 +46,12 @@ export class FirebaseFunctionsTest {
     this._oldEnv = {
       FIREBASE_CONFIG: process.env.FIREBASE_CONFIG,
       GOOGLE_APPLICATION_CREDENTIALS:
-        process.env.GOOGLE_APPLICATION_CREDENTIALS,
+      process.env.GOOGLE_APPLICATION_CREDENTIALS,
       GCLOUD_PROJECT: process.env.GCLOUD_PROJECT,
       CLOUD_RUNTIME_CONFIG: process.env.CLOUD_RUNTIME_CONFIG,
     };
 
-    if (isEmpty(firebaseConfig)) {
+    if (!(firebaseConfig && firebaseConfig.projectId)) {
       process.env.FIREBASE_CONFIG = JSON.stringify({
         databaseURL: 'https://not-a-project.firebaseio.com',
         storageBucket: 'not-a-project.appspot.com',
@@ -71,13 +70,13 @@ export class FirebaseFunctionsTest {
 
   /** Complete clean up tasks. */
   cleanup() {
-    Object.entries(this._oldEnv).forEach(([varName, val]) => {
+    for (const [varName, val] of Object.entries(this._oldEnv)) {
       if (typeof val !== 'undefined') {
         process.env[varName] = val;
       } else {
         delete process.env[varName];
       }
-    });
+    }
     testApp().deleteApp();
   }
 }

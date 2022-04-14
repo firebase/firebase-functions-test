@@ -118,7 +118,7 @@ export function wrap<T>(
     );
   }
 
-  if (cloudFunction?.__trigger?.labels && cloudFunction?.__trigger?.labels['deployment-scheduled'] === 'true') {
+  if (cloudFunction?.__trigger?.labels?.['deployment-scheduled'] === 'true') {
     const scheduledWrapped: WrappedScheduledFunction = (
       options: ContextOptions
     ) => {
@@ -151,8 +151,7 @@ export function wrap<T>(
   }
 
   const isCallableFunction =
-    cloudFunction?.__trigger?.labels &&
-    cloudFunction?.__trigger?.labels['deployment-callable'] === 'true';
+    cloudFunction?.__trigger?.labels?.['deployment-callable'] === 'true';
 
   let wrapped: WrappedFunction = (data: T, options: ContextOptions) => {
     // Although in Typescript we require `options` some of our JS samples do not pass it.
@@ -176,7 +175,7 @@ export function wrap<T>(
       const defaultContext = _makeDefaultContext(cloudFunction, options, data);
 
       if (
-        !!defaultContext.eventType &&
+        defaultContext.eventType &&
         defaultContext.eventType.match(/firebase.database/)
       ) {
         defaultContext.authType = 'UNAUTHENTICATED';
