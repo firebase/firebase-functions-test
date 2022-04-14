@@ -46,23 +46,12 @@ export function wrap<T>(
   cloudFunction: CloudFunction<T>
 ): WrappedScheduledFunction | WrappedFunction {
 
-  // TODO(tystark) Verify this is the appopriate handle for ScheduledFunctions
-  if (
-    // @ts-ignore
-    cloudFunction?.__trigger?.labels &&
-    // @ts-ignore
-    cloudFunction?.__trigger?.labels['deployment-scheduled'] === 'true') {
-    return (cloudEvent: CloudEvent): WrappedScheduledFunction => cloudFunction.run(cloudEvent);
-  }
-
   // TODO(tystark) verify
   if (
     // @ts-ignore
     !!(cloudFunction?.__trigger?.httpsTrigger) &&
     // @ts-ignore
-    cloudFunction?.__trigger?.labels &&
-    // @ts-ignore
-    cloudFunction?.__trigger?.labels['deployment-callable'] !== 'true'
+    cloudFunction?.__trigger?.labels?.['deployment-callable'] !== 'true'
   ) {
     throw new Error(
       'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.'
@@ -71,11 +60,10 @@ export function wrap<T>(
 
   if (!cloudFunction.run) {
     throw new Error(
-      'This library can only be used with functions written with firebase-functions v1.0.0 and above'
+      'This library can only be used with functions written with firebase-functions v3.20.0 and above'
     );
   }
 
-  // TODO(tystark) verify
   if (!cloudFunction.__endpoint) {
     throw new Error(
       'This function can only wrap V2 CloudFunctions.'
@@ -100,6 +88,10 @@ export function wrap<T>(
 
   return wrapped;
 }
+
+// TODO(tystark) Implement this
+export const getMockCloudEvent =
+  (cloudFunction: CloudFunction<any>): CloudEvent => _getDefaultCloudEvent();
 
 /** @internal */
 
