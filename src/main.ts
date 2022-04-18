@@ -137,7 +137,7 @@ export function wrap<T>(
 
   if (
     !!cloudFunction?.__trigger?.httpsTrigger &&
-    cloudFunction?.__trigger?.labels['deployment-callable'] !== 'true'
+    cloudFunction?.__trigger?.labels?.['deployment-callable'] !== 'true'
   ) {
     throw new Error(
       'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.'
