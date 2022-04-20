@@ -46,7 +46,6 @@ export function wrap<T>(
   cloudFunction: CloudFunction<T>
 ): WrappedScheduledFunction | WrappedFunction {
 
-  // TODO(tystark) verify
   if (
     // @ts-ignore
     !!(cloudFunction?.__trigger?.httpsTrigger) &&
@@ -89,21 +88,66 @@ export function wrap<T>(
   return wrapped;
 }
 
-// TODO(tystark) Implement this
-export const getMockCloudEvent =
-  (cloudFunction: CloudFunction<any>): CloudEvent => _getDefaultCloudEvent();
+export type CloudEventOverrides = {
+  source: string;
+  subject: string;
+  type: string;
+  data: any;
+};
+
+/**
+ *
+ * @param cloudFunction Populates default values of the CloudEvent
+ * @param cloudEventOverride Used to override CloudEvent params.
+ * @return {CloudEvent} Generated Mock CloudEvent
+ */
+export const createMockCloudEvent = <T>(
+  cloudFunction: CloudFunction<T>,
+  cloudEventOverride?: CloudEventOverrides): CloudEvent => {
+  return {
+    ..._createCloudEventWithDefaultValues(cloudFunction),
+    ...cloudEventOverride
+  };
+};
 
 /** @internal */
 
+type CloudFunctionEventTrigger = {
+  source: string;
+};
+type CloudFunctionTrigger = {
+  eventTrigger: CloudFunctionEventTrigger
+};
+
+const _getCloudEventSource =
+  (cloudFunction: CloudFunction<any>): string => {
+    if (cloudFunction?.__trigger) {
+      const trigger = cloudFunction.__trigger as CloudFunctionTrigger;
+      return trigger?.eventTrigger?.source || '';
+    }
+    return '';
+  };
+
+const _getCloudEventSubject =
+  (cloudFunction: CloudFunction<any>): string => {
+    // TODO(tystark) verify what should populate the subject
+    return '';
+  };
+
+const _getCloudEventType =
+  (cloudFunction: CloudFunction<any>): string => {
+    return cloudFunction?.__endpoint?.eventTrigger?.eventType || '';
+  };
+
 /** @return CloudEvent populated with default values */
-export const _getDefaultCloudEvent = (): CloudEvent => (
+export const _createCloudEventWithDefaultValues = <T>(cloudFunction: CloudFunction<T>): CloudEvent => (
   {
     id: _makeEventId(),
-    source: 'source',
-    subject: 'subject',
-    type: 'type',
-    time: 'time',
+    source: _getCloudEventSource(cloudFunction),
+    subject: _getCloudEventSubject(cloudFunction),
+    type: _getCloudEventType(cloudFunction),
     data: {},
+    time: new Date().toISOString(),
     params: {}
   } as CloudEvent
 );
