@@ -104,28 +104,31 @@ export type CloudEventOverrides = {
 export const createMockCloudEvent = <T>(
   cloudFunction: CloudFunction<T>,
   cloudEventOverride?: CloudEventOverrides): CloudEvent => {
+  const type = _getCloudEventType(cloudFunction) || cloudEventOverride?.type || '';
   return {
-    ..._createCloudEventWithDefaultValues(cloudFunction),
-    ...cloudEventOverride
+    ..._createCloudEventWithDefaultValues(cloudFunction, type),
+    ...cloudEventOverride,
+    type
   };
 };
 
 /** @internal */
 
-type CloudFunctionEventTrigger = {
-  source: string;
-};
-type CloudFunctionTrigger = {
-  eventTrigger: CloudFunctionEventTrigger
-};
-
 const _getCloudEventSource =
-  (cloudFunction: CloudFunction<any>): string => {
-    if (cloudFunction?.__trigger) {
-      const trigger = cloudFunction.__trigger as CloudFunctionTrigger;
-      return trigger?.eventTrigger?.source || '';
+  (cloudFunction: CloudFunction<any>, type: string): string => {
+    switch (type) {
+      case 'google.cloud.storage.object.v1.archived': // Fall-through intended
+      case 'google.cloud.storage.object.v1.deleted': // Fall-through intended
+      case 'google.cloud.storage.object.v1.finalized': // Fall-through intended
+      case 'google.cloud.storage.object.v1.metadataUpdated':
+        return cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.bucket || '';
+      case 'google.cloud.pubsub.topic.v1.messagePublished':
+        return cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.topic || '';
+      case 'google.firebase.firebasealerts.alerts.v1.published':
+        return cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.alerttype || '';
+      default:
+        return '';
     }
-    return '';
   };
 
 const _getCloudEventSubject =
@@ -140,12 +143,13 @@ const _getCloudEventType =
   };
 
 /** @return CloudEvent populated with default values */
-export const _createCloudEventWithDefaultValues = <T>(cloudFunction: CloudFunction<T>): CloudEvent => (
+export const _createCloudEventWithDefaultValues =
+  <T>(cloudFunction: CloudFunction<T>, type: string): CloudEvent => (
   {
     id: _makeEventId(),
-    source: _getCloudEventSource(cloudFunction),
+    source: _getCloudEventSource(cloudFunction, type),
     subject: _getCloudEventSubject(cloudFunction),
-    type: _getCloudEventType(cloudFunction),
+    type: type,
     data: {},
     time: new Date().toISOString(),
     params: {}
