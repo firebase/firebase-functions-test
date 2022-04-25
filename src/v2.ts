@@ -98,13 +98,13 @@ export type CloudEventOverrides = {
 /**
  *
  * @param cloudFunction Populates default values of the CloudEvent
- * @param cloudEventOverride Used to override CloudEvent params.
+ * @param {CloudEventOverrides} cloudEventOverride Used to override CloudEvent params.
  * @return {CloudEvent} Generated Mock CloudEvent
  */
 export const createMockCloudEvent = <T>(
   cloudFunction: CloudFunction<T>,
   cloudEventOverride?: CloudEventOverrides): CloudEvent => {
-  const type = _getCloudEventType(cloudFunction) || cloudEventOverride?.type || '';
+  const type = cloudEventOverride?.type || _getCloudEventType(cloudFunction) || '';
   return {
     ..._createCloudEventWithDefaultValues(cloudFunction, type),
     ...cloudEventOverride,
@@ -116,25 +116,37 @@ export const createMockCloudEvent = <T>(
 
 const _getCloudEventSource =
   (cloudFunction: CloudFunction<any>, type: string): string => {
-    switch (type) {
+  const projectId = '__PROJECT_ID__';
+  switch (type) {
       case 'google.cloud.storage.object.v1.archived': // Fall-through intended
       case 'google.cloud.storage.object.v1.deleted': // Fall-through intended
       case 'google.cloud.storage.object.v1.finalized': // Fall-through intended
       case 'google.cloud.storage.object.v1.metadataUpdated':
-        return cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.bucket || '';
+        return `//storage.googleapis.com/projects/_/buckets/${projectId}`;
       case 'google.cloud.pubsub.topic.v1.messagePublished':
+        const topicId = cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.topic || '';
+        return `//pubsub.googleapis.com/projects/${projectId}/topics/${topicId}`;
         return cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.topic || '';
       case 'google.firebase.firebasealerts.alerts.v1.published':
-        return cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.alerttype || '';
+        return `//firebasealerts.googleapis.com/projects/${projectId}`;
       default:
         return '';
     }
   };
 
 const _getCloudEventSubject =
-  (cloudFunction: CloudFunction<any>): string => {
-    // TODO(tystark) verify what should populate the subject
-    return '';
+  (cloudFunction: CloudFunction<any>, type: string): string => {
+    switch (type) {
+      case 'google.cloud.storage.object.v1.archived': // Fall-through intended
+      case 'google.cloud.storage.object.v1.deleted': // Fall-through intended
+      case 'google.cloud.storage.object.v1.finalized': // Fall-through intended
+      case 'google.cloud.storage.object.v1.metadataUpdated':
+        return `objects/__STORAGE_FILENAME__`;
+      case 'google.firebase.firebasealerts.alerts.v1.published': // FirebaseAlerts do not contain a subject
+      case 'google.cloud.pubsub.topic.v1.messagePublished': // Pubsub CloudEvents do not contain a subject
+      default:
+        return null;
+    }
   };
 
 const _getCloudEventType =
@@ -144,17 +156,21 @@ const _getCloudEventType =
 
 /** @return CloudEvent populated with default values */
 export const _createCloudEventWithDefaultValues =
-  <T>(cloudFunction: CloudFunction<T>, type: string): CloudEvent => (
-  {
+  <T>(cloudFunction: CloudFunction<T>, type: string): CloudEvent => {
+  const event = {
     id: _makeEventId(),
     source: _getCloudEventSource(cloudFunction, type),
-    subject: _getCloudEventSubject(cloudFunction),
-    type: type,
+    type,
     data: {},
     time: new Date().toISOString(),
     params: {}
-  } as CloudEvent
-);
+  } as CloudEvent;
+
+  const subject = _getCloudEventSubject(cloudFunction, type);
+  if (subject) { event.subject = subject; }
+
+  return (event);
+};
 
 function _makeEventId(): string {
   return (

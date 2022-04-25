@@ -212,21 +212,72 @@ describe('v2', () => {
   });
 
   describe('#createMockCloudEvent', () => {
-    it('should create CloudEvent with appropriate fields', () => {
-      const data = {
-        message: {
-          json: '{"hello": world}'
-        },
-        subscription: 'subscription'
-      };
-      const cloudFn = pubsub.onMessagePublished('topic', () => {
-      });
-      const cloudEvent =
-        createMockCloudEvent(cloudFn, {data} as CloudEventOverrides);
+    describe('alerts.billing.onPlanAutomatedUpdatePublished()', () => {
+      it('should create CloudEvent with appropriate fields', () => {
+        const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(() => {
+        });
+        const cloudEvent =
+          createMockCloudEvent(cloudFn);
 
-      expect(cloudEvent.type).equal(
-        'google.cloud.pubsub.topic.v1.messagePublished');
-      expect(cloudEvent.data).equal(data);
+        expect(cloudEvent.type).equal(
+          'google.firebase.firebasealerts.alerts.v1.published');
+        expect(cloudEvent.source).equal(
+          '//firebasealerts.googleapis.com/projects/__PROJECT_ID__');
+        expect(cloudEvent.subject).equal(undefined);
+      });
+    });
+    describe('storage.onObjectArchived', () => {
+      it('should create CloudEvent with appropriate fields', () => {
+        const cloudFn = storage.onObjectArchived('bucket', () => {
+        });
+        const cloudEvent =
+          createMockCloudEvent(cloudFn);
+
+        expect(cloudEvent.type).equal(
+          'google.cloud.storage.object.v1.archived');
+        expect(cloudEvent.source).equal(
+          '//storage.googleapis.com/projects/_/buckets/__PROJECT_ID__');
+        expect(cloudEvent.subject).equal('objects/__STORAGE_FILENAME__');
+      });
+    });
+    describe('pubsub.onMessagePublished()', () => {
+      it('should create CloudEvent with appropriate fields', () => {
+        const data = {
+          message: {
+            json: '{"hello": world}'
+          },
+          subscription: 'subscription'
+        };
+        const cloudFn = pubsub.onMessagePublished('topic', () => {});
+        const cloudEvent =
+          createMockCloudEvent(cloudFn, {data} as CloudEventOverrides);
+
+        expect(cloudEvent.type).equal(
+          'google.cloud.pubsub.topic.v1.messagePublished');
+        expect(cloudEvent.data).equal(data);
+        expect(cloudEvent.subject).equal(undefined);
+      });
+    });
+    describe('CloudEventOverrides', () => {
+      it('should use the type from CloudEventOverride to generate source and type', () => {
+        const cloudEventOverride = {
+          type: 'google.firebase.firebasealerts.alerts.v1.published',
+        } as CloudEventOverrides;
+
+        const cloudFn = storage.onObjectArchived('bucket', () => {});
+        /**
+         * Note: the original {@link CloudEvent} was a storage event.
+         * The test however, is providing a different type. The "override"
+         * type should take presedence over the type inferred from the
+         * {@link CloudFunction}.
+         */
+        const cloudEvent = createMockCloudEvent(cloudFn, cloudEventOverride);
+
+        expect(cloudEvent.type).equal(
+          'google.firebase.firebasealerts.alerts.v1.published');
+        expect(cloudEvent.source).equal(
+          '//firebasealerts.googleapis.com/projects/__PROJECT_ID__');
+      });
     });
   });
 });
