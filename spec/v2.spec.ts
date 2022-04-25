@@ -28,7 +28,7 @@ import {
   wrap,
 } from '../src/v2';
 import {
-  CloudFunction, CloudEvent, alerts, pubsub, storage
+  CloudFunction, CloudEvent, alerts, pubsub, storage, eventarc
 } from 'firebase-functions/v2';
 
 describe('v2', () => {
@@ -121,7 +121,13 @@ describe('v2', () => {
     describe('eventarc', () => {
       // Not published yet
       describe('eventarc.onCustomEventPublished()', () => {
-        it('is not implemented', () => {
+        it('should update CloudEvent appropriately', () => {
+          const eventType = 'EVENT_TYPE';
+          const cloudFn = eventarc.onCustomEventPublished(eventType, handler);
+          const cloudFnWrap = wrap(cloudFn);
+          const cloudEvent = createMockCloudEvent(cloudFn);
+          expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
+          expect(cloudFnWrap(cloudEvent).cloudEvent.type).equal(eventType);
         });
       });
     });
