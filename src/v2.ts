@@ -28,17 +28,17 @@ import {
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
  */
-export type WrappedFunction = (
+export type WrappedV2Function = (
   cloudEvent?: CloudEvent
 ) => any | Promise<any>;
 
 /**
- * Takes a v2 cloud function to be tested, and returns a {@link WrappedFunction}
+ * Takes a v2 cloud function to be tested, and returns a {@link WrappedV2Function}
  * which can be called in test code.
  */
-export function wrap<T>(
+export function wrapV2<T>(
   cloudFunction: CloudFunction<T>
-): WrappedFunction {
+): WrappedV2Function {
 
   if (
     // @ts-ignore
@@ -64,15 +64,16 @@ export function wrap<T>(
   return (cloudEvent: CloudEvent) => cloudFunction.run(cloudEvent);
 }
 
+/** @return Helper type that suggests useful fields to override */
 export type CloudEventOverrides = {
-  source: string;
-  subject: string;
-  type: string;
-  data: any;
+  source?: string;
+  subject?: string;
+  type?: string;
+  data?: any;
+  params?: Record<string, string>;
 };
 
 /**
- *
  * @param cloudFunction Populates default values of the CloudEvent
  * @param {CloudEventOverrides} cloudEventOverride Used to override CloudEvent params.
  * @return {CloudEvent} Generated Mock CloudEvent
@@ -150,8 +151,7 @@ const createCloudEventWithDefaultValues =
   return (event);
 };
 
-/** @internal */
-function makeEventId(): string {
+const makeEventId = (): string => {
   return (
     Math.random()
       .toString(36)
@@ -160,4 +160,4 @@ function makeEventId(): string {
       .toString(36)
       .substring(2, 15)
   );
-}
+};

@@ -25,21 +25,22 @@ import {expect} from 'chai';
 import {
   CloudEventOverrides,
   createMockCloudEvent,
-  wrap,
+  wrapV2,
 } from '../src/v2';
+
 import {
   CloudFunction, CloudEvent, alerts, pubsub, storage, eventarc
 } from 'firebase-functions/v2';
 
 describe('v2', () => {
-  describe('#wrap', () => {
+  describe('#wrapV2', () => {
     const handler = (cloudEvent) => ({cloudEvent});
 
     describe('alerts', () => {
       describe('alerts.onAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.onAlertPublished('alertType', handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -47,7 +48,7 @@ describe('v2', () => {
       describe('alerts.crashlytics.onNewAnrIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewAnrIssuePublished(handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -55,7 +56,7 @@ describe('v2', () => {
       describe('alerts.crashlytics.onNewFatalIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewFatalIssuePublished(handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -63,7 +64,7 @@ describe('v2', () => {
       describe('alerts.crashlytics.onNewNonfatalIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewNonfatalIssuePublished(handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -71,7 +72,7 @@ describe('v2', () => {
       describe('alerts.crashlytics.onRegressionAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onRegressionAlertPublished(handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -79,7 +80,7 @@ describe('v2', () => {
       describe('alerts.crashlytics.onStabilityDigestPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onStabilityDigestPublished(handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -87,7 +88,7 @@ describe('v2', () => {
       describe('alerts.crashlytics.onVelocityAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onVelocityAlertPublished(handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -95,7 +96,7 @@ describe('v2', () => {
       describe('alerts.appDistribution.onNewTesterIosDevicePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.appDistribution.onNewTesterIosDevicePublished(handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -103,7 +104,7 @@ describe('v2', () => {
       describe('alerts.billing.onPlanAutomatedUpdatePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -111,7 +112,7 @@ describe('v2', () => {
       describe('alerts.billing.onPlanUpdatePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.billing.onPlanUpdatePublished(handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -124,7 +125,7 @@ describe('v2', () => {
         it('should update CloudEvent appropriately', () => {
           const eventType = 'EVENT_TYPE';
           const cloudFn = eventarc.onCustomEventPublished(eventType, handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
           expect(cloudFnWrap(cloudEvent).cloudEvent.type).equal(eventType);
@@ -136,7 +137,7 @@ describe('v2', () => {
       describe('storage.onObjectArchived()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = storage.onObjectArchived('bucket', handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -144,7 +145,7 @@ describe('v2', () => {
       describe('storage.onObjectDeleted()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = storage.onObjectDeleted('bucket', handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -152,7 +153,7 @@ describe('v2', () => {
       describe('storage.onObjectFinalized()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = storage.onObjectFinalized('bucket', handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -160,7 +161,7 @@ describe('v2', () => {
       describe('storage.onObjectMetadataUpdated()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = storage.onObjectMetadataUpdated('bucket', handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = createMockCloudEvent(cloudFn);
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -177,7 +178,7 @@ describe('v2', () => {
             subscription: 'subscription'
           };
           const cloudFn = pubsub.onMessagePublished('topic', handler);
-          const cloudFnWrap = wrap(cloudFn);
+          const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent =
             createMockCloudEvent(cloudFn, {data});
 
@@ -198,7 +199,7 @@ describe('v2', () => {
           minInstances: 3,
           region: ['us-west1', 'us-central1'],
         };
-        const wrappedCF = wrap(cloudFunction as CloudFunction<any>);
+        const wrappedCF = wrapV2(cloudFunction as CloudFunction<any>);
         const mockCloudEvent = createMockCloudEvent(cloudFunction);
         expect(wrappedCF(mockCloudEvent).cloudEvent).to.equal(mockCloudEvent);
       });

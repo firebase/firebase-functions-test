@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { has, merge, random, get } from 'lodash';
+import {has, merge, random, get} from 'lodash';
 
 import {
   CloudFunction,
@@ -31,6 +31,19 @@ import {
   database,
   firestore,
 } from 'firebase-functions';
+
+import {
+  wrapV2 as wrapV2,
+  WrappedV2Function,
+} from './v2';
+
+import {
+  CloudFunction as CloudFunctionV2,
+} from 'firebase-functions/lib/v2/core';
+
+export {
+  WrappedV2Function
+};
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -105,8 +118,33 @@ export type WrappedScheduledFunction = (
   options?: ContextOptions
 ) => any | Promise<any>;
 
-/** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
+export function wrap<T>(cloudFunction: CloudFunction<T>): WrappedScheduledFunction | WrappedFunction;
+export function wrap<T>(cloudFunction: CloudFunctionV2<T>): WrappedV2Function;
+
 export function wrap<T>(
+  cloudFunction: CloudFunction<T> | CloudFunctionV2<T>
+): WrappedScheduledFunction | WrappedFunction | WrappedV2Function {
+  if (isV2CloudFunction(cloudFunction as CloudFunctionV2<T>)) {
+    return wrapV2(cloudFunction as CloudFunctionV2<T>);
+  }
+  return wrapV1(cloudFunction as CloudFunction<T>);
+}
+
+/**
+ * The key differences between V1 and V2 CloudFunctions are:
+ * <ul>
+ *    <li> V1 CloudFunction's handler requires the 1st arg, but has an optional 2nd.
+ *    <li> V1 CloudFunction's run handler always has 2 arguments
+ *    <li> V2 CloudFunction's handler is always 1 argument
+ *    <li> V2 CloudFunction's run handler always has 1 argument
+ * @return True iff the CloudFunction is a V2 function.
+ */
+function isV2CloudFunction<T>(cloudFunction: CloudFunctionV2<T>) {
+  return cloudFunction.length === 1 && cloudFunction?.run?.length === 1;
+}
+
+/** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
+function wrapV1<T>(
   cloudFunction: CloudFunction<T>
 ): WrappedScheduledFunction | WrappedFunction {
   if (!has(cloudFunction, '__trigger')) {
@@ -264,7 +302,7 @@ function _makeDefaultContext<T>(
       triggerParams = _extractFirestoreDocumentParams(eventResource, data);
     }
   }
-  const params = { ...triggerParams, ...optionsParams };
+  const params = {...triggerParams, ...optionsParams};
 
   const defaultContext: EventContext = {
     eventId: _makeEventId(),
