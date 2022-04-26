@@ -179,7 +179,7 @@ describe('v2', () => {
           const cloudFn = pubsub.onMessagePublished('topic', handler);
           const cloudFnWrap = wrap(cloudFn);
           const cloudEvent =
-            createMockCloudEvent(cloudFn, {data} as CloudEventOverrides);
+            createMockCloudEvent(cloudFn, {data});
 
           expect(cloudFnWrap(cloudEvent).cloudEvent).equal(cloudEvent);
         });
@@ -187,32 +187,20 @@ describe('v2', () => {
     });
 
     describe('callable functions', () => {
-      let wrappedCF;
-
-      before(() => {
+      it('should invoke the function with the supplied cloudEvent', () => {
         const cloudFunction = (input) => input;
-        cloudFunction.run = (cloudEvent: CloudEvent) => {
-          return {cloudEvent};
-        };
-        cloudFunction.__trigger = {
-          labels: {
-            'deployment-callable': 'true',
-          },
-          httpsTrigger: {},
-        };
+        cloudFunction.run = (cloudEvent: CloudEvent) => ({cloudEvent});
         cloudFunction.__endpoint = {
           platform: 'gcfv2',
           labels: {},
-          eventTrigger: {
-            retry: false,
-          }
+          callableTrigger: {},
+          concurrency: 20,
+          minInstances: 3,
+          region: ['us-west1', 'us-central1'],
         };
-        wrappedCF = wrap(cloudFunction as CloudFunction<any>);
-      });
-
-      it('should invoke the function with the supplied cloudEvent', () => {
-        const cloudEvent = {} as CloudEvent;
-        expect(wrappedCF(cloudEvent).cloudEvent).to.equal(cloudEvent);
+        const wrappedCF = wrap(cloudFunction as CloudFunction<any>);
+        const mockCloudEvent = createMockCloudEvent(cloudFunction);
+        expect(wrappedCF(mockCloudEvent).cloudEvent).to.equal(mockCloudEvent);
       });
     });
   });
@@ -234,7 +222,8 @@ describe('v2', () => {
     });
     describe('storage.onObjectArchived', () => {
       it('should create CloudEvent with appropriate fields', () => {
-        const cloudFn = storage.onObjectArchived('bucket', () => {
+        const bucketName = 'bucket_name';
+        const cloudFn = storage.onObjectArchived(bucketName, () => {
         });
         const cloudEvent =
           createMockCloudEvent(cloudFn);
@@ -242,7 +231,7 @@ describe('v2', () => {
         expect(cloudEvent.type).equal(
           'google.cloud.storage.object.v1.archived');
         expect(cloudEvent.source).equal(
-          '//storage.googleapis.com/projects/_/buckets/__PROJECT_ID__');
+          `//storage.googleapis.com/projects/_/buckets/${bucketName}`);
         expect(cloudEvent.subject).equal('objects/__STORAGE_FILENAME__');
       });
     });
@@ -265,24 +254,48 @@ describe('v2', () => {
       });
     });
     describe('CloudEventOverrides', () => {
-      it('should use the type from CloudEventOverride to generate source and type', () => {
+      it('should generate source from original CloudFunction', () => {
+        const type = 'google.firebase.firebasealerts.alerts.v1.published';
         const cloudEventOverride = {
-          type: 'google.firebase.firebasealerts.alerts.v1.published',
+          type,
         } as CloudEventOverrides;
 
-        const cloudFn = storage.onObjectArchived('bucket', () => {});
+        const bucketName = 'bucket_name';
+        const cloudFn = storage.onObjectArchived(bucketName, () => {});
         /**
          * Note: the original {@link CloudEvent} was a storage event.
-         * The test however, is providing a different type. The "override"
-         * type should take presedence over the type inferred from the
-         * {@link CloudFunction}.
+         * The test however, is providing a different type.
+         * This creates strange behaviour where {@link CloudEvent.source}
+         * is inferred by the {@link CloudFunction}.
+         * It is the responsibility of the end-user to override the
+         * {@link CloudEvent.source} to match their expectations.
          */
         const cloudEvent = createMockCloudEvent(cloudFn, cloudEventOverride);
 
-        expect(cloudEvent.type).equal(
-          'google.firebase.firebasealerts.alerts.v1.published');
-        expect(cloudEvent.source).equal(
-          '//firebasealerts.googleapis.com/projects/__PROJECT_ID__');
+        const expectedType = type;
+        const expectedSource = `//storage.googleapis.com/projects/_/buckets/${bucketName}`;
+
+        expect(cloudEvent.type).equal(expectedType);
+        expect(cloudEvent.source).equal(expectedSource);
+      });
+      it('should override source and fields', () => {
+        const type = 'google.firebase.firebasealerts.alerts.v1.published';
+        const source = '//firebasealerts.googleapis.com/projects/__PROJECT_ID__';
+        const cloudEventOverride = {
+          type,
+          source,
+        } as CloudEventOverrides;
+
+        const bucketName = 'bucket_name';
+        const cloudFn = storage.onObjectArchived(bucketName, () => {});
+
+        const cloudEvent = createMockCloudEvent(cloudFn, cloudEventOverride);
+
+        const expectedType = type;
+        const expectedSource = source;
+
+        expect(cloudEvent.type).equal(expectedType);
+        expect(cloudEvent.source).equal(expectedSource);
       });
     });
   });

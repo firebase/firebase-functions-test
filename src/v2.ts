@@ -32,19 +32,13 @@ export type WrappedFunction = (
   cloudEvent?: CloudEvent
 ) => any | Promise<any>;
 
-/** A scheduled function that can be called with a {@link CloudEvent}.
- * It will subsequently invoke the cloud function it wraps with a generated {@link CloudEvent}.
- */
-export type WrappedScheduledFunction = (
-  cloudEvent?: CloudEvent
-) => any | Promise<any>;
-
-/** Takes a v2 cloud function to be tested, and returns a {@link WrappedFunction}
+/**
+ * Takes a v2 cloud function to be tested, and returns a {@link WrappedFunction}
  * which can be called in test code.
  */
 export function wrap<T>(
   cloudFunction: CloudFunction<T>
-): WrappedScheduledFunction | WrappedFunction {
+): WrappedFunction {
 
   if (
     // @ts-ignore
@@ -63,29 +57,11 @@ export function wrap<T>(
     );
   }
 
-  if (!cloudFunction.__endpoint) {
-    throw new Error(
-      'This function can only wrap V2 CloudFunctions.'
-    );
+  if (cloudFunction?.__endpoint?.platform !== 'gcfv2') {
+    throw new Error('This function can only wrap V2 CloudFunctions.');
   }
 
-  let wrapped: WrappedFunction = (cloudEvent: CloudEvent) => {
-    _checkCloudEventValidity(
-      [
-        'specversion',
-        'id',
-        'source',
-        'subject',
-        'type',
-        'time',
-        'data',
-        'params'],
-      cloudEvent);
-
-    return cloudFunction.run(cloudEvent);
-  };
-
-  return wrapped;
+  return (cloudEvent: CloudEvent) => cloudFunction.run(cloudEvent);
 }
 
 export type CloudEventOverrides = {
@@ -103,10 +79,10 @@ export type CloudEventOverrides = {
  */
 export const createMockCloudEvent = <T>(
   cloudFunction: CloudFunction<T>,
-  cloudEventOverride?: CloudEventOverrides): CloudEvent => {
-  const type = cloudEventOverride?.type || _getCloudEventType(cloudFunction) || '';
+  cloudEventOverride?: CloudEventOverrides|any): CloudEvent => {
+  const type = cloudEventOverride?.type || getCloudEventType(cloudFunction) || '';
   return {
-    ..._createCloudEventWithDefaultValues(cloudFunction, type),
+    ...createCloudEventWithDefaultValues(cloudFunction, type),
     ...cloudEventOverride,
     type
   };
@@ -114,15 +90,17 @@ export const createMockCloudEvent = <T>(
 
 /** @internal */
 
-const _getCloudEventSource =
-  (cloudFunction: CloudFunction<any>, type: string): string => {
+const getCloudEventSource =
+  (cloudFunction: CloudFunction<any>): string => {
   const projectId = '__PROJECT_ID__';
+  const type = getCloudEventType(cloudFunction);
   switch (type) {
       case 'google.cloud.storage.object.v1.archived': // Fall-through intended
       case 'google.cloud.storage.object.v1.deleted': // Fall-through intended
       case 'google.cloud.storage.object.v1.finalized': // Fall-through intended
       case 'google.cloud.storage.object.v1.metadataUpdated':
-        return `//storage.googleapis.com/projects/_/buckets/${projectId}`;
+        const bucketId = cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.bucket || '';
+        return `//storage.googleapis.com/projects/_/buckets/${bucketId}`;
       case 'google.cloud.pubsub.topic.v1.messagePublished':
         const topicId = cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.topic || '';
         return `//pubsub.googleapis.com/projects/${projectId}/topics/${topicId}`;
@@ -134,7 +112,7 @@ const _getCloudEventSource =
     }
   };
 
-const _getCloudEventSubject =
+const getCloudEventSubject =
   (cloudFunction: CloudFunction<any>, type: string): string => {
     switch (type) {
       case 'google.cloud.storage.object.v1.archived': // Fall-through intended
@@ -149,30 +127,31 @@ const _getCloudEventSubject =
     }
   };
 
-const _getCloudEventType =
+const getCloudEventType =
   (cloudFunction: CloudFunction<any>): string => {
     return cloudFunction?.__endpoint?.eventTrigger?.eventType || '';
   };
 
 /** @return CloudEvent populated with default values */
-export const _createCloudEventWithDefaultValues =
+const createCloudEventWithDefaultValues =
   <T>(cloudFunction: CloudFunction<T>, type: string): CloudEvent => {
   const event = {
-    id: _makeEventId(),
-    source: _getCloudEventSource(cloudFunction, type),
+    id: makeEventId(),
+    source: getCloudEventSource(cloudFunction),
     type,
     data: {},
     time: new Date().toISOString(),
     params: {}
   } as CloudEvent;
 
-  const subject = _getCloudEventSubject(cloudFunction, type);
+  const subject = getCloudEventSubject(cloudFunction, type);
   if (subject) { event.subject = subject; }
 
   return (event);
 };
 
-function _makeEventId(): string {
+/** @internal */
+function makeEventId(): string {
   return (
     Math.random()
       .toString(36)
@@ -181,17 +160,4 @@ function _makeEventId(): string {
       .toString(36)
       .substring(2, 15)
   );
-}
-
-function _checkCloudEventValidity(
-  validFields: string[],
-  options: { [s: string]: any }
-) {
-  Object.keys(options).forEach((key) => {
-    if (validFields.indexOf(key) === -1) {
-      throw new Error(
-        `Options object ${JSON.stringify(options)} has invalid key "${key}"`
-      );
-    }
-  });
 }
