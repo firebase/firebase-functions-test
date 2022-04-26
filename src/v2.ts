@@ -64,37 +64,26 @@ export function wrapV2<T>(
   return (cloudEvent: CloudEvent) => cloudFunction.run(cloudEvent);
 }
 
-/** @return Helper type that suggests useful fields to override */
-export type CloudEventOverrides = {
-  source?: string;
-  subject?: string;
-  type?: string;
-  data?: any;
-  params?: Record<string, string>;
-};
-
 /**
  * @param cloudFunction Populates default values of the CloudEvent
- * @param {CloudEventOverrides} cloudEventOverride Used to override CloudEvent params.
+ * @param {Partial<CloudEvent>} cloudEventOverride Used to override CloudEvent params.
  * @return {CloudEvent} Generated Mock CloudEvent
  */
-export const createMockCloudEvent = <T>(
-  cloudFunction: CloudFunction<T>,
-  cloudEventOverride?: CloudEventOverrides|any): CloudEvent => {
-  const type = cloudEventOverride?.type || getCloudEventType(cloudFunction) || '';
+export const createMockCloudEvent = <FunctionType, EventType>(
+  cloudFunction: CloudFunction<FunctionType>,
+  cloudEventOverride?: Partial<CloudEvent>): CloudEvent<EventType> => {
   return {
-    ...createCloudEventWithDefaultValues(cloudFunction, type),
+    ...createCloudEventWithDefaultValues<FunctionType, EventType>(cloudFunction),
     ...cloudEventOverride,
-    type
-  };
+  } as CloudEvent<EventType>;
 };
 
 /** @internal */
 
 const getCloudEventSource =
-  (cloudFunction: CloudFunction<any>): string => {
+  <T>(cloudFunction: CloudFunction<T>): string => {
   const projectId = '__PROJECT_ID__';
-  const type = getCloudEventType(cloudFunction);
+  const type = getCloudEventType<T>(cloudFunction);
   switch (type) {
       case 'google.cloud.storage.object.v1.archived': // Fall-through intended
       case 'google.cloud.storage.object.v1.deleted': // Fall-through intended
@@ -114,7 +103,7 @@ const getCloudEventSource =
   };
 
 const getCloudEventSubject =
-  (cloudFunction: CloudFunction<any>, type: string): string => {
+  <T>(cloudFunction: CloudFunction<T>, type: string): string => {
     switch (type) {
       case 'google.cloud.storage.object.v1.archived': // Fall-through intended
       case 'google.cloud.storage.object.v1.deleted': // Fall-through intended
@@ -129,23 +118,24 @@ const getCloudEventSubject =
   };
 
 const getCloudEventType =
-  (cloudFunction: CloudFunction<any>): string => {
+  <T>(cloudFunction: CloudFunction<T>): string => {
     return cloudFunction?.__endpoint?.eventTrigger?.eventType || '';
   };
 
 /** @return CloudEvent populated with default values */
 const createCloudEventWithDefaultValues =
-  <T>(cloudFunction: CloudFunction<T>, type: string): CloudEvent => {
+  <FunctionType, EventType>(cloudFunction: CloudFunction<FunctionType>): CloudEvent<EventType> => {
+  const type = getCloudEventType<FunctionType>(cloudFunction);
   const event = {
     id: makeEventId(),
-    source: getCloudEventSource(cloudFunction),
+    source: getCloudEventSource<FunctionType>(cloudFunction),
     type,
     data: {},
     time: new Date().toISOString(),
     params: {}
-  } as CloudEvent;
+  } as CloudEvent<EventType>;
 
-  const subject = getCloudEventSubject(cloudFunction, type);
+  const subject = getCloudEventSubject<FunctionType>(cloudFunction, type);
   if (subject) { event.subject = subject; }
 
   return (event);

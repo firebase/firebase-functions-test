@@ -23,7 +23,6 @@
 import {expect} from 'chai';
 
 import {
-  CloudEventOverrides,
   createMockCloudEvent,
   wrapV2,
 } from '../src/v2';
@@ -246,7 +245,7 @@ describe('v2', () => {
         };
         const cloudFn = pubsub.onMessagePublished('topic', () => {});
         const cloudEvent =
-          createMockCloudEvent(cloudFn, {data} as CloudEventOverrides);
+          createMockCloudEvent(cloudFn, {data});
 
         expect(cloudEvent.type).equal(
           'google.cloud.pubsub.topic.v1.messagePublished');
@@ -254,12 +253,12 @@ describe('v2', () => {
         expect(cloudEvent.subject).equal(undefined);
       });
     });
-    describe('CloudEventOverrides', () => {
+    describe('CloudEvent Partial', () => {
       it('should generate source from original CloudFunction', () => {
         const type = 'google.firebase.firebasealerts.alerts.v1.published';
         const cloudEventOverride = {
           type,
-        } as CloudEventOverrides;
+        };
 
         const bucketName = 'bucket_name';
         const cloudFn = storage.onObjectArchived(bucketName, () => {});
@@ -285,7 +284,7 @@ describe('v2', () => {
         const cloudEventOverride = {
           type,
           source,
-        } as CloudEventOverrides;
+        };
 
         const bucketName = 'bucket_name';
         const cloudFn = storage.onObjectArchived(bucketName, () => {});

@@ -57,7 +57,6 @@ export {
 // V2 Exports
 export {
   WrappedV2Function,
-  CloudEventOverrides,
 } from './v2';
 
 export function wrap<T>(cloudFunction: CloudFunctionV1<T>): WrappedScheduledFunction | WrappedFunction;
@@ -67,9 +66,9 @@ export function wrap<T>(
   cloudFunction: CloudFunctionV1<T> | CloudFunctionV2<T>
 ): WrappedScheduledFunction | WrappedFunction | WrappedV2Function {
   if (isV2CloudFunction(cloudFunction as CloudFunctionV2<T>)) {
-    return wrapV2(cloudFunction as CloudFunctionV2<T>);
+    return wrapV2<T>(cloudFunction as CloudFunctionV2<T>);
   }
-  return wrapV1(cloudFunction as CloudFunctionV1<T>);
+  return wrapV1<T>(cloudFunction as CloudFunctionV1<T>);
 }
 
 /**
