@@ -71,7 +71,7 @@ export function wrapV2<T>(
  */
 export const createMockCloudEvent = <FunctionType, EventType>(
   cloudFunction: CloudFunction<FunctionType>,
-  cloudEventOverride?: Partial<CloudEvent>): CloudEvent<EventType> => {
+  cloudEventOverride?: Partial<CloudEvent>): CloudEvent<any> => {
   return {
     ...createCloudEventWithDefaultValues<FunctionType, EventType>(cloudFunction),
     ...cloudEventOverride,
