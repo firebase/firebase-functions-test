@@ -187,7 +187,7 @@ describe('v2', () => {
     });
 
     describe('callable functions', () => {
-      it('should invoke the function with the supplied cloudEvent', () => {
+      it('return an error because they are not supported', () => {
         const cloudFunction = (input) => input;
         cloudFunction.run = (cloudEvent: CloudEvent) => ({cloudEvent});
         cloudFunction.__endpoint = {
@@ -198,9 +198,15 @@ describe('v2', () => {
           minInstances: 3,
           region: ['us-west1', 'us-central1'],
         };
-        const wrappedCF = wrapV2(cloudFunction as CloudFunction<any>);
-        const mockCloudEvent = createMockCloudEvent(cloudFunction);
-        expect(wrappedCF(mockCloudEvent).cloudEvent).to.equal(mockCloudEvent);
+
+        try {
+          const wrappedCF = wrapV2(cloudFunction as CloudFunction<any>);
+          const mockCloudEvent = createMockCloudEvent(cloudFunction);
+          wrappedCF(mockCloudEvent);
+        } catch (e) {
+          expect(e.message).to.equal(
+            'Wrap function is not available for callableTriggers functions.');
+        }
       });
     });
   });

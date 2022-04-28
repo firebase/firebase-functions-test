@@ -59,13 +59,15 @@ export {
   WrappedV2Function,
 } from './v2';
 
+type UnknownCloudFunction = CloudFunctionV1<unknown> | CloudFunctionV2<unknown>;
+
 export function wrap<T>(cloudFunction: CloudFunctionV1<T>): WrappedScheduledFunction | WrappedFunction;
 export function wrap<T>(cloudFunction: CloudFunctionV2<T>): WrappedV2Function;
 
 export function wrap<T>(
-  cloudFunction: CloudFunctionV1<T> | CloudFunctionV2<T>
+  cloudFunction: UnknownCloudFunction
 ): WrappedScheduledFunction | WrappedFunction | WrappedV2Function {
-  if (isV2CloudFunction(cloudFunction as CloudFunctionV2<T>)) {
+  if (isV2CloudFunction(cloudFunction)) {
     return wrapV2<T>(cloudFunction as CloudFunctionV2<T>);
   }
   return wrapV1<T>(cloudFunction as CloudFunctionV1<T>);
@@ -74,12 +76,12 @@ export function wrap<T>(
 /**
  * The key differences between V1 and V2 CloudFunctions are:
  * <ul>
- *    <li> V1 CloudFunction's handler requires the 1st arg, but has an optional 2nd.
- *    <li> V1 CloudFunction's run handler always has 2 arguments
- *    <li> V2 CloudFunction's handler is always 1 argument
- *    <li> V2 CloudFunction's run handler always has 1 argument
+ *    <li> V1 CloudFunction is sometimes a binary function
+ *    <li> V2 CloudFunction is always a unary function
+ *    <li> V1 CloudFunction.run is always a binary function
+ *    <li> V2 CloudFunction.run is always a unary function
  * @return True iff the CloudFunction is a V2 function.
  */
-function isV2CloudFunction<T>(cloudFunction: CloudFunctionV2<T>) {
+function isV2CloudFunction<T>(cloudFunction: UnknownCloudFunction) {
   return cloudFunction.length === 1 && cloudFunction?.run?.length === 1;
 }
