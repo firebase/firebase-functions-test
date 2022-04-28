@@ -55,7 +55,7 @@ describe('mock-cloud-event', () => {
           'google.cloud.storage.object.v1.archived');
         expect(cloudEvent.source).equal(
           `//storage.googleapis.com/projects/_/buckets/${bucketName}`);
-        expect(cloudEvent.subject).equal('objects/__STORAGE_FILENAME__');
+        expect(cloudEvent.subject).equal('objects/file_name');
       });
     });
   });

@@ -11,6 +11,6 @@ export function generateMockCloudEvent<FunctionType, EventType>(
   cloudFunction: CloudFunction<FunctionType>): CloudEvent {
   return {
     ...generateDefaultCloudEventPartial(),
-    ...generateMockCloudEventPartial(cloudFunction)
+    ...generateMockCloudEventPartial<FunctionType, EventType>(cloudFunction)
   } as CloudEvent;
 }

@@ -12,7 +12,8 @@ export function generateDefaultCloudEventPartial(): Partial<CloudEvent> {
   } as Partial<CloudEvent>;
 }
 
-export function generateMockCloudEventPartial<T>(cloudFunction: CloudFunction<unknown>): Partial<CloudEvent> {
+export function generateMockCloudEventPartial<FunctionType, EventType>(
+  cloudFunction: CloudFunction<FunctionType>): Partial<CloudEvent<EventType>> {
   for (const mockCloudEventPartial of LIST_OF_MOCK_CLOUD_EVENT_PARTIALS) {
     if (mockCloudEventPartial.match(cloudFunction)) {
       return mockCloudEventPartial.generatePartial(cloudFunction);
