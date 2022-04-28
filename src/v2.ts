@@ -24,12 +24,13 @@ import {
   CloudFunction,
   CloudEvent,
 } from 'firebase-functions/v2';
+import {generateMockCloudEvent} from './mock-cloud-event';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
  */
 export type WrappedV2Function = (
-  cloudEvent?: CloudEvent
+  cloudEventPartial?: Partial<CloudEvent>
 ) => any | Promise<any>;
 
 /**
@@ -56,97 +57,13 @@ export function wrapV2<T>(
     throw new Error('This function can only wrap V2 CloudFunctions.');
   }
 
-  // TODO(tystark): Convert cloudEvent to a partial, construct the mock inline
-  return (cloudEvent: CloudEvent) => {
-    // TODO(tystark) Decouple the createMockCloudEvent from the partial
+  const generatedCloudEvent = generateMockCloudEvent(cloudFunction);
+  return (cloudEventPartial?: Partial<CloudEvent>) => {
+    const cloudEvent = {
+      ...generatedCloudEvent,
+      ...cloudEventPartial,
+    };
     // TODO(tystark) Handle deep merge
     return cloudFunction.run(cloudEvent);
   };
-}
-
-/**
- * @param cloudFunction Populates default values of the CloudEvent
- * @param {Partial<CloudEvent>} cloudEventOverride Used to override CloudEvent params.
- * @return {CloudEvent} Generated Mock CloudEvent
- */
-export function createMockCloudEvent<FunctionType, EventType>(
-  cloudFunction: CloudFunction<FunctionType>,
-  cloudEventOverride?: Partial<CloudEvent>): CloudEvent {
-  return {
-    ...createCloudEventWithDefaultValues<FunctionType, EventType>(cloudFunction),
-    ...cloudEventOverride,
-  } as CloudEvent;
-}
-
-/** @internal */
-
-function getCloudEventSource<T>(cloudFunction: CloudFunction<T>): string {
-  const projectId = '__PROJECT_ID__';
-  const type = getCloudEventType<T>(cloudFunction);
-  switch (type) {
-    case 'google.cloud.storage.object.v1.archived': // Fall-through intended
-    case 'google.cloud.storage.object.v1.deleted': // Fall-through intended
-    case 'google.cloud.storage.object.v1.finalized': // Fall-through intended
-    case 'google.cloud.storage.object.v1.metadataUpdated':
-      const bucketId = cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.bucket || 'bucket_name';
-      return `//storage.googleapis.com/projects/_/buckets/${bucketId}`;
-    case 'google.cloud.pubsub.topic.v1.messagePublished':
-      const topicId = cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.topic || '';
-      return `//pubsub.googleapis.com/projects/${projectId}/topics/${topicId}`;
-    case 'google.firebase.firebasealerts.alerts.v1.published':
-      return `//firebasealerts.googleapis.com/projects/${projectId}`;
-    default:
-      return '';
-  }
-}
-
-function getCloudEventSubject<T>(cloudFunction: CloudFunction<T>, type: string): string {
-  switch (type) {
-    case 'google.cloud.storage.object.v1.archived': // Fall-through intended
-    case 'google.cloud.storage.object.v1.deleted': // Fall-through intended
-    case 'google.cloud.storage.object.v1.finalized': // Fall-through intended
-    case 'google.cloud.storage.object.v1.metadataUpdated':
-      return `objects/__STORAGE_FILENAME__`;
-    case 'google.firebase.firebasealerts.alerts.v1.published': // FirebaseAlerts do not contain a subject
-    case 'google.cloud.pubsub.topic.v1.messagePublished': // Pubsub CloudEvents do not contain a subject
-    default:
-      return null;
-  }
-}
-
-function getCloudEventType<T>(cloudFunction: CloudFunction<T>): string {
-  return cloudFunction?.__endpoint?.eventTrigger?.eventType || '';
-}
-
-/** @return CloudEvent populated with default values */
-function createCloudEventWithDefaultValues<FunctionType, EventType>(
-  cloudFunction: CloudFunction<FunctionType>): CloudEvent<EventType> {
-  const type = getCloudEventType<FunctionType>(cloudFunction);
-  const event = {
-    specversion: '1.0',
-    id: makeEventId(),
-    source: getCloudEventSource<FunctionType>(cloudFunction),
-    type,
-    data: {},
-    time: new Date().toISOString(),
-    params: {}
-  } as CloudEvent<EventType>;
-
-  const subject = getCloudEventSubject<FunctionType>(cloudFunction, type);
-  if (subject) {
-    event.subject = subject;
-  }
-
-  return (event);
-}
-
-function makeEventId(): string {
-  return (
-    Math.random()
-      .toString(36)
-      .substring(2, 15) +
-    Math.random()
-      .toString(36)
-      .substring(2, 15)
-  );
 }

@@ -181,7 +181,7 @@ const eventarcOnCustomEventPublished:
     };
   },
   match(cloudFunction: CloudFunction<unknown>): boolean {
-    return false; // TODO(tystark) How is an EventArc event differentiated from the other events?
+    return true; // TODO(tystark) How is an EventArc event differentiated from the other events?
   },
 };
 const storageOnObjectArchived:
@@ -269,8 +269,10 @@ const pubsubOnMessagePublished:
 };
 
 /**
+ * @internal
  * Note: Ordering matters. Some MockEventPartials will match more generally
- * (eg {@link alertsOnAlertPublished})
+ * (eg {@link alertsOnAlertPublished}). In addition,
+ * {@link eventarcOnCustomEventPublished} acts as a catch-all.
  */
 export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS:
   Array<MockCloudEventPartials<any>> = [
@@ -284,12 +286,12 @@ export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS:
   alertsBillingOnPlanAutomatedUpdatePublished,
   alertsBillingOnPlanUpdatePublished,
   alertsOnAlertPublished, // Note: alert.onAlertPublished matching is more generic
-  eventarcOnCustomEventPublished,
   storageOnObjectArchived,
   storageOnObjectDeleted,
   storageOnObjectFinalized,
   storageOnObjectMetadataUpdated,
   pubsubOnMessagePublished,
+  eventarcOnCustomEventPublished,
 ];
 
 function getEventType<T>(cloudFunction: CloudFunction<T>): string {

@@ -34,7 +34,7 @@ import {
 import { features } from '../src/features';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
 import {alerts} from 'firebase-functions/v2';
-import {createMockCloudEvent, wrapV2} from '../src/v2';
+import {wrapV2} from '../src/v2';
 
 describe('main', () => {
   describe('#wrap', () => {
@@ -233,11 +233,9 @@ describe('main', () => {
         const handler = (cloudEvent) => ({cloudEvent});
         const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(handler);
         const cloudFnWrap = wrapV2(cloudFn);
-        const mockCloudEvent = createMockCloudEvent(cloudFn);
 
         const expectedType = 'google.firebase.firebasealerts.alerts.v1.published';
-        expect(cloudFnWrap(mockCloudEvent).cloudEvent).equal(mockCloudEvent);
-        expect(mockCloudEvent.type).equal(expectedType);
+        expect(cloudFnWrap().cloudEvent).to.include({type: expectedType});
       });
     });
 
