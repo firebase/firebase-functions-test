@@ -24,6 +24,8 @@ import {
   CloudFunction,
   CloudEvent,
 } from 'firebase-functions/v2';
+import merge from 'ts-deepmerge';
+
 import {generateMockCloudEvent} from './mock-cloud-event';
 import {DeepPartial} from './mock-cloud-event-partial-definitions';
 
@@ -58,13 +60,9 @@ export function wrapV2<T>(
     throw new Error('This function can only wrap V2 CloudFunctions.');
   }
 
-  const generatedCloudEvent = generateMockCloudEvent(cloudFunction);
   return (cloudEventPartial?: DeepPartial<CloudEvent>) => {
-    const cloudEvent = {
-      ...generatedCloudEvent,
-      ...cloudEventPartial,
-    };
-    // TODO(tystark) Handle deep merge
+    const generatedCloudEvent = generateMockCloudEvent(cloudFunction);
+    const cloudEvent = cloudEventPartial? merge(generatedCloudEvent, cloudEventPartial): generatedCloudEvent;
     return cloudFunction.run(cloudEvent);
   };
 }

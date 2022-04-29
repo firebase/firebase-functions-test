@@ -39,7 +39,8 @@
   "homepage": "https://github.com/firebase/firebase-functions-test#readme",
   "dependencies": {
     "@types/lodash": "^4.14.104",
-    "lodash": "^4.17.5"
+    "lodash": "^4.17.5",
+    "ts-deepmerge": "^2.0.1"
   },
   "devDependencies": {
     "@types/chai": "~4.2.4",
@@ -55,8 +56,8 @@
     "typescript": "^3.6.4"
   },
   "peerDependencies": {
-    "firebase-functions": ">=3.20.1",
-    "firebase-admin": ">=6.0.0"
+    "firebase-admin": ">=6.0.0",
+    "firebase-functions": ">=3.20.1"
   },
   "engines": {
     "node": ">=8.0.0"

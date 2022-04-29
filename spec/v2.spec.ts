@@ -162,7 +162,7 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = {data};
 
-          expect(cloudFnWrap(cloudEventPartial).cloudEvent).to.include({data});
+          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data).deep.equal(data);
         });
       });
     });
@@ -203,7 +203,7 @@ describe('v2', () => {
 
         expect(cloudEvent.type).equal(
           'google.cloud.pubsub.topic.v1.messagePublished');
-        expect(cloudEvent.data).equal(data);
+        expect(cloudEvent.data).deep.equal(data);
         expect(cloudEvent.subject).equal(undefined);
       });
       it('should generate source from original CloudFunction', () => {
@@ -248,6 +248,20 @@ describe('v2', () => {
 
         expect(mergedCloudEvent.type).equal(expectedType);
         expect(mergedCloudEvent.source).equal(expectedSource);
+      });
+      it('should deep-merge user supplied partial', () => {
+        const cloudEventOverride = {
+          data: {
+            contentType: 'application/octet-stream',
+          }
+        };
+
+        const bucketName = 'bucket_name';
+        const cloudFn = storage.onObjectArchived(bucketName, handler);
+
+        const mergedCloudEvent = wrapV2(cloudFn)(cloudEventOverride).cloudEvent;
+        expect(mergedCloudEvent.data?.size).equal(42);
+        expect(mergedCloudEvent.data?.contentType).equal('application/octet-stream');
       });
     });
   });
