@@ -19,8 +19,12 @@ import {StorageObjectData} from 'firebase-functions/lib/v2/providers/storage';
 const PROJECT_ID = '__PROJECT_ID__';
 const FILENAME = 'file_name';
 
+export type DeepPartial<T extends object> = {
+  [Key in keyof T]?: T[Key] extends object ? DeepPartial<T[Key]> : T[Key]
+};
+
 type MockCloudEventPartialFunction<FunctionType, EventType> =
-  (cloudFunction: CloudFunction<FunctionType>) => Partial<CloudEvent<EventType>>;
+  (cloudFunction: CloudFunction<FunctionType>) => DeepPartial<CloudEvent<EventType>>;
 type MockCloudEventMatchFunction<FunctionType> =
   (cloudFunction: CloudFunction<FunctionType>) => boolean;
 
@@ -31,7 +35,7 @@ interface MockCloudEventPartials<FunctionType, EventType> {
 
 const alertsOnAlertPublished:
   MockCloudEventPartials<FirebaseAlertData, AlertEvent<any>> = {
-  generatePartial(cloudFunction: CloudFunction<FirebaseAlertData>): Partial<CloudEvent<AlertEvent<any>>> {
+  generatePartial(cloudFunction: CloudFunction<FirebaseAlertData>): DeepPartial<CloudEvent<AlertEvent<any>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -47,7 +51,7 @@ const alertsCrashlyticsOnNewAnrIssuePublished:
   MockCloudEventPartials<FirebaseAlertData<NewAnrIssuePayload>, CrashlyticsEvent<NewAnrIssuePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<NewAnrIssuePayload>>):
-    Partial<CloudEvent<CrashlyticsEvent<NewAnrIssuePayload>>> {
+    DeepPartial<CloudEvent<CrashlyticsEvent<NewAnrIssuePayload>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -64,7 +68,7 @@ const alertsCrashlyticsOnNewFatalIssuePublished:
   MockCloudEventPartials<FirebaseAlertData<NewFatalIssuePayload>, CrashlyticsEvent<NewFatalIssuePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<NewFatalIssuePayload>>):
-    Partial<CloudEvent<CrashlyticsEvent<NewFatalIssuePayload>>> {
+    DeepPartial<CloudEvent<CrashlyticsEvent<NewFatalIssuePayload>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -81,7 +85,7 @@ const alertsCrashlyticsOnNewNonfatalIssuePublished:
   MockCloudEventPartials<FirebaseAlertData<NewNonfatalIssuePayload>, CrashlyticsEvent<NewNonfatalIssuePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<NewNonfatalIssuePayload>>):
-    Partial<CloudEvent<CrashlyticsEvent<NewNonfatalIssuePayload>>> {
+    DeepPartial<CloudEvent<CrashlyticsEvent<NewNonfatalIssuePayload>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -98,7 +102,7 @@ const alertsCrashlyticsOnRegressionAlertPublished:
   MockCloudEventPartials<FirebaseAlertData<RegressionAlertPayload>, CrashlyticsEvent<RegressionAlertPayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<RegressionAlertPayload>>):
-    Partial<CloudEvent<CrashlyticsEvent<RegressionAlertPayload>>> {
+    DeepPartial<CloudEvent<CrashlyticsEvent<RegressionAlertPayload>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -115,7 +119,7 @@ const alertsCrashlyticsOnStabilityDigestPublished:
   MockCloudEventPartials<FirebaseAlertData<StabilityDigestPayload>, CrashlyticsEvent<StabilityDigestPayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<StabilityDigestPayload>>):
-    Partial<CloudEvent<CrashlyticsEvent<StabilityDigestPayload>>> {
+    DeepPartial<CloudEvent<CrashlyticsEvent<StabilityDigestPayload>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -132,7 +136,7 @@ const alertsCrashlyticsOnVelocityAlertPublished:
   MockCloudEventPartials<FirebaseAlertData<VelocityAlertPayload>, CrashlyticsEvent<VelocityAlertPayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<VelocityAlertPayload>>):
-    Partial<CloudEvent<CrashlyticsEvent<VelocityAlertPayload>>> {
+    DeepPartial<CloudEvent<CrashlyticsEvent<VelocityAlertPayload>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -149,7 +153,7 @@ const alertsAppDistributionOnNewTesterIosDevicePublished:
   MockCloudEventPartials<FirebaseAlertData<NewTesterDevicePayload>, AppDistributionEvent<NewTesterDevicePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<NewTesterDevicePayload>>):
-    Partial<CloudEvent<AppDistributionEvent<NewTesterDevicePayload>>> {
+    DeepPartial<CloudEvent<AppDistributionEvent<NewTesterDevicePayload>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -166,7 +170,7 @@ const alertsBillingOnPlanAutomatedUpdatePublished:
   MockCloudEventPartials<FirebaseAlertData<PlanAutomatedUpdatePayload>, BillingEvent<PlanAutomatedUpdatePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<PlanAutomatedUpdatePayload>>):
-    Partial<CloudEvent<BillingEvent<PlanAutomatedUpdatePayload>>> {
+    DeepPartial<CloudEvent<BillingEvent<PlanAutomatedUpdatePayload>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -183,7 +187,7 @@ const alertsBillingOnPlanUpdatePublished:
   MockCloudEventPartials<FirebaseAlertData<PlanUpdatePayload>, BillingEvent<PlanUpdatePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<PlanUpdatePayload>>):
-    Partial<CloudEvent<BillingEvent<PlanUpdatePayload>>> {
+    DeepPartial<CloudEvent<BillingEvent<PlanUpdatePayload>>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -198,7 +202,7 @@ const alertsBillingOnPlanUpdatePublished:
 };
 const eventarcOnCustomEventPublished:
   MockCloudEventPartials<any, any> = {
-  generatePartial(cloudFunction: CloudFunction<unknown>): Partial<CloudEvent> {
+  generatePartial(cloudFunction: CloudFunction<unknown>): DeepPartial<CloudEvent> {
     const source = '';
 
     return {
@@ -212,7 +216,7 @@ const eventarcOnCustomEventPublished:
 };
 const storageOnObjectArchived:
   MockCloudEventPartials<StorageObjectData, StorageObjectData> = {
-  generatePartial(cloudFunction: CloudFunction<StorageObjectData>): Partial<CloudEvent<StorageObjectData>> {
+  generatePartial(cloudFunction: CloudFunction<StorageObjectData>): DeepPartial<CloudEvent<StorageObjectData>> {
     const bucket = getEventFilters(cloudFunction)?.bucket || 'bucket_name';
     const source = `//storage.googleapis.com/projects/_/buckets/${bucket}`;
     const subject = `objects/${FILENAME}`;
@@ -230,7 +234,7 @@ const storageOnObjectArchived:
 };
 const storageOnObjectDeleted:
   MockCloudEventPartials<StorageObjectData, StorageObjectData> = {
-  generatePartial(cloudFunction: CloudFunction<StorageObjectData>): Partial<CloudEvent<StorageObjectData>> {
+  generatePartial(cloudFunction: CloudFunction<StorageObjectData>): DeepPartial<CloudEvent<StorageObjectData>> {
     const bucket = getEventFilters(cloudFunction)?.bucket || 'bucket_name';
     const source = `//storage.googleapis.com/projects/_/buckets/${bucket}`;
     const subject = `objects/${FILENAME}`;
@@ -248,7 +252,7 @@ const storageOnObjectDeleted:
 };
 const storageOnObjectFinalized:
   MockCloudEventPartials<StorageObjectData, StorageObjectData> = {
-  generatePartial(cloudFunction: CloudFunction<StorageObjectData>): Partial<CloudEvent<StorageObjectData>> {
+  generatePartial(cloudFunction: CloudFunction<StorageObjectData>): DeepPartial<CloudEvent<StorageObjectData>> {
     const bucket = getEventFilters(cloudFunction)?.bucket || 'bucket_name';
     const source = `//storage.googleapis.com/projects/_/buckets/${bucket}`;
     const subject = `objects/${FILENAME}`;
@@ -270,7 +274,7 @@ const storageOnObjectFinalized:
 };
 const storageOnObjectMetadataUpdated:
   MockCloudEventPartials<StorageObjectData, StorageObjectData> = {
-  generatePartial(cloudFunction: CloudFunction<StorageObjectData>): Partial<CloudEvent<StorageObjectData>> {
+  generatePartial(cloudFunction: CloudFunction<StorageObjectData>): DeepPartial<CloudEvent<StorageObjectData>> {
     const bucket = getEventFilters(cloudFunction)?.bucket || 'bucket_name';
     const source = `//storage.googleapis.com/projects/_/buckets/${bucket}`;
     const subject = `objects/__STORAGE_FILENAME__`;
@@ -288,7 +292,7 @@ const storageOnObjectMetadataUpdated:
 };
 const pubsubOnMessagePublished:
   MockCloudEventPartials<MessagePublishedData, MessagePublishedData> = {
-  generatePartial(cloudFunction: CloudFunction<MessagePublishedData>): Partial<CloudEvent<MessagePublishedData>> {
+  generatePartial(cloudFunction: CloudFunction<MessagePublishedData>): DeepPartial<CloudEvent<MessagePublishedData>> {
     const topicId = getEventFilters(cloudFunction)?.topic || '';
     const source = `//pubsub.googleapis.com/projects/${PROJECT_ID}/topics/${topicId}`;
 

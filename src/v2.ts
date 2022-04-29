@@ -25,12 +25,13 @@ import {
   CloudEvent,
 } from 'firebase-functions/v2';
 import {generateMockCloudEvent} from './mock-cloud-event';
+import {DeepPartial} from './mock-cloud-event-partial-definitions';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
  */
 export type WrappedV2Function = (
-  cloudEventPartial?: Partial<CloudEvent>
+  cloudEventPartial?: DeepPartial<CloudEvent>
 ) => any | Promise<any>;
 
 /**
@@ -58,7 +59,7 @@ export function wrapV2<T>(
   }
 
   const generatedCloudEvent = generateMockCloudEvent(cloudFunction);
-  return (cloudEventPartial?: Partial<CloudEvent>) => {
+  return (cloudEventPartial?: DeepPartial<CloudEvent>) => {
     const cloudEvent = {
       ...generatedCloudEvent,
       ...cloudEventPartial,

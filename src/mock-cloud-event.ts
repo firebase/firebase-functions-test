@@ -4,7 +4,6 @@ import {generateDefaultCloudEventPartial, generateMockCloudEventPartial} from '.
 
 /**
  * @param cloudFunction Populates default values of the CloudEvent
- * @param {Partial<CloudEvent>} cloudEventOverride Used to override CloudEvent params.
  * @return {CloudEvent} Generated Mock CloudEvent
  */
 export function generateMockCloudEvent<FunctionType, EventType>(
