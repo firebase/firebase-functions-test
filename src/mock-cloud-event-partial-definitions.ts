@@ -52,7 +52,7 @@ const alertsCrashlyticsOnNewAnrIssuePublished:
   MockCloudEventPartials<FirebaseAlertData<NewAnrIssuePayload>, FirebaseAlertData<NewAnrIssuePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<NewAnrIssuePayload>>):
-    DeepPartial<CloudEvent<FirebaseAlertData<NewAnrIssuePayload>>> {
+    DeepPartial<CrashlyticsEvent<NewAnrIssuePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -70,7 +70,7 @@ const alertsCrashlyticsOnNewFatalIssuePublished:
   MockCloudEventPartials<FirebaseAlertData<NewFatalIssuePayload>, FirebaseAlertData<NewFatalIssuePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<NewFatalIssuePayload>>):
-    DeepPartial<CloudEvent<FirebaseAlertData<NewFatalIssuePayload>>> {
+    DeepPartial<CrashlyticsEvent<NewFatalIssuePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -88,7 +88,7 @@ const alertsCrashlyticsOnNewNonfatalIssuePublished:
   MockCloudEventPartials<FirebaseAlertData<NewNonfatalIssuePayload>, FirebaseAlertData<NewNonfatalIssuePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<NewNonfatalIssuePayload>>):
-    DeepPartial<CloudEvent<FirebaseAlertData<NewNonfatalIssuePayload>>> {
+    DeepPartial<CrashlyticsEvent<NewNonfatalIssuePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -106,7 +106,7 @@ const alertsCrashlyticsOnRegressionAlertPublished:
   MockCloudEventPartials<FirebaseAlertData<RegressionAlertPayload>, FirebaseAlertData<RegressionAlertPayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<RegressionAlertPayload>>):
-    DeepPartial<CloudEvent<FirebaseAlertData<RegressionAlertPayload>>> {
+    DeepPartial<CrashlyticsEvent<RegressionAlertPayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -124,7 +124,7 @@ const alertsCrashlyticsOnStabilityDigestPublished:
   MockCloudEventPartials<FirebaseAlertData<StabilityDigestPayload>, FirebaseAlertData<StabilityDigestPayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<StabilityDigestPayload>>):
-    DeepPartial<CloudEvent<FirebaseAlertData<StabilityDigestPayload>>> {
+    DeepPartial<CrashlyticsEvent<StabilityDigestPayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -142,7 +142,7 @@ const alertsCrashlyticsOnVelocityAlertPublished:
   MockCloudEventPartials<FirebaseAlertData<VelocityAlertPayload>, FirebaseAlertData<VelocityAlertPayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<VelocityAlertPayload>>):
-    DeepPartial<CloudEvent<FirebaseAlertData<VelocityAlertPayload>>> {
+    DeepPartial<CrashlyticsEvent<VelocityAlertPayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -160,7 +160,7 @@ const alertsAppDistributionOnNewTesterIosDevicePublished:
   MockCloudEventPartials<FirebaseAlertData<NewTesterDevicePayload>, FirebaseAlertData<NewTesterDevicePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<NewTesterDevicePayload>>):
-    DeepPartial<CloudEvent<FirebaseAlertData<NewTesterDevicePayload>>> {
+    DeepPartial<AppDistributionEvent<NewTesterDevicePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
     const now = new Date().toISOString();
 
@@ -191,7 +191,7 @@ const alertsBillingOnPlanAutomatedUpdatePublished:
     FirebaseAlertData<PlanAutomatedUpdatePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<PlanAutomatedUpdatePayload>>):
-    DeepPartial<CloudEvent<FirebaseAlertData<PlanAutomatedUpdatePayload>>> {
+    DeepPartial<BillingEvent<PlanAutomatedUpdatePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -209,7 +209,7 @@ const alertsBillingOnPlanUpdatePublished:
   MockCloudEventPartials<FirebaseAlertData<PlanUpdatePayload>, FirebaseAlertData<PlanUpdatePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<FirebaseAlertData<PlanUpdatePayload>>):
-    DeepPartial<CloudEvent<FirebaseAlertData<PlanUpdatePayload>>> {
+    DeepPartial<BillingEvent<PlanUpdatePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
