@@ -12,6 +12,12 @@ export const pubsubOnMessagePublished:
     return {
       source,
       type: getEventType(cloudFunction),
+      data: {
+        message: {
+          json: '{"hello": world}'
+        },
+        subscription: 'Subscription',
+      },
     };
   },
   match(cloudFunction: CloudFunction<unknown>): boolean {
