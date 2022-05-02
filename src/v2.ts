@@ -24,9 +24,8 @@ import {
   CloudFunction,
   CloudEvent,
 } from 'firebase-functions/v2';
-import merge from 'ts-deepmerge';
 
-import {generateMockCloudEvent} from './cloudevent/generate';
+import {generateCombinedCloudEvent} from './cloudevent/generate';
 import {DeepPartial} from './cloudevent/types';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
@@ -61,8 +60,7 @@ export function wrapV2<T>(
   }
 
   return (cloudEventPartial?: DeepPartial<CloudEvent>) => {
-    const generatedCloudEvent = generateMockCloudEvent(cloudFunction);
-    const cloudEvent = cloudEventPartial? merge(generatedCloudEvent, cloudEventPartial): generatedCloudEvent;
+    const cloudEvent = generateCombinedCloudEvent(cloudFunction, cloudEventPartial);
     return cloudFunction.run(cloudEvent);
   };
 }

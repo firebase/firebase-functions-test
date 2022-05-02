@@ -25,9 +25,9 @@ import {expect} from 'chai';
 import {
   alerts, pubsub, storage, eventarc
 } from 'firebase-functions/v2';
-import {generateMockCloudEvent} from '../src/cloudevent/generate';
+import {generateMockCloudEvent} from '../../src/cloudevent/generate';
 
-describe('mock-cloud-event', () => {
+describe('generate (CloudEvent)', () => {
   describe('#generateMockCloudEvent', () => {
     describe('alerts.billing.onPlanAutomatedUpdatePublished()', () => {
       it('should create CloudEvent with appropriate fields', () => {

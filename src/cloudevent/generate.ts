@@ -2,11 +2,19 @@ import {CloudEvent} from 'firebase-functions/v2';
 import {CloudFunction} from 'firebase-functions/lib/v2';
 import {LIST_OF_MOCK_CLOUD_EVENT_PARTIALS} from './partials/partials';
 import {DeepPartial} from './types';
+import merge from 'ts-deepmerge';
 
 /**
- * @param cloudFunction Populates default values of the CloudEvent
  * @return {CloudEvent} Generated Mock CloudEvent
  */
+export function generateCombinedCloudEvent<FunctionType, EventType>(
+  cloudFunction: CloudFunction<FunctionType>,
+  cloudEventPartial?: DeepPartial<CloudEvent>): CloudEvent {
+  const generatedCloudEvent = generateMockCloudEvent(cloudFunction);
+  return cloudEventPartial? merge(generatedCloudEvent, cloudEventPartial): generatedCloudEvent;
+}
+
+/** @internal */
 export function generateMockCloudEvent<FunctionType, EventType>(
   cloudFunction: CloudFunction<FunctionType>): CloudEvent {
   return {
@@ -15,6 +23,7 @@ export function generateMockCloudEvent<FunctionType, EventType>(
   } as CloudEvent;
 }
 
+/** @internal */
 function generateDefaultCloudEventPartial(): Partial<CloudEvent> {
   return {
     specversion: '1.0',

@@ -7,13 +7,12 @@ export const eventarcOnCustomEventPublished:
   generatePartial(cloudFunction: CloudFunction<unknown>): DeepPartial<CloudEvent> {
     const source = 'eventarc_source';
     const subject = 'eventarc_subject';
-    const type = 'eventarc_type';
 
     return {
       data: {},
       source,
       subject,
-      type,
+      type: getEventType(cloudFunction),
     };
   },
   match(cloudFunction: CloudFunction<unknown>): boolean {

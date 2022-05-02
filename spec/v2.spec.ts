@@ -151,10 +151,19 @@ describe('v2', () => {
 
     describe('pubsub', () => {
       describe('pubsub.onMessagePublished()', () => {
-        it('should update CloudEvent appropriately', () => {
+        it('should update CloudEvent without data provided', () => {
+          const cloudFn = pubsub.onMessagePublished('topic', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+
+          expect(cloudFnWrap().cloudEvent.data.message).to.include({
+            data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: Defined in the partial
+            json: '{"hello": "world"}', // Note: Defined in the partial
+          });
+        });
+        it('should update CloudEvent with json data override', () => {
           const data = {
             message: {
-              json: '{"hello": world}'
+              json: '{"firebase": "test"}'
             },
             subscription: 'subscription'
           };
@@ -162,7 +171,27 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = {data};
 
-          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data).deep.equal(data);
+          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message).to.include({
+            data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: This is a mismatch from the json
+            json: '{"firebase": "test"}',
+          });
+        });
+        it('should update CloudEvent with json and data string overrides', () => {
+          const data = {
+            message: {
+              data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
+              json: '{"firebase": "non_json_test"}',
+            },
+            subscription: 'subscription'
+          };
+          const cloudFn = pubsub.onMessagePublished('topic', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEventPartial = {data};
+
+          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message).to.include({
+            data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
+            json: '{"firebase": "non_json_test"}',
+          });
         });
       });
     });
@@ -194,7 +223,7 @@ describe('v2', () => {
       it('should create CloudEvent with appropriate fields for pubsub.onMessagePublished()', () => {
         const data = {
           message: {
-            json: '{"hello": world}'
+            json: '{"hello_firebase": "world_firebase"}'
           },
           subscription: 'subscription'
         };
@@ -203,8 +232,9 @@ describe('v2', () => {
 
         expect(cloudEvent.type).equal(
           'google.cloud.pubsub.topic.v1.messagePublished');
-        expect(cloudEvent.data).deep.equal(data);
-        expect(cloudEvent.subject).equal(undefined);
+        expect(cloudEvent.data.message).to.include({
+          json: '{"hello_firebase": "world_firebase"}'
+        });
       });
       it('should generate source from original CloudFunction', () => {
         const type = 'google.firebase.firebasealerts.alerts.v1.published';
