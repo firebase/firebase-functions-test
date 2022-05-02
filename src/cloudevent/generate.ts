@@ -1,8 +1,21 @@
 import {CloudEvent} from 'firebase-functions/v2';
 import {CloudFunction} from 'firebase-functions/lib/v2';
-import {DeepPartial, LIST_OF_MOCK_CLOUD_EVENT_PARTIALS} from './mock-cloud-event-partial-definitions';
+import {LIST_OF_MOCK_CLOUD_EVENT_PARTIALS} from './partials/partials';
+import {DeepPartial} from './types';
 
-export function generateDefaultCloudEventPartial(): Partial<CloudEvent> {
+/**
+ * @param cloudFunction Populates default values of the CloudEvent
+ * @return {CloudEvent} Generated Mock CloudEvent
+ */
+export function generateMockCloudEvent<FunctionType, EventType>(
+  cloudFunction: CloudFunction<FunctionType>): CloudEvent {
+  return {
+    ...generateDefaultCloudEventPartial(),
+    ...generateMockCloudEventPartial<FunctionType, EventType>(cloudFunction)
+  } as CloudEvent;
+}
+
+function generateDefaultCloudEventPartial(): Partial<CloudEvent> {
   return {
     specversion: '1.0',
     id: makeEventId(),
@@ -12,7 +25,7 @@ export function generateDefaultCloudEventPartial(): Partial<CloudEvent> {
   } as Partial<CloudEvent>;
 }
 
-export function generateMockCloudEventPartial<FunctionType, EventType>(
+function generateMockCloudEventPartial<FunctionType, EventType>(
   cloudFunction: CloudFunction<FunctionType>): DeepPartial<CloudEvent<EventType>> {
   for (const mockCloudEventPartial of LIST_OF_MOCK_CLOUD_EVENT_PARTIALS) {
     if (mockCloudEventPartial.match(cloudFunction)) {

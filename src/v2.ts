@@ -26,8 +26,8 @@ import {
 } from 'firebase-functions/v2';
 import merge from 'ts-deepmerge';
 
-import {generateMockCloudEvent} from './mock-cloud-event';
-import {DeepPartial} from './mock-cloud-event-partial-definitions';
+import {generateMockCloudEvent} from './cloudevent/generate';
+import {DeepPartial} from './cloudevent/types';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}

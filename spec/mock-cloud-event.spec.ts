@@ -25,7 +25,7 @@ import {expect} from 'chai';
 import {
   alerts, pubsub, storage, eventarc
 } from 'firebase-functions/v2';
-import {generateMockCloudEvent} from '../src/mock-cloud-event';
+import {generateMockCloudEvent} from '../src/cloudevent/generate';
 
 describe('mock-cloud-event', () => {
   describe('#generateMockCloudEvent', () => {
