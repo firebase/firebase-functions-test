@@ -5,14 +5,18 @@ import {getEventType} from '../helpers';
 export const eventarcOnCustomEventPublished:
   MockCloudEventPartials<any, any> = {
   generatePartial(cloudFunction: CloudFunction<unknown>): DeepPartial<CloudEvent> {
-    const source = '';
+    const source = 'eventarc_source';
+    const subject = 'eventarc_subject';
+    const type = 'eventarc_type';
 
     return {
+      data: {},
       source,
-      type: getEventType(cloudFunction),
+      subject,
+      type,
     };
   },
   match(cloudFunction: CloudFunction<unknown>): boolean {
-    return true; // TODO(tystark) How is an EventArc event differentiated from the other events?
+    return true;
   },
 };
