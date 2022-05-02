@@ -30,7 +30,6 @@ function generateDefaultCloudEventPartial(): Partial<CloudEvent> {
     id: makeEventId(),
     data: {},
     time: new Date().toISOString(),
-    params: {}
   } as Partial<CloudEvent>;
 }
 
