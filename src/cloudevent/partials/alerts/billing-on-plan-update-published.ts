@@ -11,7 +11,6 @@ export const alertsBillingOnPlanUpdatePublished:
 
     return {
       source,
-      type: getEventType(cloudFunction),
       data: getBillingPlanUpdateData(),
     };
   },

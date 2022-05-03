@@ -12,7 +12,6 @@ export const eventarcOnCustomEventPublished:
       data: {},
       source,
       subject,
-      type: getEventType(cloudFunction),
     };
   },
   match(cloudFunction: CloudFunction<unknown>): boolean {

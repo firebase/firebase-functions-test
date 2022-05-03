@@ -11,7 +11,6 @@ export const alertsCrashlyticsOnNewAnrIssuePublished:
 
     return {
       source,
-      type: getEventType(cloudFunction),
       data: getCrashlyticsNewAnrIssueData()
     };
   },

@@ -12,7 +12,6 @@ export const alertsAppDistributionOnNewTesterIosDevicePublished:
 
     return {
       source,
-      type: getEventType(cloudFunction),
       data: {
         createTime: now,
         endTime: now,

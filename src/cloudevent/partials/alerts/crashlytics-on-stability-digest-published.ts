@@ -11,7 +11,6 @@ export const alertsCrashlyticsOnStabilityDigestPublished:
 
     return {
       source,
-      type: getEventType(cloudFunction),
       data: getCrashlyticsStabilityData()
     };
   },

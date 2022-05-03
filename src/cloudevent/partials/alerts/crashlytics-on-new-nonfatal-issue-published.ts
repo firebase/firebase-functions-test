@@ -11,7 +11,6 @@ export const alertsCrashlyticsOnNewNonfatalIssuePublished:
 
     return {
       source,
-      type: getEventType(cloudFunction),
       data: getCrashlyticsNewNonfatalIssueData()
     };
   },

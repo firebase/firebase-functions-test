@@ -14,7 +14,6 @@ export const alertsOnAlertPublished:
       alertType,
       appId,
       data: getOnAlertPublishedData(),
-      type: getEventType(cloudFunction),
       source,
     };
   },

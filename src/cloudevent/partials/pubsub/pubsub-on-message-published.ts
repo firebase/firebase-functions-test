@@ -20,7 +20,6 @@ export const pubsubOnMessagePublished:
 
     return {
       source,
-      type: getEventType(cloudFunction),
       data: {
         message: {
           attributes: {'sample-attribute': 'I am an attribute'},

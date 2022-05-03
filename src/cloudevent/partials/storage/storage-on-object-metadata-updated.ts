@@ -14,7 +14,6 @@ export const storageOnObjectMetadataUpdated:
     return {
       source,
       subject,
-      type: getEventType(cloudFunction),
       data: getStorageObjectData(bucket, FILENAME, 1),
     };
   },

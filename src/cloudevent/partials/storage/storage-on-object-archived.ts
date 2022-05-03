@@ -13,7 +13,6 @@ export const storageOnObjectArchived:
     return {
       source,
       subject,
-      type: getEventType(cloudFunction),
       data: getStorageObjectData(bucket, FILENAME, 1),
     };
   },

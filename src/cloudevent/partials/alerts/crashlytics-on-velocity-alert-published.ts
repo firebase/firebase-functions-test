@@ -11,7 +11,6 @@ export const alertsCrashlyticsOnVelocityAlertPublished:
 
     return {
       source,
-      type: getEventType(cloudFunction),
       data: getCrashlyticsVelocityAlertData(),
     };
   },

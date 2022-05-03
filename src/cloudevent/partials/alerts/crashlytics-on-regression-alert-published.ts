@@ -11,7 +11,6 @@ export const alertsCrashlyticsOnRegressionAlertPublished:
 
     return {
       source,
-      type: getEventType(cloudFunction),
       data: getCrashlyticsRegressionAlertPayload(),
     };
   },

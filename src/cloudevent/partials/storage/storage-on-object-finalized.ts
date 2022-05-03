@@ -13,7 +13,6 @@ export const storageOnObjectFinalized:
     return {
       source,
       subject,
-      type: getEventType(cloudFunction),
       data: getStorageObjectData(bucket, FILENAME, 1),
 
       /* TODO(tystark): The following get returned by the server, I don't know what extension to expect*/
