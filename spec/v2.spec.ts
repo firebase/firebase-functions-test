@@ -157,13 +157,12 @@ describe('v2', () => {
 
           expect(cloudFnWrap().cloudEvent.data.message).to.include({
             data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: Defined in the partial
-            json: '{"hello": "world"}', // Note: Defined in the partial
           });
         });
         it('should update CloudEvent with json data override', () => {
           const data = {
             message: {
-              json: '{"firebase": "test"}'
+              json: {firebase: 'test'}
             },
             subscription: 'subscription'
           };
@@ -173,14 +172,14 @@ describe('v2', () => {
 
           expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message).to.include({
             data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: This is a mismatch from the json
-            json: '{"firebase": "test"}',
           });
+          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json).to.include({firebase: 'test'});
         });
         it('should update CloudEvent with json and data string overrides', () => {
           const data = {
             message: {
               data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
-              json: '{"firebase": "non_json_test"}',
+              json: {firebase: 'non_json_test'},
             },
             subscription: 'subscription'
           };
@@ -190,8 +189,9 @@ describe('v2', () => {
 
           expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message).to.include({
             data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
-            json: '{"firebase": "non_json_test"}',
           });
+          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json)
+            .to.include({firebase: 'non_json_test'});
         });
       });
     });
