@@ -7,19 +7,19 @@ import merge from 'ts-deepmerge';
 /**
  * @return {CloudEvent} Generated Mock CloudEvent
  */
-export function generateCombinedCloudEvent<FunctionType, EventType>(
-  cloudFunction: CloudFunction<FunctionType>,
+export function generateCombinedCloudEvent<EventType>(
+  cloudFunction: CloudFunction<EventType>,
   cloudEventPartial?: DeepPartial<CloudEvent>): CloudEvent {
   const generatedCloudEvent = generateMockCloudEvent(cloudFunction);
   return cloudEventPartial? merge(generatedCloudEvent, cloudEventPartial): generatedCloudEvent;
 }
 
 /** @internal */
-export function generateMockCloudEvent<FunctionType, EventType>(
-  cloudFunction: CloudFunction<FunctionType>): CloudEvent {
+export function generateMockCloudEvent<EventType>(
+  cloudFunction: CloudFunction<EventType>): CloudEvent {
   return {
     ...generateDefaultCloudEventPartial(),
-    ...generateMockCloudEventPartial<FunctionType, EventType>(cloudFunction)
+    ...generateMockCloudEventPartial<EventType>(cloudFunction)
   } as CloudEvent;
 }
 
@@ -33,8 +33,8 @@ function generateDefaultCloudEventPartial(): Partial<CloudEvent> {
   } as Partial<CloudEvent>;
 }
 
-function generateMockCloudEventPartial<FunctionType, EventType>(
-  cloudFunction: CloudFunction<FunctionType>): DeepPartial<CloudEvent<EventType>> {
+function generateMockCloudEventPartial<EventType>(
+  cloudFunction: CloudFunction<EventType>): DeepPartial<CloudEvent<EventType>> {
   for (const mockCloudEventPartial of LIST_OF_MOCK_CLOUD_EVENT_PARTIALS) {
     if (mockCloudEventPartial.match(cloudFunction)) {
       return mockCloudEventPartial.generatePartial(cloudFunction);

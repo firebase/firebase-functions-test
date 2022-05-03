@@ -3,7 +3,7 @@ import {CloudEvent, CloudFunction, alerts} from 'firebase-functions/v2';
 import {APP_ID, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsOnAlertPublished:
-  MockCloudEventPartials<alerts.FirebaseAlertData, alerts.FirebaseAlertData<any>> = {
+  MockCloudEventPartials<alerts.FirebaseAlertData> = {
   generatePartial(cloudFunction: CloudFunction<alerts.FirebaseAlertData>): DeepPartial<alerts.AlertEvent<any>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 

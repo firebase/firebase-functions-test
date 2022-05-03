@@ -3,7 +3,7 @@ import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsAppDistributionOnNewTesterIosDevicePublished:
-  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.appDistribution.NewTesterDevicePayload>, alerts.FirebaseAlertData<alerts.appDistribution.NewTesterDevicePayload>> = {
+  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.appDistribution.NewTesterDevicePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.appDistribution.NewTesterDevicePayload>>):
     DeepPartial<alerts.appDistribution.AppDistributionEvent<alerts.appDistribution.NewTesterDevicePayload>> {

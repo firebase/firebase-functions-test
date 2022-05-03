@@ -4,7 +4,7 @@ import {FILENAME, getEventFilters, getEventType} from '../helpers';
 import {getStorageObjectData} from './storage-data';
 
 export const storageOnObjectMetadataUpdated:
-  MockCloudEventPartials<storage.StorageObjectData, storage.StorageObjectData> = {
+  MockCloudEventPartials<storage.StorageObjectData> = {
   generatePartial(
     cloudFunction: CloudFunction<storage.StorageObjectData>): DeepPartial<CloudEvent<storage.StorageObjectData>> {
     const bucket = getEventFilters(cloudFunction)?.bucket || 'bucket_name';

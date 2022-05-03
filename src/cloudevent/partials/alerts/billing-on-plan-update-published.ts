@@ -3,7 +3,7 @@ import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsBillingOnPlanUpdatePublished:
-  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>, alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>> = {
+  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>>):
     DeepPartial<alerts.billing.BillingEvent<alerts.billing.PlanUpdatePayload>> {

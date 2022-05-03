@@ -25,7 +25,7 @@ import {pubsubOnMessagePublished} from './pubsub/pubsub-on-message-published';
  * {@link eventarcOnCustomEventPublished} acts as a catch-all.
  */
 export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS:
-  Array<MockCloudEventPartials<any, any>> = [
+  Array<MockCloudEventPartials<any>> = [
   alertsCrashlyticsOnNewAnrIssuePublished,
   alertsCrashlyticsOnNewFatalIssuePublished,
   alertsCrashlyticsOnNewNonfatalIssuePublished,

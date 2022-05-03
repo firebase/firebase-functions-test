@@ -3,7 +3,7 @@ import {CloudEvent, CloudFunction, pubsub} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const pubsubOnMessagePublished:
-  MockCloudEventPartials<pubsub.MessagePublishedData, pubsub.MessagePublishedData> = {
+  MockCloudEventPartials<pubsub.MessagePublishedData> = {
   generatePartial(
     cloudFunction: CloudFunction<pubsub.MessagePublishedData>): DeepPartial<CloudEvent<pubsub.MessagePublishedData>> {
     const topicId = getEventFilters(cloudFunction)?.topic || '';

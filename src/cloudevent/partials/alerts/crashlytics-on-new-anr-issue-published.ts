@@ -3,7 +3,7 @@ import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsCrashlyticsOnNewAnrIssuePublished:
-  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.crashlytics.NewAnrIssuePayload>, alerts.FirebaseAlertData<alerts.crashlytics.NewAnrIssuePayload>> = {
+  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.crashlytics.NewAnrIssuePayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewAnrIssuePayload>>):
     DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.NewAnrIssuePayload>> {

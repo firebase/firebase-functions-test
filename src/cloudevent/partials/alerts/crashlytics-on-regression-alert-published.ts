@@ -3,9 +3,7 @@ import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsCrashlyticsOnRegressionAlertPublished:
-  MockCloudEventPartials<
-    alerts.FirebaseAlertData<alerts.crashlytics.RegressionAlertPayload>,
-    alerts.FirebaseAlertData<alerts.crashlytics.RegressionAlertPayload>> = {
+  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.crashlytics.RegressionAlertPayload>> = {
   generatePartial(
     cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.RegressionAlertPayload>>):
     DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.RegressionAlertPayload>> {
