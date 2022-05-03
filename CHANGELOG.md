@@ -1,0 +1,2 @@
+- Try to extract context.params from triggered data [pull request](https://github.com/firebase/firebase-functions-test/pull/114)
+- Implement firebase-functions-test wrapV2 [pull request](https://github.com/firebase/firebase-functions-test/pull/131)
