@@ -5,7 +5,7 @@ import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 export const alertsBillingOnPlanUpdatePublished:
   MockCloudEventPartials<alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>> = {
   generatePartial(
-    cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>>):
+    _: CloudFunction<alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>>):
     DeepPartial<alerts.billing.BillingEvent<alerts.billing.PlanUpdatePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 

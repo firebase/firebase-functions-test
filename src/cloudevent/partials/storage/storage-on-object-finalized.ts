@@ -5,7 +5,8 @@ import {getStorageObjectData} from './storage-data';
 
 export const storageOnObjectFinalized:
   MockCloudEventPartials<storage.StorageObjectData> = {
-  generatePartial(cloudFunction: CloudFunction<storage.StorageObjectData>): DeepPartial<CloudEvent<storage.StorageObjectData>> {
+  generatePartial(
+    cloudFunction: CloudFunction<storage.StorageObjectData>): DeepPartial<CloudEvent<storage.StorageObjectData>> {
     const bucket = getEventFilters(cloudFunction)?.bucket || 'bucket_name';
     const source = `//storage.googleapis.com/projects/_/buckets/${bucket}`;
     const subject = `objects/${FILENAME}`;

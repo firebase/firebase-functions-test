@@ -5,7 +5,7 @@ import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 export const alertsCrashlyticsOnStabilityDigestPublished:
   MockCloudEventPartials<alerts.FirebaseAlertData<alerts.crashlytics.StabilityDigestPayload>> = {
   generatePartial(
-    cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.StabilityDigestPayload>>):
+    _: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.StabilityDigestPayload>>):
     DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.StabilityDigestPayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 

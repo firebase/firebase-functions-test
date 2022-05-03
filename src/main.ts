@@ -20,8 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {has, merge, random, get} from 'lodash';
-
 import {
   CloudFunction as CloudFunctionV1,
 } from 'firebase-functions';

@@ -1,10 +1,9 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
 import {CloudEvent, CloudFunction} from 'firebase-functions/v2';
-import {getEventType} from '../helpers';
 
 export const eventarcOnCustomEventPublished:
   MockCloudEventPartials<any> = {
-  generatePartial(cloudFunction: CloudFunction<unknown>): DeepPartial<CloudEvent> {
+  generatePartial(_: CloudFunction<unknown>): DeepPartial<CloudEvent> {
     const source = 'eventarc_source';
     const subject = 'eventarc_subject';
 
@@ -14,7 +13,7 @@ export const eventarcOnCustomEventPublished:
       subject,
     };
   },
-  match(cloudFunction: CloudFunction<unknown>): boolean {
+  match(_: CloudFunction<unknown>): boolean {
     return true;
   },
 };
