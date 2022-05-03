@@ -33,6 +33,8 @@ import {
 } from '../src/main';
 import { features } from '../src/features';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
+import {alerts} from 'firebase-functions/v2';
+import {wrapV2} from '../src/v2';
 
 describe('main', () => {
   describe('#wrap', () => {
@@ -223,6 +225,17 @@ describe('main', () => {
             'companies/Alphabet/users/Lauren'
           );
         });
+      });
+    });
+
+    describe('v2 functions', () => {
+      it('should invoke wrapV2 wrapper', () => {
+        const handler = (cloudEvent) => ({cloudEvent});
+        const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(handler);
+        const cloudFnWrap = wrapV2(cloudFn);
+
+        const expectedType = 'google.firebase.firebasealerts.alerts.v1.published';
+        expect(cloudFnWrap().cloudEvent).to.include({type: expectedType});
       });
     });
 

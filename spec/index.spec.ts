@@ -67,6 +67,8 @@ describe('index', () => {
 
 import './lifecycle.spec';
 import './main.spec';
+import './v2.spec';
+import './cloudevent/generate';
 import './app.spec';
 import './providers/https.spec';
 import './providers/firestore.spec';
