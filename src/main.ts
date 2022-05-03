@@ -28,7 +28,7 @@ import {
 
 import {
   CloudFunction as CloudFunctionV2,
-} from 'firebase-functions/lib/v2/core';
+} from 'firebase-functions/v2';
 
 import {
   wrapV1,

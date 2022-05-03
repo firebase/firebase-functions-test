@@ -1,14 +1,12 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {FirebaseAlertData} from 'firebase-functions/lib/v2/providers/alerts';
-import {CrashlyticsEvent, NewAnrIssuePayload} from 'firebase-functions/lib/v2/providers/alerts/crashlytics';
-import {CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsCrashlyticsOnNewAnrIssuePublished:
-  MockCloudEventPartials<FirebaseAlertData<NewAnrIssuePayload>, FirebaseAlertData<NewAnrIssuePayload>> = {
+  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.crashlytics.NewAnrIssuePayload>, alerts.FirebaseAlertData<alerts.crashlytics.NewAnrIssuePayload>> = {
   generatePartial(
-    cloudFunction: CloudFunction<FirebaseAlertData<NewAnrIssuePayload>>):
-    DeepPartial<CrashlyticsEvent<NewAnrIssuePayload>> {
+    cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewAnrIssuePayload>>):
+    DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.NewAnrIssuePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -17,13 +15,13 @@ export const alertsCrashlyticsOnNewAnrIssuePublished:
       data: getCrashlyticsNewAnrIssueData()
     };
   },
-  match(cloudFunction: CloudFunction<FirebaseAlertData<NewAnrIssuePayload>>): boolean {
+  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewAnrIssuePayload>>): boolean {
     return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
       getEventFilters(cloudFunction)?.alerttype === 'crashlytics.newAnrIssue';
   },
 };
 
-function getCrashlyticsNewAnrIssueData(): FirebaseAlertData<NewAnrIssuePayload> {
+function getCrashlyticsNewAnrIssueData(): alerts.FirebaseAlertData<alerts.crashlytics.NewAnrIssuePayload> {
   const now = new Date().toISOString();
   return ({
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',

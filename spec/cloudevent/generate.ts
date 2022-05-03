@@ -22,9 +22,7 @@
 
 import {expect} from 'chai';
 
-import {
-  alerts, pubsub, storage, eventarc
-} from 'firebase-functions/v2';
+import {alerts, storage} from 'firebase-functions/v2';
 import {generateMockCloudEvent} from '../../src/cloudevent/generate';
 
 describe('generate (CloudEvent)', () => {
@@ -39,7 +37,7 @@ describe('generate (CloudEvent)', () => {
         expect(cloudEvent.type).equal(
           'google.firebase.firebasealerts.alerts.v1.published');
         expect(cloudEvent.source).equal(
-          '//firebasealerts.googleapis.com/projects/__PROJECT_ID__');
+          '//firebasealerts.googleapis.com/projects/42');
         expect(cloudEvent.subject).equal(undefined);
       });
     });

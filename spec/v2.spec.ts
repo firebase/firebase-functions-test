@@ -262,7 +262,7 @@ describe('v2', () => {
       });
       it('should override source and fields', () => {
         const type = 'google.firebase.firebasealerts.alerts.v1.published';
-        const source = '//firebasealerts.googleapis.com/projects/__PROJECT_ID__';
+        const source = '//firebasealerts.googleapis.com/projects/42';
         const cloudEventOverride = {
           type,
           source,

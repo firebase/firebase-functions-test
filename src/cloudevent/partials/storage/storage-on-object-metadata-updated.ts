@@ -1,12 +1,12 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {StorageObjectData} from 'firebase-functions/lib/v2/providers/storage';
-import {CloudEvent, CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudEvent, CloudFunction, storage} from 'firebase-functions/v2';
 import {FILENAME, getEventFilters, getEventType} from '../helpers';
 import {getStorageObjectData} from './storage-data';
 
 export const storageOnObjectMetadataUpdated:
-  MockCloudEventPartials<StorageObjectData, StorageObjectData> = {
-  generatePartial(cloudFunction: CloudFunction<StorageObjectData>): DeepPartial<CloudEvent<StorageObjectData>> {
+  MockCloudEventPartials<storage.StorageObjectData, storage.StorageObjectData> = {
+  generatePartial(
+    cloudFunction: CloudFunction<storage.StorageObjectData>): DeepPartial<CloudEvent<storage.StorageObjectData>> {
     const bucket = getEventFilters(cloudFunction)?.bucket || 'bucket_name';
     const source = `//storage.googleapis.com/projects/_/buckets/${bucket}`;
     const subject = `objects/__STORAGE_FILENAME__`;

@@ -1,14 +1,12 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {FirebaseAlertData} from 'firebase-functions/lib/v2/providers/alerts';
-import {CrashlyticsEvent, NewFatalIssuePayload} from 'firebase-functions/lib/v2/providers/alerts/crashlytics';
-import {CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsCrashlyticsOnNewFatalIssuePublished:
-  MockCloudEventPartials<FirebaseAlertData<NewFatalIssuePayload>, FirebaseAlertData<NewFatalIssuePayload>> = {
+  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.crashlytics.NewFatalIssuePayload>, alerts.FirebaseAlertData<alerts.crashlytics.NewFatalIssuePayload>> = {
   generatePartial(
-    cloudFunction: CloudFunction<FirebaseAlertData<NewFatalIssuePayload>>):
-    DeepPartial<CrashlyticsEvent<NewFatalIssuePayload>> {
+    cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewFatalIssuePayload>>):
+    DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.NewFatalIssuePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -17,13 +15,13 @@ export const alertsCrashlyticsOnNewFatalIssuePublished:
       data: getCrashlyticsNewFatalIssueData()
     };
   },
-  match(cloudFunction: CloudFunction<FirebaseAlertData<NewFatalIssuePayload>>): boolean {
+  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewFatalIssuePayload>>): boolean {
     return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
       getEventFilters(cloudFunction)?.alerttype === 'crashlytics.newFatalIssue';
   },
 };
 
-function getCrashlyticsNewFatalIssueData(): FirebaseAlertData<NewFatalIssuePayload> {
+function getCrashlyticsNewFatalIssueData(): alerts.FirebaseAlertData<alerts.crashlytics.NewFatalIssuePayload> {
   const now = new Date().toISOString();
   return ({
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',

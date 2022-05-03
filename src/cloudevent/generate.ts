@@ -1,5 +1,5 @@
 import {CloudEvent} from 'firebase-functions/v2';
-import {CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudFunction} from 'firebase-functions/v2';
 import {LIST_OF_MOCK_CLOUD_EVENT_PARTIALS} from './partials/partials';
 import {DeepPartial} from './types';
 import merge from 'ts-deepmerge';

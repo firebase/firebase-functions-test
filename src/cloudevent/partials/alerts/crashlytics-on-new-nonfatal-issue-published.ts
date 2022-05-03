@@ -1,14 +1,14 @@
-import {FirebaseAlertData} from 'firebase-functions/lib/v2/providers/alerts';
-import {CrashlyticsEvent, NewNonfatalIssuePayload} from 'firebase-functions/lib/v2/providers/alerts/crashlytics';
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsCrashlyticsOnNewNonfatalIssuePublished:
-  MockCloudEventPartials<FirebaseAlertData<NewNonfatalIssuePayload>, FirebaseAlertData<NewNonfatalIssuePayload>> = {
+  MockCloudEventPartials<
+    alerts.FirebaseAlertData<alerts.crashlytics.NewNonfatalIssuePayload>,
+    alerts.FirebaseAlertData<alerts.crashlytics.NewNonfatalIssuePayload>> = {
   generatePartial(
-    cloudFunction: CloudFunction<FirebaseAlertData<NewNonfatalIssuePayload>>):
-    DeepPartial<CrashlyticsEvent<NewNonfatalIssuePayload>> {
+    cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewNonfatalIssuePayload>>):
+    DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.NewNonfatalIssuePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -17,13 +17,13 @@ export const alertsCrashlyticsOnNewNonfatalIssuePublished:
       data: getCrashlyticsNewNonfatalIssueData()
     };
   },
-  match(cloudFunction: CloudFunction<FirebaseAlertData<NewNonfatalIssuePayload>>): boolean {
+  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewNonfatalIssuePayload>>): boolean {
     return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
       getEventFilters(cloudFunction)?.alerttype === 'crashlytics.newNonfatalIssue';
   },
 };
 
-function getCrashlyticsNewNonfatalIssueData(): FirebaseAlertData<NewNonfatalIssuePayload> {
+function getCrashlyticsNewNonfatalIssueData(): alerts.FirebaseAlertData<alerts.crashlytics.NewNonfatalIssuePayload> {
   const now = new Date().toISOString();
   return ({
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',

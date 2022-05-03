@@ -1,5 +1,5 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {CloudEvent, CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudEvent, CloudFunction} from 'firebase-functions/v2';
 import {getEventType} from '../helpers';
 
 export const eventarcOnCustomEventPublished:

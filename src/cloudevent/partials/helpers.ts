@@ -1,7 +1,7 @@
-import {CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudFunction} from 'firebase-functions/v2';
 
 export const APP_ID = '__APP_ID__';
-export const PROJECT_ID = '__PROJECT_ID__';
+export const PROJECT_ID = '42';
 export const FILENAME = 'file_name';
 
 export function getEventType<T>(cloudFunction: CloudFunction<T>): string {

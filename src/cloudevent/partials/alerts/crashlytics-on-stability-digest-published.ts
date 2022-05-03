@@ -1,14 +1,14 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {FirebaseAlertData} from 'firebase-functions/lib/v2/providers/alerts';
-import {CrashlyticsEvent, StabilityDigestPayload} from 'firebase-functions/lib/v2/providers/alerts/crashlytics';
-import {CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsCrashlyticsOnStabilityDigestPublished:
-  MockCloudEventPartials<FirebaseAlertData<StabilityDigestPayload>, FirebaseAlertData<StabilityDigestPayload>> = {
+  MockCloudEventPartials<
+    alerts.FirebaseAlertData<alerts.crashlytics.StabilityDigestPayload>,
+    alerts.FirebaseAlertData<alerts.crashlytics.StabilityDigestPayload>> = {
   generatePartial(
-    cloudFunction: CloudFunction<FirebaseAlertData<StabilityDigestPayload>>):
-    DeepPartial<CrashlyticsEvent<StabilityDigestPayload>> {
+    cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.StabilityDigestPayload>>):
+    DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.StabilityDigestPayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -17,13 +17,13 @@ export const alertsCrashlyticsOnStabilityDigestPublished:
       data: getCrashlyticsStabilityData()
     };
   },
-  match(cloudFunction: CloudFunction<FirebaseAlertData<StabilityDigestPayload>>): boolean {
+  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.StabilityDigestPayload>>): boolean {
     return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
       getEventFilters(cloudFunction)?.alerttype === 'crashlytics.stabilityDigest';
   },
 };
 
-function getCrashlyticsStabilityData(): FirebaseAlertData<StabilityDigestPayload> {
+function getCrashlyticsStabilityData(): alerts.FirebaseAlertData<alerts.crashlytics.StabilityDigestPayload> {
   const now = new Date().toISOString();
   return ({
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',

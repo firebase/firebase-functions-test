@@ -1,8 +1,8 @@
-import {StorageObjectData} from 'firebase-functions/lib/v2/providers/storage';
+import {storage} from 'firebase-functions/v2';
 import {FILENAME} from '../helpers';
 
 /** Storage Data */
-export function getStorageObjectData(bucket: string, filename: string, generation: number): StorageObjectData {
+export function getStorageObjectData(bucket: string, filename: string, generation: number): storage.StorageObjectData {
   const now = new Date().toISOString();
   return {
     metageneration: 1,

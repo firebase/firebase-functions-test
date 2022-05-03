@@ -1,11 +1,10 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {AlertEvent, FirebaseAlertData} from 'firebase-functions/lib/v2/providers/alerts';
-import {CloudEvent, CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudEvent, CloudFunction, alerts} from 'firebase-functions/v2';
 import {APP_ID, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsOnAlertPublished:
-  MockCloudEventPartials<FirebaseAlertData, FirebaseAlertData<any>> = {
-  generatePartial(cloudFunction: CloudFunction<FirebaseAlertData>): DeepPartial<AlertEvent<any>> {
+  MockCloudEventPartials<alerts.FirebaseAlertData, alerts.FirebaseAlertData<any>> = {
+  generatePartial(cloudFunction: CloudFunction<alerts.FirebaseAlertData>): DeepPartial<alerts.AlertEvent<any>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     const alertType = 'appDistribution.newTesterIosDevice';
@@ -19,14 +18,14 @@ export const alertsOnAlertPublished:
       source,
     };
   },
-  match(cloudFunction: CloudFunction<FirebaseAlertData>): boolean {
+  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData>): boolean {
     return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published';
   },
 };
 
 /** Alert Published Data */
 
-function getOnAlertPublishedData(): FirebaseAlertData<any> {
+function getOnAlertPublishedData(): alerts.FirebaseAlertData<any> {
   const now = new Date().toISOString();
   return ({
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',

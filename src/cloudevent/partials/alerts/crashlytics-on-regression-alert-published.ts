@@ -1,14 +1,14 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {FirebaseAlertData} from 'firebase-functions/lib/v2/providers/alerts';
-import {CrashlyticsEvent, RegressionAlertPayload} from 'firebase-functions/lib/v2/providers/alerts/crashlytics';
-import {CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsCrashlyticsOnRegressionAlertPublished:
-  MockCloudEventPartials<FirebaseAlertData<RegressionAlertPayload>, FirebaseAlertData<RegressionAlertPayload>> = {
+  MockCloudEventPartials<
+    alerts.FirebaseAlertData<alerts.crashlytics.RegressionAlertPayload>,
+    alerts.FirebaseAlertData<alerts.crashlytics.RegressionAlertPayload>> = {
   generatePartial(
-    cloudFunction: CloudFunction<FirebaseAlertData<RegressionAlertPayload>>):
-    DeepPartial<CrashlyticsEvent<RegressionAlertPayload>> {
+    cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.RegressionAlertPayload>>):
+    DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.RegressionAlertPayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -17,14 +17,14 @@ export const alertsCrashlyticsOnRegressionAlertPublished:
       data: getCrashlyticsRegressionAlertPayload(),
     };
   },
-  match(cloudFunction: CloudFunction<FirebaseAlertData<RegressionAlertPayload>>): boolean {
+  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.RegressionAlertPayload>>): boolean {
     return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
       getEventFilters(cloudFunction)?.alerttype === 'crashlytics.regression';
   },
 };
 
 /** Alert Crashlytics Data */
-function getCrashlyticsRegressionAlertPayload(): FirebaseAlertData<RegressionAlertPayload> {
+function getCrashlyticsRegressionAlertPayload(): alerts.FirebaseAlertData<alerts.crashlytics.RegressionAlertPayload> {
   const now = new Date().toISOString();
   return ({
     // ['@type']: 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',

@@ -1,14 +1,12 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {FirebaseAlertData} from 'firebase-functions/lib/v2/providers/alerts';
-import {BillingEvent, PlanUpdatePayload} from 'firebase-functions/lib/v2/providers/alerts/billing';
-import {CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudFunction, alerts} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const alertsBillingOnPlanUpdatePublished:
-  MockCloudEventPartials<FirebaseAlertData<PlanUpdatePayload>, FirebaseAlertData<PlanUpdatePayload>> = {
+  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>, alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>> = {
   generatePartial(
-    cloudFunction: CloudFunction<FirebaseAlertData<PlanUpdatePayload>>):
-    DeepPartial<BillingEvent<PlanUpdatePayload>> {
+    cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>>):
+    DeepPartial<alerts.billing.BillingEvent<alerts.billing.PlanUpdatePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -17,14 +15,14 @@ export const alertsBillingOnPlanUpdatePublished:
       data: getBillingPlanUpdateData(),
     };
   },
-  match(cloudFunction: CloudFunction<FirebaseAlertData<PlanUpdatePayload>>): boolean {
+  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload>>): boolean {
     return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
       getEventFilters(cloudFunction)?.alerttype === 'billing.planUpdate';
   },
 };
 
 /** Alert Billing Data */
-function getBillingPlanUpdateData(): FirebaseAlertData<PlanUpdatePayload> {
+function getBillingPlanUpdateData(): alerts.FirebaseAlertData<alerts.billing.PlanUpdatePayload> {
   const now = new Date().toISOString();
   return ({
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',

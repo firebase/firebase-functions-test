@@ -1,11 +1,11 @@
 import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {MessagePublishedData} from 'firebase-functions/lib/v2/providers/pubsub';
-import {CloudEvent, CloudFunction} from 'firebase-functions/lib/v2';
+import {CloudEvent, CloudFunction, pubsub} from 'firebase-functions/v2';
 import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
 
 export const pubsubOnMessagePublished:
-  MockCloudEventPartials<MessagePublishedData, MessagePublishedData> = {
-  generatePartial(cloudFunction: CloudFunction<MessagePublishedData>): DeepPartial<CloudEvent<MessagePublishedData>> {
+  MockCloudEventPartials<pubsub.MessagePublishedData, pubsub.MessagePublishedData> = {
+  generatePartial(
+    cloudFunction: CloudFunction<pubsub.MessagePublishedData>): DeepPartial<CloudEvent<pubsub.MessagePublishedData>> {
     const topicId = getEventFilters(cloudFunction)?.topic || '';
     const source = `//pubsub.googleapis.com/projects/${PROJECT_ID}/topics/${topicId}`;
     const subscription = `projects/${PROJECT_ID}/subscriptions/pubsubexample-1`;
