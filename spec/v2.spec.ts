@@ -20,19 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {expect} from 'chai';
+import { expect } from 'chai';
+
+import { wrapV2 } from '../src/v2';
 
 import {
-  wrapV2,
-} from '../src/v2';
-
-import {
-  CloudFunction, CloudEvent, alerts, pubsub, storage, eventarc
+  CloudFunction,
+  alerts,
+  pubsub,
+  storage,
+  eventarc,
+  https,
 } from 'firebase-functions/v2';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
-    const handler = (cloudEvent) => ({cloudEvent});
+    const handler = (cloudEvent) => ({ cloudEvent });
 
     describe('alerts', () => {
       describe('alerts.onAlertPublished()', () => {
@@ -58,21 +61,27 @@ describe('v2', () => {
       });
       describe('alerts.crashlytics.onNewNonfatalIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.crashlytics.onNewNonfatalIssuePublished(handler);
+          const cloudFn = alerts.crashlytics.onNewNonfatalIssuePublished(
+            handler
+          );
           const cloudFnWrap = wrapV2(cloudFn);
           expect(cloudFnWrap().cloudEvent).to.include({});
         });
       });
       describe('alerts.crashlytics.onRegressionAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.crashlytics.onRegressionAlertPublished(handler);
+          const cloudFn = alerts.crashlytics.onRegressionAlertPublished(
+            handler
+          );
           const cloudFnWrap = wrapV2(cloudFn);
           expect(cloudFnWrap().cloudEvent).to.include({});
         });
       });
       describe('alerts.crashlytics.onStabilityDigestPublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.crashlytics.onStabilityDigestPublished(handler);
+          const cloudFn = alerts.crashlytics.onStabilityDigestPublished(
+            handler
+          );
           const cloudFnWrap = wrapV2(cloudFn);
           expect(cloudFnWrap().cloudEvent).to.include({});
         });
@@ -86,14 +95,18 @@ describe('v2', () => {
       });
       describe('alerts.appDistribution.onNewTesterIosDevicePublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.appDistribution.onNewTesterIosDevicePublished(handler);
+          const cloudFn = alerts.appDistribution.onNewTesterIosDevicePublished(
+            handler
+          );
           const cloudFnWrap = wrapV2(cloudFn);
           expect(cloudFnWrap().cloudEvent).to.include({});
         });
       });
       describe('alerts.billing.onPlanAutomatedUpdatePublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(handler);
+          const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(
+            handler
+          );
           const cloudFnWrap = wrapV2(cloudFn);
           expect(cloudFnWrap().cloudEvent).to.include({});
         });
@@ -113,7 +126,7 @@ describe('v2', () => {
           const eventType = 'EVENT_TYPE';
           const cloudFn = eventarc.onCustomEventPublished(eventType, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({type: eventType});
+          expect(cloudFnWrap().cloudEvent).to.include({ type: eventType });
         });
       });
     });
@@ -162,44 +175,50 @@ describe('v2', () => {
         it('should update CloudEvent with json data override', () => {
           const data = {
             message: {
-              json: {firebase: 'test'}
+              json: { firebase: 'test' },
             },
-            subscription: 'subscription'
+            subscription: 'subscription',
           };
           const cloudFn = pubsub.onMessagePublished('topic', handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const cloudEventPartial = {data};
+          const cloudEventPartial = { data };
 
-          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message).to.include({
+          expect(
+            cloudFnWrap(cloudEventPartial).cloudEvent.data.message
+          ).to.include({
             data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: This is a mismatch from the json
           });
-          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json).to.include({firebase: 'test'});
+          expect(
+            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
+          ).to.include({ firebase: 'test' });
         });
         it('should update CloudEvent with json and data string overrides', () => {
           const data = {
             message: {
               data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
-              json: {firebase: 'non_json_test'},
+              json: { firebase: 'non_json_test' },
             },
-            subscription: 'subscription'
+            subscription: 'subscription',
           };
           const cloudFn = pubsub.onMessagePublished('topic', handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const cloudEventPartial = {data};
+          const cloudEventPartial = { data };
 
-          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message).to.include({
+          expect(
+            cloudFnWrap(cloudEventPartial).cloudEvent.data.message
+          ).to.include({
             data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
           });
-          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json)
-            .to.include({firebase: 'non_json_test'});
+          expect(
+            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
+          ).to.include({ firebase: 'non_json_test' });
         });
       });
     });
 
     describe('callable functions', () => {
       it('return an error because they are not supported', () => {
-        const cloudFunction = (input) => input;
-        cloudFunction.run = (cloudEvent: CloudEvent) => ({cloudEvent});
+        const cloudFunction = https.onCall((data) => data);
         cloudFunction.__endpoint = {
           platform: 'gcfv2',
           labels: {},
@@ -210,11 +229,12 @@ describe('v2', () => {
         };
 
         try {
-          const wrappedCF = wrapV2(cloudFunction as CloudFunction<any>);
+          const wrappedCF = wrapV2(cloudFunction as any);
           wrappedCF();
         } catch (e) {
           expect(e.message).to.equal(
-            'Wrap function is not available for callableTriggers functions.');
+            'Wrap function is not available for callableTriggers functions.'
+          );
         }
       });
     });
@@ -223,17 +243,18 @@ describe('v2', () => {
       it('should create CloudEvent with appropriate fields for pubsub.onMessagePublished()', () => {
         const data = {
           message: {
-            json: '{"hello_firebase": "world_firebase"}'
+            json: '{"hello_firebase": "world_firebase"}',
           },
-          subscription: 'subscription'
+          subscription: 'subscription',
         };
         const cloudFn = pubsub.onMessagePublished('topic', handler);
-        const cloudEvent = wrapV2(cloudFn)({data}).cloudEvent;
+        const cloudEvent = wrapV2(cloudFn)({ data }).cloudEvent;
 
         expect(cloudEvent.type).equal(
-          'google.cloud.pubsub.topic.v1.messagePublished');
+          'google.cloud.pubsub.topic.v1.messagePublished'
+        );
         expect(cloudEvent.data.message).to.include({
-          json: '{"hello_firebase": "world_firebase"}'
+          json: '{"hello_firebase": "world_firebase"}',
         });
       });
       it('should generate source from original CloudFunction', () => {
@@ -283,7 +304,7 @@ describe('v2', () => {
         const cloudEventOverride = {
           data: {
             contentType: 'application/octet-stream',
-          }
+          },
         };
 
         const bucketName = 'bucket_name';
@@ -291,7 +312,9 @@ describe('v2', () => {
 
         const mergedCloudEvent = wrapV2(cloudFn)(cloudEventOverride).cloudEvent;
         expect(mergedCloudEvent.data?.size).equal(42);
-        expect(mergedCloudEvent.data?.contentType).equal('application/octet-stream');
+        expect(mergedCloudEvent.data?.contentType).equal(
+          'application/octet-stream'
+        );
       });
     });
   });

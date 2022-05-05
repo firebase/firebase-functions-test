@@ -1,39 +1,53 @@
-import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {CloudFunction, alerts} from 'firebase-functions/v2';
-import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
+import { DeepPartial, MockCloudEventPartials } from '../../types';
+import { CloudFunction } from 'firebase-functions/v2';
+import { getEventFilters, getEventType, PROJECT_ID } from '../helpers';
+import {
+  CrashlyticsEvent,
+  NewFatalIssuePayload,
+} from 'firebase-functions/v2/alerts/crashlytics';
+import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 
-export const alertsCrashlyticsOnNewFatalIssuePublished:
-  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.crashlytics.NewFatalIssuePayload>> = {
+export const alertsCrashlyticsOnNewFatalIssuePublished: MockCloudEventPartials<CrashlyticsEvent<
+  NewFatalIssuePayload
+>> = {
   generatePartial(
-    _: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewFatalIssuePayload>>):
-    DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.NewFatalIssuePayload>> {
+    _: CloudFunction<CrashlyticsEvent<NewFatalIssuePayload>>
+  ): DeepPartial<CrashlyticsEvent<NewFatalIssuePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
       source,
-      data: getCrashlyticsNewFatalIssueData()
+      data: getCrashlyticsNewFatalIssueData(),
     };
   },
-  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewFatalIssuePayload>>): boolean {
-    return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
-      getEventFilters(cloudFunction)?.alerttype === 'crashlytics.newFatalIssue';
+  match(
+    cloudFunction: CloudFunction<CrashlyticsEvent<NewFatalIssuePayload>>
+  ): boolean {
+    return (
+      getEventType(cloudFunction) ===
+        'google.firebase.firebasealerts.alerts.v1.published' &&
+      getEventFilters(cloudFunction)?.alerttype === 'crashlytics.newFatalIssue'
+    );
   },
 };
 
-function getCrashlyticsNewFatalIssueData(): alerts.FirebaseAlertData<alerts.crashlytics.NewFatalIssuePayload> {
+function getCrashlyticsNewFatalIssueData(): FirebaseAlertData<
+  NewFatalIssuePayload
+> {
   const now = new Date().toISOString();
-  return ({
+  return {
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',
     createTime: now,
     endTime: now,
     payload: {
-      '@type': 'com.google.firebase.firebasealerts.CrashlyticsNewFatalIssuePayload',
-      'issue': {
+      '@type':
+        'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsNewFatalIssuePayload',
+      issue: {
         id: 'crashlytics_issue_id',
         title: 'crashlytics_issue_title',
         subtitle: 'crashlytics_issue_subtitle',
-        appVersion: 'crashlytics_issue_app_version'
+        appVersion: 'crashlytics_issue_app_version',
       },
-    }
-  });
+    },
+  };
 }

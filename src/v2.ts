@@ -20,29 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {
-  CloudFunction,
-  CloudEvent,
-} from 'firebase-functions/v2';
+import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
 
-import {generateCombinedCloudEvent} from './cloudevent/generate';
-import {DeepPartial} from './cloudevent/types';
+import { generateCombinedCloudEvent } from './cloudevent/generate';
+import { DeepPartial } from './cloudevent/types';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
  */
-export type WrappedV2Function = (
-  cloudEventPartial?: DeepPartial<CloudEvent>
+export type WrappedV2Function<T extends CloudEvent<unknown>> = (
+  cloudEventPartial?: DeepPartial<T>
 ) => any | Promise<any>;
 
 /**
  * Takes a v2 cloud function to be tested, and returns a {@link WrappedV2Function}
  * which can be called in test code.
  */
-export function wrapV2<T>(
+export function wrapV2<T extends CloudEvent<unknown>>(
   cloudFunction: CloudFunction<T>
-): WrappedV2Function {
-
+): WrappedV2Function<T> {
   if (cloudFunction?.__endpoint?.callableTrigger) {
     throw new Error(
       'Wrap function is not available for callableTriggers functions.'
@@ -59,8 +55,11 @@ export function wrapV2<T>(
     throw new Error('This function can only wrap V2 CloudFunctions.');
   }
 
-  return (cloudEventPartial?: DeepPartial<CloudEvent>) => {
-    const cloudEvent = generateCombinedCloudEvent(cloudFunction, cloudEventPartial);
+  return (cloudEventPartial?: DeepPartial<T>) => {
+    const cloudEvent = generateCombinedCloudEvent(
+      cloudFunction,
+      cloudEventPartial
+    );
     return cloudFunction.run(cloudEvent);
   };
 }
