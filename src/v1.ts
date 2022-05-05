@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {has, merge, random, get} from 'lodash';
+import { has, merge, random, get } from 'lodash';
 
 import {
   CloudFunction,
@@ -93,8 +93,8 @@ export type ContextOptions = EventContextOptions | CallableContextOptions;
 /** A function that can be called with test data and optional override values for the event context.
  * It will subsequently invoke the cloud function it wraps with the provided test data and a generated event context.
  */
-export type WrappedFunction = (
-  data: any,
+export type WrappedFunction<T> = (
+  data: T,
   options?: ContextOptions
 ) => any | Promise<any>;
 
@@ -108,7 +108,7 @@ export type WrappedScheduledFunction = (
 /** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
 export function wrapV1<T>(
   cloudFunction: CloudFunction<T>
-): WrappedScheduledFunction | WrappedFunction {
+): WrappedScheduledFunction | WrappedFunction<T> {
   if (!has(cloudFunction, '__trigger')) {
     throw new Error(
       'Wrap can only be called on functions written with the firebase-functions SDK.'
@@ -150,7 +150,7 @@ export function wrapV1<T>(
   const isCallableFunction =
     get(cloudFunction, '__trigger.labels.deployment-callable') === 'true';
 
-  let wrapped: WrappedFunction = (data: T, options: ContextOptions) => {
+  let wrapped: WrappedFunction<T> = (data: T, options: ContextOptions) => {
     // Although in Typescript we require `options` some of our JS samples do not pass it.
     options = options || {};
     let context;
@@ -264,7 +264,7 @@ function _makeDefaultContext<T>(
       triggerParams = _extractFirestoreDocumentParams(eventResource, data);
     }
   }
-  const params = {...triggerParams, ...optionsParams};
+  const params = { ...triggerParams, ...optionsParams };
 
   const defaultContext: EventContext = {
     eventId: _makeEventId(),

@@ -1,13 +1,17 @@
-import {storage} from 'firebase-functions/v2';
-import {FILENAME} from '../helpers';
+import { storage } from 'firebase-functions/v2';
+import { FILENAME } from '../helpers';
 
 /** Storage Data */
-export function getStorageObjectData(bucket: string, filename: string, generation: number): storage.StorageObjectData {
+export function getStorageObjectData(
+  bucket: string,
+  filename: string,
+  generation: number
+): storage.StorageObjectData {
   const now = new Date().toISOString();
   return {
     metageneration: 1,
     metadata: {
-      firebaseStorageDownloadTokens: '00000000-0000-0000-0000-000000000000'
+      firebaseStorageDownloadTokens: '00000000-0000-0000-0000-000000000000',
     },
     kind: 'storage#object',
     mediaLink: `https://www.googleapis.com/download/storage/v1/b/${bucket}/o/${FILENAME}?generation=${generation}&alt=media`,
@@ -25,6 +29,6 @@ export function getStorageObjectData(bucket: string, filename: string, generatio
     contentType: 'image/gif',
     timeCreated: now,
     id: `${bucket}/${FILENAME}/${generation}`,
-    bucket
+    bucket,
   };
 }

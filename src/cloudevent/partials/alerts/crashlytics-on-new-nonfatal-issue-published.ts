@@ -1,39 +1,54 @@
-import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {CloudFunction, alerts} from 'firebase-functions/v2';
-import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
+import { DeepPartial, MockCloudEventPartials } from '../../types';
+import { CloudFunction } from 'firebase-functions/v2';
+import { getEventFilters, getEventType, PROJECT_ID } from '../helpers';
+import {
+  CrashlyticsEvent,
+  NewNonfatalIssuePayload,
+} from 'firebase-functions/v2/alerts/crashlytics';
+import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 
-export const alertsCrashlyticsOnNewNonfatalIssuePublished:
-  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.crashlytics.NewNonfatalIssuePayload>> = {
+export const alertsCrashlyticsOnNewNonfatalIssuePublished: MockCloudEventPartials<CrashlyticsEvent<
+  NewNonfatalIssuePayload
+>> = {
   generatePartial(
-    _: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewNonfatalIssuePayload>>):
-    DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.NewNonfatalIssuePayload>> {
+    _: CloudFunction<CrashlyticsEvent<NewNonfatalIssuePayload>>
+  ): DeepPartial<CrashlyticsEvent<NewNonfatalIssuePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
       source,
-      data: getCrashlyticsNewNonfatalIssueData()
+      data: getCrashlyticsNewNonfatalIssueData(),
     };
   },
-  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.NewNonfatalIssuePayload>>): boolean {
-    return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
-      getEventFilters(cloudFunction)?.alerttype === 'crashlytics.newNonfatalIssue';
+  match(
+    cloudFunction: CloudFunction<CrashlyticsEvent<NewNonfatalIssuePayload>>
+  ): boolean {
+    return (
+      getEventType(cloudFunction) ===
+        'google.firebase.firebasealerts.alerts.v1.published' &&
+      getEventFilters(cloudFunction)?.alerttype ===
+        'crashlytics.newNonfatalIssue'
+    );
   },
 };
 
-function getCrashlyticsNewNonfatalIssueData(): alerts.FirebaseAlertData<alerts.crashlytics.NewNonfatalIssuePayload> {
+function getCrashlyticsNewNonfatalIssueData(): FirebaseAlertData<
+  NewNonfatalIssuePayload
+> {
   const now = new Date().toISOString();
-  return ({
+  return {
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',
     createTime: now,
     endTime: now,
     payload: {
-      '@type': 'com.google.firebase.firebasealerts.CrashlyticsNewNonfatalIssuePayload',
-      'issue': {
+      '@type':
+        'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsNewNonfatalIssuePayload',
+      issue: {
         id: 'crashlytics_issue_id',
         title: 'crashlytics_issue_title',
         subtitle: 'crashlytics_issue_subtitle',
-        appVersion: 'crashlytics_issue_app_version'
+        appVersion: 'crashlytics_issue_app_version',
       },
-    }
-  });
+    },
+  };
 }
