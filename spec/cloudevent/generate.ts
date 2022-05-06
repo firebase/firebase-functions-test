@@ -20,39 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {expect} from 'chai';
+import { expect } from 'chai';
 
-import {alerts, storage} from 'firebase-functions/v2';
-import {generateMockCloudEvent} from '../../src/cloudevent/generate';
+import { alerts, storage } from 'firebase-functions/v2';
+import { generateMockCloudEvent } from '../../src/cloudevent/generate';
 
 describe('generate (CloudEvent)', () => {
   describe('#generateMockCloudEvent', () => {
     describe('alerts.billing.onPlanAutomatedUpdatePublished()', () => {
       it('should create CloudEvent with appropriate fields', () => {
-        const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(() => {
-        });
-        const cloudEvent =
-          generateMockCloudEvent(cloudFn);
+        const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(() => {});
+        const cloudEvent = generateMockCloudEvent(cloudFn);
 
         expect(cloudEvent.type).equal(
-          'google.firebase.firebasealerts.alerts.v1.published');
+          'google.firebase.firebasealerts.alerts.v1.published'
+        );
         expect(cloudEvent.source).equal(
-          '//firebasealerts.googleapis.com/projects/42');
+          '//firebasealerts.googleapis.com/projects/42'
+        );
         expect(cloudEvent.subject).equal(undefined);
       });
     });
     describe('storage.onObjectArchived', () => {
       it('should create CloudEvent with appropriate fields', () => {
         const bucketName = 'bucket_name';
-        const cloudFn = storage.onObjectArchived(bucketName, () => {
-        });
-        const cloudEvent =
-          generateMockCloudEvent(cloudFn);
+        const cloudFn = storage.onObjectArchived(bucketName, () => {});
+        const cloudEvent = generateMockCloudEvent(cloudFn);
 
         expect(cloudEvent.type).equal(
-          'google.cloud.storage.object.v1.archived');
+          'google.cloud.storage.object.v1.archived'
+        );
         expect(cloudEvent.source).equal(
-          `//storage.googleapis.com/projects/_/buckets/${bucketName}`);
+          `//storage.googleapis.com/projects/_/buckets/${bucketName}`
+        );
         expect(cloudEvent.subject).equal('objects/file_name');
       });
     });

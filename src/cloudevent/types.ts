@@ -1,14 +1,16 @@
-import {CloudEvent, CloudFunction} from 'firebase-functions/v2';
+import { CloudEvent, CloudFunction } from 'firebase-functions/v2';
 
 export type DeepPartial<T extends object> = {
-  [Key in keyof T]?: T[Key] extends object ? DeepPartial<T[Key]> : T[Key]
+  [Key in keyof T]?: T[Key] extends object ? DeepPartial<T[Key]> : T[Key];
 };
-type MockCloudEventPartialFunction<EventType> =
-  (cloudFunction: CloudFunction<EventType>) => DeepPartial<CloudEvent<EventType>>;
-type MockCloudEventMatchFunction<EventType> =
-  (cloudFunction: CloudFunction<EventType>) => boolean;
+type MockCloudEventPartialFunction<EventType extends CloudEvent<unknown>> = (
+  cloudFunction: CloudFunction<EventType>
+) => DeepPartial<EventType>;
+type MockCloudEventMatchFunction<EventType extends CloudEvent<unknown>> = (
+  cloudFunction: CloudFunction<EventType>
+) => boolean;
 
-export interface MockCloudEventPartials<EventType> {
+export interface MockCloudEventPartials<EventType extends CloudEvent<unknown>> {
   generatePartial: MockCloudEventPartialFunction<EventType>;
   match: MockCloudEventMatchFunction<EventType>;
 }

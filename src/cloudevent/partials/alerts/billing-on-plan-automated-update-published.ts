@@ -1,12 +1,18 @@
-import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {CloudFunction, alerts} from 'firebase-functions/v2';
-import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
+import { DeepPartial, MockCloudEventPartials } from '../../types';
+import { CloudFunction } from 'firebase-functions/v2';
+import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
+import {
+  BillingEvent,
+  PlanAutomatedUpdatePayload,
+} from 'firebase-functions/v2/alerts/billing';
+import { getEventFilters, getEventType, PROJECT_ID } from '../helpers';
 
-export const alertsBillingOnPlanAutomatedUpdatePublished:
-  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.billing.PlanAutomatedUpdatePayload>> = {
+export const alertsBillingOnPlanAutomatedUpdatePublished: MockCloudEventPartials<BillingEvent<
+  PlanAutomatedUpdatePayload
+>> = {
   generatePartial(
-    _: CloudFunction<alerts.FirebaseAlertData<alerts.billing.PlanAutomatedUpdatePayload>>):
-    DeepPartial<alerts.billing.BillingEvent<alerts.billing.PlanAutomatedUpdatePayload>> {
+    _: CloudFunction<BillingEvent<PlanAutomatedUpdatePayload>>
+  ): DeepPartial<BillingEvent<PlanAutomatedUpdatePayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -14,22 +20,31 @@ export const alertsBillingOnPlanAutomatedUpdatePublished:
       data: getBillingPlanAutomatedUpdateData(),
     };
   },
-  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.billing.PlanAutomatedUpdatePayload>>): boolean {
-    return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
-      getEventFilters(cloudFunction)?.alerttype === 'billing.planAutomatedUpdate';
+  match(
+    cloudFunction: CloudFunction<BillingEvent<PlanAutomatedUpdatePayload>>
+  ): boolean {
+    return (
+      getEventType(cloudFunction) ===
+        'google.firebase.firebasealerts.alerts.v1.published' &&
+      getEventFilters(cloudFunction)?.alerttype ===
+        'billing.planAutomatedUpdate'
+    );
   },
 };
 
-function getBillingPlanAutomatedUpdateData(): alerts.FirebaseAlertData<alerts.billing.PlanAutomatedUpdatePayload> {
+function getBillingPlanAutomatedUpdateData(): FirebaseAlertData<
+  PlanAutomatedUpdatePayload
+> {
   const now = new Date().toISOString();
-  return ({
+  return {
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',
     createTime: now,
     endTime: now,
     payload: {
-      '@type': 'com.google.firebase.firebasealerts.PlanAutomatedUpdatePayload',
-      'billingPlan': 'flame',
-      // 'notificationType': 'upgrade'
-    }
-  });
+      '@type':
+        'type.googleapis.com/google.events.firebase.firebasealerts.v1.BillingPlanAutomatedUpdatePayload',
+      billingPlan: 'flame',
+      notificationType: 'upgrade',
+    },
+  };
 }

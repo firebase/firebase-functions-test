@@ -1,12 +1,18 @@
-import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {CloudFunction, alerts} from 'firebase-functions/v2';
-import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
+import { DeepPartial, MockCloudEventPartials } from '../../types';
+import { CloudFunction } from 'firebase-functions/v2';
+import { getEventFilters, getEventType, PROJECT_ID } from '../helpers';
+import {
+  CrashlyticsEvent,
+  VelocityAlertPayload,
+} from 'firebase-functions/v2/alerts/crashlytics';
+import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 
-export const alertsCrashlyticsOnVelocityAlertPublished:
-  MockCloudEventPartials<alerts.FirebaseAlertData<alerts.crashlytics.VelocityAlertPayload>> = {
+export const alertsCrashlyticsOnVelocityAlertPublished: MockCloudEventPartials<CrashlyticsEvent<
+  VelocityAlertPayload
+>> = {
   generatePartial(
-    _: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.VelocityAlertPayload>>):
-    DeepPartial<alerts.crashlytics.CrashlyticsEvent<alerts.crashlytics.VelocityAlertPayload>> {
+    _: CloudFunction<CrashlyticsEvent<VelocityAlertPayload>>
+  ): DeepPartial<CrashlyticsEvent<VelocityAlertPayload>> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
@@ -14,30 +20,38 @@ export const alertsCrashlyticsOnVelocityAlertPublished:
       data: getCrashlyticsVelocityAlertData(),
     };
   },
-  match(cloudFunction: CloudFunction<alerts.FirebaseAlertData<alerts.crashlytics.VelocityAlertPayload>>): boolean {
-    return getEventType(cloudFunction) === 'google.firebase.firebasealerts.alerts.v1.published' &&
-      getEventFilters(cloudFunction)?.alerttype === 'crashlytics.velocity';
+  match(
+    cloudFunction: CloudFunction<CrashlyticsEvent<VelocityAlertPayload>>
+  ): boolean {
+    return (
+      getEventType(cloudFunction) ===
+        'google.firebase.firebasealerts.alerts.v1.published' &&
+      getEventFilters(cloudFunction)?.alerttype === 'crashlytics.velocity'
+    );
   },
 };
 
-function getCrashlyticsVelocityAlertData(): alerts.FirebaseAlertData<alerts.crashlytics.VelocityAlertPayload> {
+function getCrashlyticsVelocityAlertData(): FirebaseAlertData<
+  VelocityAlertPayload
+> {
   const now = new Date().toISOString();
-  return ({
+  return {
     // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',
     createTime: now,
     endTime: now,
     payload: {
-      '@type': 'com.google.firebase.firebasealerts.VelocityAlertPayload',
-      'crashCount': 100,
-      'issue': {
+      '@type':
+        'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsVelocityAlertPayload',
+      crashCount: 100,
+      issue: {
         id: 'crashlytics_issue_id',
         title: 'crashlytics_issue_title',
         subtitle: 'crashlytics_issue_subtitle',
-        appVersion: 'crashlytics_issue_app_version'
+        appVersion: 'crashlytics_issue_app_version',
       },
-      'createTime': now,
-      'firstVersion': '1.1',
-      'crashPercentage': 50.0
-    }
-  });
+      createTime: now,
+      firstVersion: '1.1',
+      crashPercentage: 50.0,
+    },
+  };
 }

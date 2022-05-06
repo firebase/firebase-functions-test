@@ -1,11 +1,13 @@
-import {DeepPartial, MockCloudEventPartials} from '../../types';
-import {CloudEvent, CloudFunction, pubsub} from 'firebase-functions/v2';
-import {getEventFilters, getEventType, PROJECT_ID} from '../helpers';
+import { DeepPartial, MockCloudEventPartials } from '../../types';
+import { CloudEvent, CloudFunction, pubsub } from 'firebase-functions/v2';
+import { getEventFilters, getEventType, PROJECT_ID } from '../helpers';
 
-export const pubsubOnMessagePublished:
-  MockCloudEventPartials<pubsub.MessagePublishedData> = {
+export const pubsubOnMessagePublished: MockCloudEventPartials<CloudEvent<
+  pubsub.MessagePublishedData
+>> = {
   generatePartial(
-    cloudFunction: CloudFunction<pubsub.MessagePublishedData>): DeepPartial<CloudEvent<pubsub.MessagePublishedData>> {
+    cloudFunction: CloudFunction<CloudEvent<pubsub.MessagePublishedData>>
+  ): DeepPartial<CloudEvent<pubsub.MessagePublishedData>> {
     const topicId = getEventFilters(cloudFunction)?.topic || '';
     const source = `//pubsub.googleapis.com/projects/${PROJECT_ID}/topics/${topicId}`;
     const subscription = `projects/${PROJECT_ID}/subscriptions/pubsubexample-1`;
@@ -20,7 +22,7 @@ export const pubsubOnMessagePublished:
       source,
       data: {
         message: {
-          attributes: {'sample-attribute': 'I am an attribute'},
+          attributes: { 'sample-attribute': 'I am an attribute' },
           data: dataMessageData, // Buffer base64 encoded
           messageId: 'messageId',
           publishTime: new Date().toISOString(),
@@ -29,7 +31,10 @@ export const pubsubOnMessagePublished:
       },
     };
   },
-  match(cloudFunction: CloudFunction<unknown>): boolean {
-    return getEventType(cloudFunction) === 'google.cloud.pubsub.topic.v1.messagePublished';
+  match(cloudFunction: CloudFunction<CloudEvent<unknown>>): boolean {
+    return (
+      getEventType(cloudFunction) ===
+      'google.cloud.pubsub.topic.v1.messagePublished'
+    );
   },
 };

@@ -20,24 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {
-  CloudFunction as CloudFunctionV1,
-} from 'firebase-functions';
+import { CloudFunction as CloudFunctionV1 } from 'firebase-functions';
 
 import {
   CloudFunction as CloudFunctionV2,
+  CloudEvent,
 } from 'firebase-functions/v2';
 
-import {
-  wrapV1,
-  WrappedFunction,
-  WrappedScheduledFunction,
-} from './v1';
+import { wrapV1, WrappedFunction, WrappedScheduledFunction } from './v1';
 
-import {
-  wrapV2,
-  WrappedV2Function,
-} from './v2';
+import { wrapV2, WrappedV2Function } from './v2';
 
 // Re-exporting V1 (to reduce breakage)
 export {
@@ -53,20 +45,20 @@ export {
 } from './v1';
 
 // V2 Exports
-export {
-  WrappedV2Function,
-} from './v2';
-
-type UnknownCloudFunction = CloudFunctionV1<unknown> | CloudFunctionV2<unknown>;
-
-export function wrap<T>(cloudFunction: CloudFunctionV1<T>): WrappedScheduledFunction | WrappedFunction;
-export function wrap<T>(cloudFunction: CloudFunctionV2<T>): WrappedV2Function;
+export { WrappedV2Function } from './v2';
 
 export function wrap<T>(
-  cloudFunction: UnknownCloudFunction
-): WrappedScheduledFunction | WrappedFunction | WrappedV2Function {
-  if (isV2CloudFunction(cloudFunction)) {
-    return wrapV2<T>(cloudFunction as CloudFunctionV2<T>);
+  cloudFunction: CloudFunctionV1<T>
+): WrappedScheduledFunction | WrappedFunction<T>;
+export function wrap<T extends CloudEvent<unknown>>(
+  cloudFunction: CloudFunctionV2<T>
+): WrappedV2Function<T>;
+
+export function wrap<T, V extends CloudEvent<unknown>>(
+  cloudFunction: CloudFunctionV1<T> | CloudFunctionV2<V>
+): WrappedScheduledFunction | WrappedFunction<T> | WrappedV2Function<V> {
+  if (isV2CloudFunction<V>(cloudFunction)) {
+    return wrapV2<V>(cloudFunction as CloudFunctionV2<V>);
   }
   return wrapV1<T>(cloudFunction as CloudFunctionV1<T>);
 }
@@ -80,6 +72,8 @@ export function wrap<T>(
  *    <li> V2 CloudFunction.run is always a unary function
  * @return True iff the CloudFunction is a V2 function.
  */
-function isV2CloudFunction<T>(cloudFunction: UnknownCloudFunction) {
+function isV2CloudFunction<T extends CloudEvent<unknown>>(
+  cloudFunction: any
+): cloudFunction is CloudFunctionV2<T> {
   return cloudFunction.length === 1 && cloudFunction?.run?.length === 1;
 }
