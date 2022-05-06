@@ -1,0 +1,2 @@
+- Make WrappedFunction curry type info (#138)
+- Update to `firebase-functions@2.21` to include updated typing (#139)
