@@ -39,7 +39,7 @@ function getCrashlyticsNewFatalIssueData(): FirebaseAlertData<
     createTime: now,
     endTime: now,
     payload: {
-      '@type':
+      ['@type']:
         'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsNewFatalIssuePayload',
       issue: {
         id: 'crashlytics_issue_id',

@@ -40,7 +40,7 @@ function getBillingPlanAutomatedUpdateData(): FirebaseAlertData<
     createTime: now,
     endTime: now,
     payload: {
-      '@type':
+      ['@type']:
         'type.googleapis.com/google.events.firebase.firebasealerts.v1.BillingPlanAutomatedUpdatePayload',
       billingPlan: 'flame',
       notificationType: 'upgrade',

@@ -39,7 +39,7 @@ function getCrashlyticsVelocityAlertData(): FirebaseAlertData<
     createTime: now,
     endTime: now,
     payload: {
-      '@type':
+      ['@type']:
         'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsVelocityAlertPayload',
       crashCount: 100,
       issue: {

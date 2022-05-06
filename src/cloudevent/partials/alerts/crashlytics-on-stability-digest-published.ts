@@ -40,7 +40,7 @@ function getCrashlyticsStabilityData(): FirebaseAlertData<
     createTime: now,
     endTime: now,
     payload: {
-      '@type':
+      ['@type']:
         'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsStabilityDigestPayload',
       digestDate: new Date().toISOString(),
       trendingIssues: [

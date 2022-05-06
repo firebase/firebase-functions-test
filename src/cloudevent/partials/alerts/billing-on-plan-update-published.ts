@@ -38,7 +38,7 @@ function getBillingPlanUpdateData(): FirebaseAlertData<PlanUpdatePayload> {
     createTime: now,
     endTime: now,
     payload: {
-      '@type':
+      ['@type']:
         'type.googleapis.com/google.events.firebase.firebasealerts.v1.BillingPlanUpdatePayload',
       billingPlan: 'flame',
       principalEmail: 'test@test.com',

@@ -40,7 +40,7 @@ function getCrashlyticsRegressionAlertPayload(): FirebaseAlertData<
     createTime: now,
     endTime: now,
     payload: {
-      '@type':
+      ['@type']:
         'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsRegressionAlertPayload',
       issue: {
         id: 'crashlytics_issue_id',
