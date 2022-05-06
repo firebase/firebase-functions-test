@@ -37,7 +37,6 @@ function getCrashlyticsStabilityData(): FirebaseAlertData<
 > {
   const now = new Date().toISOString();
   return {
-    // '@type': 'type.googleapis.com/google.events.firebase.firebasealerts.v1.AlertData',
     createTime: now,
     endTime: now,
     payload: {
