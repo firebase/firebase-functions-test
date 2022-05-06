@@ -21,7 +21,7 @@ export const alertsAppDistributionOnNewTesterIosDevicePublished: MockCloudEventP
         createTime: now,
         endTime: now,
         payload: {
-          '@type':
+          ['@type']:
             'type.googleapis.com/google.events.firebase.firebasealerts.v1.AppDistroNewTesterIosDevicePayload',
           testerName: 'tester name',
           testerEmail: 'test@test.com',
