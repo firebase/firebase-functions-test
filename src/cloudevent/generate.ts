@@ -29,6 +29,7 @@ export function generateMockCloudEvent<EventType extends CloudEvent<unknown>>(
   };
 }
 
+/** @internal */
 function generateBaseCloudEvent<EventType extends CloudEvent<unknown>>(
   cloudFunction: CloudFunction<EventType>
 ): EventType {

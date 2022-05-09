@@ -188,6 +188,7 @@ export function wrapV1<T>(
   return wrapped;
 }
 
+/** @internal */
 export function _makeResourceName(
   triggerResource: string,
   params = {}
@@ -300,6 +301,7 @@ function _extractFirestoreDocumentParams(
 /**
  * Extracts the `{wildcard}` values from `dataPath`.
  * E.g. A wildcard path of `users/{userId}` with `users/FOO` would result in `{ userId: 'FOO' }`.
+ * @internal
  */
 export function _extractParams(
   wildcardTriggerPath: string,
