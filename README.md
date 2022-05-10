@@ -34,9 +34,9 @@ test('my unit test', () => {
 ## Examples
 
 * [Unit Testing Gen-1 Cloud Functions using Mocha](https://github.com/firebase/functions-samples/tree/main/quickstarts/uppercase/functions)
-* [Unit Testing Gen-2 Cloud Functions using Mocha](https://github.com/firebase/functions-samples/tree/gen2/2nd-gen/test-functions-mocha/functions)
-* [Unit Testing Gen-2 Cloud Functions using Jest](https://github.com/firebase/functions-samples/tree/gen2/2nd-gen/test-functions-jest/functions)
-* [Unit Testing Gen-2 Cloud Functions using Jest-Ts](https://github.com/firebase/functions-samples/tree/gen2/2nd-gen/test-functions-jest-ts/functions)
+* [Unit Testing Gen-2 Cloud Functions using Mocha](https://github.com/firebase/functions-samples/tree/main/2nd-gen/test-functions-mocha/functions)
+* [Unit Testing Gen-2 Cloud Functions using Jest](https://github.com/firebase/functions-samples/tree/main/2nd-gen/test-functions-jest/functions)
+* [Unit Testing Gen-2 Cloud Functions using Jest-Ts](https://github.com/firebase/functions-samples/tree/main/2nd-gen/test-functions-jest-ts/functions)
 
 ## Learn more
 
