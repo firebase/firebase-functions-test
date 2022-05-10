@@ -1,6 +1,6 @@
 {
   "name": "firebase-functions-test",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A testing companion to firebase-functions.",
   "main": "lib/index.js",
   "scripts": {
