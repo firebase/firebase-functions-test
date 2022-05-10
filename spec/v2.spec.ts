@@ -185,13 +185,8 @@ describe('v2', () => {
           const cloudEventPartial = { data };
 
           expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message
-          ).to.not.include({
-            data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: This is a mismatch from the json
-          });
-          expect(
             cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
-          ).to.include({ firebase: 'test' });
+          ).to.equal(data.message.json);
         });
       });
     });
