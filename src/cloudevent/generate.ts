@@ -16,7 +16,7 @@ export function generateCombinedCloudEvent<
 ): EventType {
   const generatedCloudEvent = generateMockCloudEvent(cloudFunction);
   return cloudEventPartial
-    ? (merge(generatedCloudEvent, cloudEventPartial) as EventType)
+    ? (mergeCloudEvent(generatedCloudEvent, cloudEventPartial) as EventType)
     : generatedCloudEvent;
 }
 
@@ -27,6 +27,19 @@ export function generateMockCloudEvent<EventType extends CloudEvent<unknown>>(
     ...generateBaseCloudEvent(cloudFunction),
     ...generateMockCloudEventPartial(cloudFunction),
   };
+}
+
+function mergeCloudEvent<EventType extends CloudEvent<unknown>>(
+  generatedCloudEvent: EventType,
+  cloudEventPartial: DeepPartial<EventType>
+) {
+  const combined = merge(generatedCloudEvent, cloudEventPartial) as EventType;
+
+  // Override the generated `data` if the user submitted `data` is provided too.
+  if (cloudEventPartial?.data) {
+    combined.data = cloudEventPartial.data;
+  }
+  return combined;
 }
 
 /** @internal */

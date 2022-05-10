@@ -27,6 +27,8 @@ import { DeepPartial } from './cloudevent/types';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
+ * @param cloudEventPartial - If provided, will merge the partial with the generated mock CloudEvent.
+ *   If `cloudEventPartial.data` is provided, it will replace the `data` field of the generated mock CloudEvent.
  */
 export type WrappedV2Function<T extends CloudEvent<unknown>> = (
   cloudEventPartial?: DeepPartial<T>

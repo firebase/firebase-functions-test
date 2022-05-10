@@ -172,10 +172,11 @@ describe('v2', () => {
             data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: Defined in the partial
           });
         });
-        it('should update CloudEvent with json data override', () => {
+        it('should update CloudEvent data message with override', () => {
           const data = {
             message: {
               json: { firebase: 'test' },
+              data: 'eyJmaXJlYmFzZSI6InRlc3QifQ==',
             },
             subscription: 'subscription',
           };
@@ -185,33 +186,12 @@ describe('v2', () => {
 
           expect(
             cloudFnWrap(cloudEventPartial).cloudEvent.data.message
-          ).to.include({
+          ).to.not.include({
             data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: This is a mismatch from the json
           });
           expect(
             cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
           ).to.include({ firebase: 'test' });
-        });
-        it('should update CloudEvent with json and data string overrides', () => {
-          const data = {
-            message: {
-              data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
-              json: { firebase: 'non_json_test' },
-            },
-            subscription: 'subscription',
-          };
-          const cloudFn = pubsub.onMessagePublished('topic', handler);
-          const cloudFnWrap = wrapV2(cloudFn);
-          const cloudEventPartial = { data };
-
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message
-          ).to.include({
-            data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
-          });
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
-          ).to.include({ firebase: 'non_json_test' });
         });
       });
     });
@@ -300,7 +280,7 @@ describe('v2', () => {
         expect(mergedCloudEvent.type).equal(expectedType);
         expect(mergedCloudEvent.source).equal(expectedSource);
       });
-      it('should deep-merge user supplied partial', () => {
+      it('should override data with user supplied partial', () => {
         const cloudEventOverride = {
           data: {
             contentType: 'application/octet-stream',
@@ -311,7 +291,7 @@ describe('v2', () => {
         const cloudFn = storage.onObjectArchived(bucketName, handler);
 
         const mergedCloudEvent = wrapV2(cloudFn)(cloudEventOverride).cloudEvent;
-        expect(mergedCloudEvent.data?.size).equal(42);
+        expect(mergedCloudEvent.data?.size).not.equal(42);
         expect(mergedCloudEvent.data?.contentType).equal(
           'application/octet-stream'
         );
