@@ -14,7 +14,6 @@ import { pubsubOnMessagePublished } from './pubsub/pubsub-on-message-published';
 import { storageV1 } from './storage';
 
 /**
- * @internal
  * Note: Ordering matters. Some MockEventPartials will match more generally
  * (eg {@link alertsOnAlertPublished}). In addition,
  * {@link eventarcOnCustomEventPublished} acts as a catch-all.

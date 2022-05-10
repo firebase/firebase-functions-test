@@ -40,8 +40,6 @@ export {
   CallableContextOptions,
   makeChange,
   mockConfig,
-  _makeResourceName,
-  _extractParams,
 } from './v1';
 
 // V2 Exports

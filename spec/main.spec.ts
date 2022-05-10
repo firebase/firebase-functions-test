@@ -27,10 +27,12 @@ import { set } from 'lodash';
 import {
   mockConfig,
   makeChange,
-  _makeResourceName,
-  _extractParams,
   wrap,
 } from '../src/main';
+import {
+  _makeResourceName,
+  _extractParams,
+} from '../src/v1';
 import { features } from '../src/features';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
 import { alerts } from 'firebase-functions/v2';
