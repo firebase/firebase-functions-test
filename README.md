@@ -40,7 +40,7 @@ test('my unit test', () => {
 
 ## Learn more
 
-Learn more about the SDK [Firebase documentation](https://firebase.google.com/docs/functions/unit-testing).
+Learn more about unit testing Cloud Functions [here](https://firebase.google.com/docs/functions/unit-testing).
 
 ## Contributing
 
