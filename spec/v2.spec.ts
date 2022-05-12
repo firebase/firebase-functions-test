@@ -134,30 +134,42 @@ describe('v2', () => {
     describe('storage', () => {
       describe('storage.onObjectArchived()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = storage.onObjectArchived('bucket', handler);
+          const bucket = 'bucket';
+          const cloudFn = storage.onObjectArchived(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          expect(cloudFnWrap().cloudEvent).to.include({
+            bucket,
+          });
         });
       });
       describe('storage.onObjectDeleted()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = storage.onObjectDeleted('bucket', handler);
+          const bucket = 'bucket';
+          const cloudFn = storage.onObjectDeleted(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          expect(cloudFnWrap().cloudEvent).to.include({
+            bucket,
+          });
         });
       });
       describe('storage.onObjectFinalized()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = storage.onObjectFinalized('bucket', handler);
+          const bucket = 'bucket';
+          const cloudFn = storage.onObjectFinalized(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          expect(cloudFnWrap().cloudEvent).to.include({
+            bucket,
+          });
         });
       });
       describe('storage.onObjectMetadataUpdated()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = storage.onObjectMetadataUpdated('bucket', handler);
+          const bucket = 'bucket';
+          const cloudFn = storage.onObjectMetadataUpdated(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          expect(cloudFnWrap().cloudEvent).to.include({
+            bucket,
+          });
         });
       });
     });
