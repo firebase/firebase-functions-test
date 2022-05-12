@@ -134,11 +134,12 @@ describe('v2', () => {
     describe('storage', () => {
       describe('storage.onObjectArchived()', () => {
         it('should update CloudEvent appropriately', () => {
-          const bucket = 'bucket';
+          const bucket = 'bucket_override';
           const cloudFn = storage.onObjectArchived(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
           expect(cloudFnWrap().cloudEvent).to.include({
             bucket,
+            source: `//storage.googleapis.com/projects/_/buckets/${bucket}`,
           });
         });
       });
@@ -195,11 +196,8 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = { data };
 
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message
-          ).to.include({
-            data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: This is a mismatch from the json
-          });
+          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message.data)
+            .equal(Buffer.from(JSON.stringify(data.message.json)).toString('base64'));
           expect(
             cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
           ).to.include({ firebase: 'test' });
@@ -216,14 +214,11 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = { data };
 
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message
-          ).to.include({
-            data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
-          });
+          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message.data)
+            .equal(Buffer.from(JSON.stringify(data.message.json)).toString('base64'));
           expect(
             cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
-          ).to.include({ firebase: 'non_json_test' });
+          ).to.include(data.message.json);
         });
       });
     });
