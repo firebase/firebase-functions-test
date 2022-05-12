@@ -29,15 +29,20 @@ export function generateMockCloudEvent<EventType extends CloudEvent<unknown>>(
   };
 }
 
-function mergeCloudEvent<EventType extends CloudEvent<unknown>>(
+function mergeCloudEvent<EventType extends CloudEvent<any>>(
   generatedCloudEvent: EventType,
   cloudEventPartial: DeepPartial<EventType>
 ) {
-  const combined = merge(generatedCloudEvent, cloudEventPartial) as EventType;
+  const combined = merge(generatedCloudEvent, cloudEventPartial) as DeepPartial<EventType>;
 
-  // Override the generated `data` if the user submitted `data` is provided too.
-  if (cloudEventPartial?.data) {
-    combined.data = cloudEventPartial.data;
+  // Handle Opaque keys for Pub/Sub CloudEvents
+  if (generatedCloudEvent.data?.message?.json && cloudEventPartial?.data?.message?.json) {
+    combined.data.message.json = cloudEventPartial.data.message.json;
+    combined.data.message.data = Buffer.from(
+      JSON.stringify(cloudEventPartial.data.message.json)).toString('base64');
+  }
+  if (combined.data?.message?.data && cloudEventPartial?.data?.message?.data) {
+    combined.data.message.data = cloudEventPartial.data.message.data;
   }
   return combined;
 }

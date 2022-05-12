@@ -298,7 +298,7 @@ describe('v2', () => {
         const cloudFn = storage.onObjectArchived(bucketName, handler);
 
         const mergedCloudEvent = wrapV2(cloudFn)(cloudEventOverride).cloudEvent;
-        expect(mergedCloudEvent.data?.size).not.equal(42);
+        expect(mergedCloudEvent.data?.size).equal(42);
         expect(mergedCloudEvent.data?.contentType).equal(
           'application/octet-stream'
         );
