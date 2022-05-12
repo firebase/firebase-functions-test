@@ -13,6 +13,7 @@ export const storageV1: MockCloudEventPartials<StorageEvent> = {
     const subject = `objects/${FILENAME}`;
 
     return {
+      bucket,
       source,
       subject,
       data: getStorageObjectData(bucket, FILENAME, 1),
