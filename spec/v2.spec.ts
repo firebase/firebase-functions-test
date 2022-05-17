@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { expect } from 'chai';
+import {expect} from 'chai';
 
-import { wrapV2 } from '../src/v2';
+import {wrapV2} from '../src/v2';
 
 import {
   CloudFunction,
@@ -35,7 +35,7 @@ import {
 
 describe('v2', () => {
   describe('#wrapV2', () => {
-    const handler = (cloudEvent) => ({ cloudEvent });
+    const handler = (cloudEvent) => ({cloudEvent});
 
     describe('alerts', () => {
       describe('alerts.onAlertPublished()', () => {
@@ -126,7 +126,7 @@ describe('v2', () => {
           const eventType = 'EVENT_TYPE';
           const cloudFn = eventarc.onCustomEventPublished(eventType, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({ type: eventType });
+          expect(cloudFnWrap().cloudEvent).to.include({type: eventType});
         });
       });
     });
@@ -181,50 +181,80 @@ describe('v2', () => {
           const cloudFn = pubsub.onMessagePublished('topic', handler);
           const cloudFnWrap = wrapV2(cloudFn);
 
-          expect(cloudFnWrap().cloudEvent.data.message).to.include({
-            data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: Defined in the partial
+          const message = cloudFnWrap().cloudEvent.data.message;
+          const data = message.data;
+          const json = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
+          expect(message).deep.equal({
+
+            // Mock data (can be overridden)
+            attributes: {
+              'sample-attribute': 'I am an attribute'
+            },
+            messageId: 'message_id',
+
+            // Recapture publish time (since it's generated during runtime)
+            publishTime: message.publishTime,
+
+            // Assertions on Expected Updates
+            data: Buffer.from(JSON.stringify(json)).toString('base64'),
           });
         });
         it('should update CloudEvent with json data override', () => {
           const data = {
             message: {
-              json: { firebase: 'test' },
+              json: {firebase: 'test'},
             },
             subscription: 'subscription',
           };
           const cloudFn = pubsub.onMessagePublished('topic', handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const cloudEventPartial = { data };
+          const cloudEventPartial = {data};
 
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.data
-          ).equal(
-            Buffer.from(JSON.stringify(data.message.json)).toString('base64')
-          );
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
-          ).to.include({ firebase: 'test' });
+          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data.message;
+          expect(message).deep.equal({
+            // Mock data (can be overridden)
+            attributes: {
+              'sample-attribute': 'I am an attribute'
+            },
+            messageId: 'message_id',
+
+            // Recapture publish time (since it's generated during runtime)
+            publishTime: message.publishTime,
+
+            // Assertions on Expected Updates
+            data: Buffer.from(JSON.stringify(data.message.json)).toString('base64'),
+            json: {firebase: 'test'}
+          });
         });
         it('should update CloudEvent with json and data string overrides', () => {
           const data = {
             message: {
               data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
-              json: { firebase: 'non_json_test' },
+              json: {firebase: 'non_json_test'},
             },
             subscription: 'subscription',
           };
           const cloudFn = pubsub.onMessagePublished('topic', handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const cloudEventPartial = { data };
+          const cloudEventPartial = {data};
 
+          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data.message;
           expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.data
-          ).equal(
-            Buffer.from(JSON.stringify(data.message.json)).toString('base64')
-          );
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
-          ).to.include(data.message.json);
+            message
+          ).deep.equal({
+            // Mock data (can be overridden)
+            attributes: {
+              'sample-attribute': 'I am an attribute'
+            },
+            messageId: 'message_id',
+
+            // Recapture publish time (since it's generated during runtime)
+            publishTime: message.publishTime,
+
+            // Assertions on Expected Updates
+            data: Buffer.from(JSON.stringify(data.message.json)).toString('base64'),
+            json: data.message.json
+          });
         });
       });
     });
@@ -261,7 +291,7 @@ describe('v2', () => {
           subscription: 'subscription',
         };
         const cloudFn = pubsub.onMessagePublished('topic', handler);
-        const cloudEvent = wrapV2(cloudFn)({ data }).cloudEvent;
+        const cloudEvent = wrapV2(cloudFn)({data}).cloudEvent;
 
         expect(cloudEvent.type).equal(
           'google.cloud.pubsub.topic.v1.messagePublished'
