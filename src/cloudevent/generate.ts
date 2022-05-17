@@ -13,7 +13,10 @@ export function generateCombinedCloudEvent<
   cloudFunction: CloudFunction<EventType>,
   cloudEventPartial?: DeepPartial<EventType>
 ): EventType {
-  const generatedCloudEvent = generateMockCloudEvent(cloudFunction, cloudEventPartial);
+  const generatedCloudEvent = generateMockCloudEvent(
+    cloudFunction,
+    cloudEventPartial
+  );
   return cloudEventPartial
     ? (merge(generatedCloudEvent, cloudEventPartial) as EventType)
     : generatedCloudEvent;
@@ -21,11 +24,14 @@ export function generateCombinedCloudEvent<
 
 export function generateMockCloudEvent<EventType extends CloudEvent<unknown>>(
   cloudFunction: CloudFunction<EventType>,
-  cloudEventPartial?: DeepPartial<EventType>): EventType {
-
+  cloudEventPartial?: DeepPartial<EventType>
+): EventType {
   for (const mockCloudEventPartial of LIST_OF_MOCK_CLOUD_EVENT_PARTIALS) {
     if (mockCloudEventPartial.match(cloudFunction)) {
-      return mockCloudEventPartial.generateMock(cloudFunction, cloudEventPartial);
+      return mockCloudEventPartial.generateMock(
+        cloudFunction,
+        cloudEventPartial
+      );
     }
   }
   // No matches were found

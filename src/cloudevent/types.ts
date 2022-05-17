@@ -5,12 +5,15 @@ export type DeepPartial<T extends object> = {
 };
 type MockCloudEventFunction<EventType extends CloudEvent<unknown>> = (
   cloudFunction: CloudFunction<EventType>,
-  cloudEventPartial?: DeepPartial<EventType>) => EventType;
+  cloudEventPartial?: DeepPartial<EventType>
+) => EventType;
 type MockCloudEventMatchFunction<EventType extends CloudEvent<unknown>> = (
   cloudFunction: CloudFunction<EventType>
 ) => boolean;
 
-export interface MockCloudEventAbstractFactory<EventType extends CloudEvent<unknown>> {
+export interface MockCloudEventAbstractFactory<
+  EventType extends CloudEvent<unknown>
+> {
   generateMock: MockCloudEventFunction<EventType>;
   match: MockCloudEventMatchFunction<EventType>;
 }

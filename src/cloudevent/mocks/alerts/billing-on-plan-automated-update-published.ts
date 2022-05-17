@@ -5,7 +5,12 @@ import {
   BillingEvent,
   PlanAutomatedUpdatePayload,
 } from 'firebase-functions/v2/alerts/billing';
-import {getBaseCloudEvent, getEventFilters, getEventType, PROJECT_ID} from '../helpers';
+import {
+  getBaseCloudEvent,
+  getEventFilters,
+  getEventType,
+  PROJECT_ID,
+} from '../helpers';
 
 export const alertsBillingOnPlanAutomatedUpdatePublished: MockCloudEventAbstractFactory<BillingEvent<
   PlanAutomatedUpdatePayload

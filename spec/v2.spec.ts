@@ -196,8 +196,11 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = { data };
 
-          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message.data)
-            .equal(Buffer.from(JSON.stringify(data.message.json)).toString('base64'));
+          expect(
+            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.data
+          ).equal(
+            Buffer.from(JSON.stringify(data.message.json)).toString('base64')
+          );
           expect(
             cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
           ).to.include({ firebase: 'test' });
@@ -214,8 +217,11 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = { data };
 
-          expect(cloudFnWrap(cloudEventPartial).cloudEvent.data.message.data)
-            .equal(Buffer.from(JSON.stringify(data.message.json)).toString('base64'));
+          expect(
+            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.data
+          ).equal(
+            Buffer.from(JSON.stringify(data.message.json)).toString('base64')
+          );
           expect(
             cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
           ).to.include(data.message.json);

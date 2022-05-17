@@ -1,6 +1,11 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
 import { CloudFunction } from 'firebase-functions/v2';
-import {APP_ID, getBaseCloudEvent, getEventType, PROJECT_ID} from '../helpers';
+import {
+  APP_ID,
+  getBaseCloudEvent,
+  getEventType,
+  PROJECT_ID,
+} from '../helpers';
 import { FirebaseAlertData, AlertEvent } from 'firebase-functions/v2/alerts';
 
 export const alertsOnAlertPublished: MockCloudEventAbstractFactory<AlertEvent<

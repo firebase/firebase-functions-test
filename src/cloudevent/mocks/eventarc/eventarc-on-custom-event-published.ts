@@ -1,6 +1,6 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
 import { CloudEvent, CloudFunction } from 'firebase-functions/v2';
-import {getBaseCloudEvent} from '../helpers';
+import { getBaseCloudEvent } from '../helpers';
 
 export const eventarcOnCustomEventPublished: MockCloudEventAbstractFactory<any> = {
   generateMock(
