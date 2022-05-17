@@ -20,9 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {expect} from 'chai';
+import { expect } from 'chai';
 
-import {wrapV2} from '../src/v2';
+import { wrapV2 } from '../src/v2';
 
 import {
   CloudFunction,
@@ -35,7 +35,7 @@ import {
 
 describe('v2', () => {
   describe('#wrapV2', () => {
-    const handler = (cloudEvent) => ({cloudEvent});
+    const handler = (cloudEvent) => ({ cloudEvent });
 
     describe('alerts', () => {
       describe('alerts.onAlertPublished()', () => {
@@ -126,7 +126,7 @@ describe('v2', () => {
           const eventType = 'EVENT_TYPE';
           const cloudFn = eventarc.onCustomEventPublished(eventType, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({type: eventType});
+          expect(cloudFnWrap().cloudEvent).to.include({ type: eventType });
         });
       });
     });
@@ -185,10 +185,9 @@ describe('v2', () => {
           const data = message.data;
           const json = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
           expect(message).deep.equal({
-
             // Mock data (can be overridden)
             attributes: {
-              'sample-attribute': 'I am an attribute'
+              'sample-attribute': 'I am an attribute',
             },
             messageId: 'message_id',
 
@@ -202,19 +201,20 @@ describe('v2', () => {
         it('should update CloudEvent with json data override', () => {
           const data = {
             message: {
-              json: {firebase: 'test'},
+              json: { firebase: 'test' },
             },
             subscription: 'subscription',
           };
           const cloudFn = pubsub.onMessagePublished('topic', handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const cloudEventPartial = {data};
+          const cloudEventPartial = { data };
 
-          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data.message;
+          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data
+            .message;
           expect(message).deep.equal({
             // Mock data (can be overridden)
             attributes: {
-              'sample-attribute': 'I am an attribute'
+              'sample-attribute': 'I am an attribute',
             },
             messageId: 'message_id',
 
@@ -222,29 +222,30 @@ describe('v2', () => {
             publishTime: message.publishTime,
 
             // Assertions on Expected Updates
-            data: Buffer.from(JSON.stringify(data.message.json)).toString('base64'),
-            json: {firebase: 'test'}
+            data: Buffer.from(JSON.stringify(data.message.json)).toString(
+              'base64'
+            ),
+            json: { firebase: 'test' },
           });
         });
         it('should update CloudEvent with json and data string overrides', () => {
           const data = {
             message: {
               data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
-              json: {firebase: 'non_json_test'},
+              json: { firebase: 'non_json_test' },
             },
             subscription: 'subscription',
           };
           const cloudFn = pubsub.onMessagePublished('topic', handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const cloudEventPartial = {data};
+          const cloudEventPartial = { data };
 
-          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data.message;
-          expect(
-            message
-          ).deep.equal({
+          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data
+            .message;
+          expect(message).deep.equal({
             // Mock data (can be overridden)
             attributes: {
-              'sample-attribute': 'I am an attribute'
+              'sample-attribute': 'I am an attribute',
             },
             messageId: 'message_id',
 
@@ -252,8 +253,10 @@ describe('v2', () => {
             publishTime: message.publishTime,
 
             // Assertions on Expected Updates
-            data: Buffer.from(JSON.stringify(data.message.json)).toString('base64'),
-            json: data.message.json
+            data: Buffer.from(JSON.stringify(data.message.json)).toString(
+              'base64'
+            ),
+            json: data.message.json,
           });
         });
       });
@@ -291,7 +294,7 @@ describe('v2', () => {
           subscription: 'subscription',
         };
         const cloudFn = pubsub.onMessagePublished('topic', handler);
-        const cloudEvent = wrapV2(cloudFn)({data}).cloudEvent;
+        const cloudEvent = wrapV2(cloudFn)({ data }).cloudEvent;
 
         expect(cloudEvent.type).equal(
           'google.cloud.pubsub.topic.v1.messagePublished'
