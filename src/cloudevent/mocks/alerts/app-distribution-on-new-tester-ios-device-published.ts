@@ -1,21 +1,29 @@
-import { DeepPartial, MockCloudEventPartials } from '../../types';
+import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
 import { CloudFunction } from 'firebase-functions/v2';
-import { getEventFilters, getEventType, PROJECT_ID } from '../helpers';
+import {
+  getBaseCloudEvent,
+  getEventFilters,
+  getEventType,
+  PROJECT_ID,
+} from '../helpers';
 import {
   AppDistributionEvent,
   NewTesterDevicePayload,
 } from 'firebase-functions/v2/alerts/appDistribution';
 
-export const alertsAppDistributionOnNewTesterIosDevicePublished: MockCloudEventPartials<AppDistributionEvent<
+export const alertsAppDistributionOnNewTesterIosDevicePublished: MockCloudEventAbstractFactory<AppDistributionEvent<
   NewTesterDevicePayload
 >> = {
-  generatePartial(
-    _: CloudFunction<AppDistributionEvent<NewTesterDevicePayload>>
-  ): DeepPartial<AppDistributionEvent<NewTesterDevicePayload>> {
+  generateMock(
+    cloudFunction: CloudFunction<AppDistributionEvent<NewTesterDevicePayload>>
+  ): AppDistributionEvent<NewTesterDevicePayload> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
     const now = new Date().toISOString();
 
     return {
+      // Spread common fields
+      ...getBaseCloudEvent(cloudFunction),
+      // Spread fields specific to this CloudEvent
       source,
       data: {
         createTime: now,

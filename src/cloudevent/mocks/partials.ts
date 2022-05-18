@@ -1,4 +1,4 @@
-import { MockCloudEventPartials } from '../types';
+import { MockCloudEventAbstractFactory } from '../types';
 import { alertsOnAlertPublished } from './alerts/alerts-on-alert-published';
 import { alertsCrashlyticsOnNewAnrIssuePublished } from './alerts/crashlytics-on-new-anr-issue-published';
 import { alertsCrashlyticsOnNewFatalIssuePublished } from './alerts/crashlytics-on-new-fatal-issue-published';
@@ -18,7 +18,7 @@ import { storageV1 } from './storage';
  * (eg {@link alertsOnAlertPublished}). In addition,
  * {@link eventarcOnCustomEventPublished} acts as a catch-all.
  */
-export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: Array<MockCloudEventPartials<
+export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: Array<MockCloudEventAbstractFactory<
   any
 >> = [
   alertsCrashlyticsOnNewAnrIssuePublished,

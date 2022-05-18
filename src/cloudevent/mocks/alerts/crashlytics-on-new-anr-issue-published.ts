@@ -1,21 +1,29 @@
-import { DeepPartial, MockCloudEventPartials } from '../../types';
+import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
 import { CloudFunction } from 'firebase-functions/v2';
-import { getEventFilters, getEventType, PROJECT_ID } from '../helpers';
+import {
+  getBaseCloudEvent,
+  getEventFilters,
+  getEventType,
+  PROJECT_ID,
+} from '../helpers';
 import {
   CrashlyticsEvent,
   NewAnrIssuePayload,
 } from 'firebase-functions/v2/alerts/crashlytics';
 import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 
-export const alertsCrashlyticsOnNewAnrIssuePublished: MockCloudEventPartials<CrashlyticsEvent<
+export const alertsCrashlyticsOnNewAnrIssuePublished: MockCloudEventAbstractFactory<CrashlyticsEvent<
   NewAnrIssuePayload
 >> = {
-  generatePartial(
-    _: CloudFunction<CrashlyticsEvent<NewAnrIssuePayload>>
-  ): DeepPartial<CrashlyticsEvent<NewAnrIssuePayload>> {
+  generateMock(
+    cloudFunction: CloudFunction<CrashlyticsEvent<NewAnrIssuePayload>>
+  ): CrashlyticsEvent<NewAnrIssuePayload> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
+      // Spread common fields
+      ...getBaseCloudEvent(cloudFunction),
+      // Spread fields specific to this CloudEvent
       source,
       data: getCrashlyticsNewAnrIssueData(),
     };

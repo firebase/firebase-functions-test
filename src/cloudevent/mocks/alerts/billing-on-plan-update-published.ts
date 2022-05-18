@@ -1,21 +1,29 @@
-import { DeepPartial, MockCloudEventPartials } from '../../types';
+import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
 import { CloudFunction } from 'firebase-functions/v2';
 import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 import {
   BillingEvent,
   PlanUpdatePayload,
 } from 'firebase-functions/v2/alerts/billing';
-import { getEventFilters, getEventType, PROJECT_ID } from '../helpers';
+import {
+  getBaseCloudEvent,
+  getEventFilters,
+  getEventType,
+  PROJECT_ID,
+} from '../helpers';
 
-export const alertsBillingOnPlanUpdatePublished: MockCloudEventPartials<BillingEvent<
+export const alertsBillingOnPlanUpdatePublished: MockCloudEventAbstractFactory<BillingEvent<
   PlanUpdatePayload
 >> = {
-  generatePartial(
-    _: CloudFunction<BillingEvent<PlanUpdatePayload>>
-  ): DeepPartial<BillingEvent<PlanUpdatePayload>> {
+  generateMock(
+    cloudFunction: CloudFunction<BillingEvent<PlanUpdatePayload>>
+  ): BillingEvent<PlanUpdatePayload> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
     return {
+      // Spread common fields
+      ...getBaseCloudEvent(cloudFunction),
+      // Spread fields specific to this CloudEvent
       source,
       data: getBillingPlanUpdateData(),
     };

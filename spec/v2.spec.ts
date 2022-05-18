@@ -134,11 +134,12 @@ describe('v2', () => {
     describe('storage', () => {
       describe('storage.onObjectArchived()', () => {
         it('should update CloudEvent appropriately', () => {
-          const bucket = 'bucket';
+          const bucket = 'bucket_override';
           const cloudFn = storage.onObjectArchived(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
           expect(cloudFnWrap().cloudEvent).to.include({
             bucket,
+            source: `//storage.googleapis.com/projects/_/buckets/${bucket}`,
           });
         });
       });
@@ -180,8 +181,21 @@ describe('v2', () => {
           const cloudFn = pubsub.onMessagePublished('topic', handler);
           const cloudFnWrap = wrapV2(cloudFn);
 
-          expect(cloudFnWrap().cloudEvent.data.message).to.include({
-            data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: Defined in the partial
+          const message = cloudFnWrap().cloudEvent.data.message;
+          const data = message.data;
+          const json = JSON.parse(Buffer.from(data, 'base64').toString('utf8'));
+          expect(message).deep.equal({
+            // Mock data (can be overridden)
+            attributes: {
+              'sample-attribute': 'I am an attribute',
+            },
+            messageId: 'message_id',
+
+            // Recapture publish time (since it's generated during runtime)
+            publishTime: message.publishTime,
+
+            // Assertions on Expected Updates
+            data: Buffer.from(JSON.stringify(json)).toString('base64'),
           });
         });
         it('should update CloudEvent with json data override', () => {
@@ -195,14 +209,24 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = { data };
 
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message
-          ).to.include({
-            data: 'eyJoZWxsbyI6IndvcmxkIn0=', // Note: This is a mismatch from the json
+          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data
+            .message;
+          expect(message).deep.equal({
+            // Mock data (can be overridden)
+            attributes: {
+              'sample-attribute': 'I am an attribute',
+            },
+            messageId: 'message_id',
+
+            // Recapture publish time (since it's generated during runtime)
+            publishTime: message.publishTime,
+
+            // Assertions on Expected Updates
+            data: Buffer.from(JSON.stringify(data.message.json)).toString(
+              'base64'
+            ),
+            json: { firebase: 'test' },
           });
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
-          ).to.include({ firebase: 'test' });
         });
         it('should update CloudEvent with json and data string overrides', () => {
           const data = {
@@ -216,14 +240,24 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = { data };
 
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message
-          ).to.include({
-            data: 'eyJmaXJlYmFzZSI6Im5vbl9qc29uX3Rlc3QifQ==',
+          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data
+            .message;
+          expect(message).deep.equal({
+            // Mock data (can be overridden)
+            attributes: {
+              'sample-attribute': 'I am an attribute',
+            },
+            messageId: 'message_id',
+
+            // Recapture publish time (since it's generated during runtime)
+            publishTime: message.publishTime,
+
+            // Assertions on Expected Updates
+            data: Buffer.from(JSON.stringify(data.message.json)).toString(
+              'base64'
+            ),
+            json: data.message.json,
           });
-          expect(
-            cloudFnWrap(cloudEventPartial).cloudEvent.data.message.json
-          ).to.include({ firebase: 'non_json_test' });
         });
       });
     });
