@@ -1,0 +1,13 @@
+- Update to README.md to include more samples #143
+- Add top-level bucket field to Mock Storage CloudEvents #145
+- Delete .travis.yml #120
+- Add CI for firebase-functions-test #147
+- Refactor MockCloudEvent generation to include user partial #146
+
+- Updated Dependencies
+  - Bump plist from 3.0.1 to 3.0.5 #132
+  - Bump minimist from 1.2.5 to 1.2.6 #129
+  - Bump path-parse from 1.0.6 to 1.0.7 #115
+  - Bump pathval from 1.1.0 to 1.1.1 #127
+  - Bump glob-parent from 5.1.1 to 5.1.2 #103
+  - Bump ws from 7.3.1 to 7.5.7 #133
