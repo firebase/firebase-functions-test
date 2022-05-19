@@ -42,21 +42,83 @@ describe('v2', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.onAlertPublished('alertType', handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            alertType: 'appDistribution.newTesterIosDevice',
+            appId: '__APP_ID__',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {},
+            },
+          });
         });
       });
       describe('alerts.crashlytics.onNewAnrIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewAnrIssuePublished(handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsNewAnrIssuePayload',
+                issue: {
+                  appVersion: 'crashlytics_issue_app_version',
+                  id: 'crashlytics_issue_id',
+                  subtitle: 'crashlytics_issue_subtitle',
+                  title: 'crashlytics_issue_title',
+                },
+              },
+            },
+          });
         });
       });
       describe('alerts.crashlytics.onNewFatalIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewFatalIssuePublished(handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsNewFatalIssuePayload',
+                issue: {
+                  appVersion: 'crashlytics_issue_app_version',
+                  id: 'crashlytics_issue_id',
+                  subtitle: 'crashlytics_issue_subtitle',
+                  title: 'crashlytics_issue_title',
+                },
+              },
+            },
+          });
         });
       });
       describe('alerts.crashlytics.onNewNonfatalIssuePublished()', () => {
@@ -65,7 +127,30 @@ describe('v2', () => {
             handler
           );
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsNewNonfatalIssuePayload',
+                issue: {
+                  appVersion: 'crashlytics_issue_app_version',
+                  id: 'crashlytics_issue_id',
+                  subtitle: 'crashlytics_issue_subtitle',
+                  title: 'crashlytics_issue_title',
+                },
+              },
+            },
+          });
         });
       });
       describe('alerts.crashlytics.onRegressionAlertPublished()', () => {
@@ -74,7 +159,32 @@ describe('v2', () => {
             handler
           );
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsRegressionAlertPayload',
+                issue: {
+                  appVersion: 'crashlytics_issue_app_version',
+                  id: 'crashlytics_issue_id',
+                  subtitle: 'crashlytics_issue_subtitle',
+                  title: 'crashlytics_issue_title',
+                },
+                resolveTime: cloudEvent.data.payload.resolveTime,
+                type: 'test type',
+              },
+            },
+          });
         });
       });
       describe('alerts.crashlytics.onStabilityDigestPublished()', () => {
@@ -83,14 +193,72 @@ describe('v2', () => {
             handler
           );
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsStabilityDigestPayload',
+                digestDate: cloudEvent.data.payload.digestDate,
+                trendingIssues: [
+                  {
+                    eventCount: 100,
+                    issue: {
+                      appVersion: 'crashlytics_issue_app_version',
+                      id: 'crashlytics_issue_id',
+                      subtitle: 'crashlytics_issue_subtitle',
+                      title: 'crashlytics_issue_title',
+                    },
+                    type: 'type',
+                    userCount: 100,
+                  },
+                ],
+              },
+            },
+          });
         });
       });
       describe('alerts.crashlytics.onVelocityAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onVelocityAlertPublished(handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.firebasealerts.v1.CrashlyticsVelocityAlertPayload',
+                crashCount: 100,
+                crashPercentage: 50,
+                createTime: cloudEvent.data.payload.createTime,
+                firstVersion: '1.1',
+                issue: {
+                  appVersion: 'crashlytics_issue_app_version',
+                  id: 'crashlytics_issue_id',
+                  subtitle: 'crashlytics_issue_subtitle',
+                  title: 'crashlytics_issue_title',
+                },
+              },
+            },
+          });
         });
       });
       describe('alerts.appDistribution.onNewTesterIosDevicePublished()', () => {
@@ -99,7 +267,28 @@ describe('v2', () => {
             handler
           );
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.firebasealerts.v1.AppDistroNewTesterIosDevicePayload',
+                testerDeviceIdentifier: 'tester device identifier',
+                testerDeviceModelName: 'tester device model name',
+                testerEmail: 'test@test.com',
+                testerName: 'tester name',
+              },
+            },
+          });
         });
       });
       describe('alerts.billing.onPlanAutomatedUpdatePublished()', () => {
@@ -108,14 +297,53 @@ describe('v2', () => {
             handler
           );
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.firebasealerts.v1.BillingPlanAutomatedUpdatePayload',
+                billingPlan: 'flame',
+                notificationType: 'upgrade',
+              },
+            },
+          });
         });
       });
       describe('alerts.billing.onPlanUpdatePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.billing.onPlanUpdatePublished(handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({});
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.firebasealerts.v1.BillingPlanUpdatePayload',
+                billingPlan: 'flame',
+                notificationType: 'upgrade',
+                principalEmail: 'test@test.com',
+              },
+            },
+          });
         });
       });
     });
@@ -125,8 +353,23 @@ describe('v2', () => {
         it('should update CloudEvent appropriately', () => {
           const eventType = 'EVENT_TYPE';
           const cloudFn = eventarc.onCustomEventPublished(eventType, handler);
+          const data = {
+            arbitrary: 'data',
+          };
+
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({ type: eventType });
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            source: 'eventarc_source',
+            subject: 'eventarc_subject',
+            type: eventType,
+            data,
+          });
         });
       });
     });
@@ -137,9 +380,42 @@ describe('v2', () => {
           const bucket = 'bucket_override';
           const cloudFn = storage.onObjectArchived(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
             bucket,
+            data: {
+              bucket,
+              contentDisposition: "inline; filename*=utf-8''file_name",
+              contentType: 'image/gif',
+              crc32c: 'qqqqqq==',
+              etag: 'xxxxxxxxx/yyyyy=',
+              generation: 1,
+              id: `${bucket}/file_name/1`,
+              kind: 'storage#object',
+              md5Hash: 'E9LIfVl7pcVu3/moXc743w==',
+              // tslint:disable-next-line:max-line-length
+              mediaLink: `https://www.googleapis.com/download/storage/v1/b/${bucket}/o/file_name?generation=1&alt=media`,
+              metadata: {
+                firebaseStorageDownloadTokens:
+                  '00000000-0000-0000-0000-000000000000',
+              },
+              metageneration: 1,
+              name: 'file_name',
+              selfLink: `https://www.googleapis.com/storage/v1/b/${bucket}/o/file_name`,
+              size: 42,
+              storageClass: 'REGIONAL',
+              timeCreated: cloudEvent.data.timeCreated,
+              timeStorageClassUpdated: cloudEvent.data.timeStorageClassUpdated,
+              updated: cloudEvent.data.updated,
+            },
             source: `//storage.googleapis.com/projects/_/buckets/${bucket}`,
+            subject: 'objects/file_name',
+            type: 'google.cloud.storage.object.v1.archived',
           });
         });
       });
@@ -148,8 +424,42 @@ describe('v2', () => {
           const bucket = 'bucket';
           const cloudFn = storage.onObjectDeleted(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
             bucket,
+            data: {
+              bucket,
+              contentDisposition: "inline; filename*=utf-8''file_name",
+              contentType: 'image/gif',
+              crc32c: 'qqqqqq==',
+              etag: 'xxxxxxxxx/yyyyy=',
+              generation: 1,
+              id: `${bucket}/file_name/1`,
+              kind: 'storage#object',
+              md5Hash: 'E9LIfVl7pcVu3/moXc743w==',
+              // tslint:disable-next-line:max-line-length
+              mediaLink: `https://www.googleapis.com/download/storage/v1/b/${bucket}/o/file_name?generation=1&alt=media`,
+              metadata: {
+                firebaseStorageDownloadTokens:
+                  '00000000-0000-0000-0000-000000000000',
+              },
+              metageneration: 1,
+              name: 'file_name',
+              selfLink: `https://www.googleapis.com/storage/v1/b/${bucket}/o/file_name`,
+              size: 42,
+              storageClass: 'REGIONAL',
+              timeCreated: cloudEvent.data.timeCreated,
+              timeStorageClassUpdated: cloudEvent.data.timeStorageClassUpdated,
+              updated: cloudEvent.data.updated,
+            },
+            source: `//storage.googleapis.com/projects/_/buckets/${bucket}`,
+            subject: 'objects/file_name',
+            type: 'google.cloud.storage.object.v1.deleted',
           });
         });
       });
@@ -158,8 +468,42 @@ describe('v2', () => {
           const bucket = 'bucket';
           const cloudFn = storage.onObjectFinalized(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
             bucket,
+            data: {
+              bucket,
+              contentDisposition: "inline; filename*=utf-8''file_name",
+              contentType: 'image/gif',
+              crc32c: 'qqqqqq==',
+              etag: 'xxxxxxxxx/yyyyy=',
+              generation: 1,
+              id: `${bucket}/file_name/1`,
+              kind: 'storage#object',
+              md5Hash: 'E9LIfVl7pcVu3/moXc743w==',
+              // tslint:disable-next-line:max-line-length
+              mediaLink: `https://www.googleapis.com/download/storage/v1/b/${bucket}/o/file_name?generation=1&alt=media`,
+              metadata: {
+                firebaseStorageDownloadTokens:
+                  '00000000-0000-0000-0000-000000000000',
+              },
+              metageneration: 1,
+              name: 'file_name',
+              selfLink: `https://www.googleapis.com/storage/v1/b/${bucket}/o/file_name`,
+              size: 42,
+              storageClass: 'REGIONAL',
+              timeCreated: cloudEvent.data.timeCreated,
+              timeStorageClassUpdated: cloudEvent.data.timeStorageClassUpdated,
+              updated: cloudEvent.data.updated,
+            },
+            source: `//storage.googleapis.com/projects/_/buckets/${bucket}`,
+            subject: 'objects/file_name',
+            type: 'google.cloud.storage.object.v1.finalized',
           });
         });
       });
@@ -168,8 +512,42 @@ describe('v2', () => {
           const bucket = 'bucket';
           const cloudFn = storage.onObjectMetadataUpdated(bucket, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          expect(cloudFnWrap().cloudEvent).to.include({
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
             bucket,
+            data: {
+              bucket,
+              contentDisposition: "inline; filename*=utf-8''file_name",
+              contentType: 'image/gif',
+              crc32c: 'qqqqqq==',
+              etag: 'xxxxxxxxx/yyyyy=',
+              generation: 1,
+              id: `${bucket}/file_name/1`,
+              kind: 'storage#object',
+              md5Hash: 'E9LIfVl7pcVu3/moXc743w==',
+              // tslint:disable-next-line:max-line-length
+              mediaLink: `https://www.googleapis.com/download/storage/v1/b/${bucket}/o/file_name?generation=1&alt=media`,
+              metadata: {
+                firebaseStorageDownloadTokens:
+                  '00000000-0000-0000-0000-000000000000',
+              },
+              metageneration: 1,
+              name: 'file_name',
+              selfLink: `https://www.googleapis.com/storage/v1/b/${bucket}/o/file_name`,
+              size: 42,
+              storageClass: 'REGIONAL',
+              timeCreated: cloudEvent.data.timeCreated,
+              timeStorageClassUpdated: cloudEvent.data.timeStorageClassUpdated,
+              updated: cloudEvent.data.updated,
+            },
+            source: `//storage.googleapis.com/projects/_/buckets/${bucket}`,
+            subject: 'objects/file_name',
+            type: 'google.cloud.storage.object.v1.metadataUpdated',
           });
         });
       });
