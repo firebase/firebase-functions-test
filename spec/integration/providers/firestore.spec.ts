@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { firestore, initializeApp } from 'firebase-admin';
+import { initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 import fft = require('../../../src/index');
 
 describe('providers/firestore', () => {
@@ -9,7 +10,7 @@ describe('providers/firestore', () => {
 
   it('clears database with clearFirestoreData', async () => {
     const test = fft({ projectId: 'not-a-project' });
-    const db = firestore();
+    const db = getFirestore();
 
     await Promise.all([
       db
