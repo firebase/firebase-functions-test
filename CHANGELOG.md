@@ -1,0 +1,1 @@
+- Add >=jest@28 as a peerDependency (#152)
