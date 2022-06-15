@@ -11,6 +11,12 @@ import { alertsBillingOnPlanAutomatedUpdatePublished } from './alerts/billing-on
 import { alertsBillingOnPlanUpdatePublished } from './alerts/billing-on-plan-update-published';
 import { eventarcOnCustomEventPublished } from './eventarc/eventarc-on-custom-event-published';
 import { pubsubOnMessagePublished } from './pubsub/pubsub-on-message-published';
+import {
+  databaseOnRefCreated,
+  databaseOnRefDeleted,
+  databaseOnRefUpdated,
+  databaseOnRefWritten,
+} from './database';
 import { storageV1 } from './storage';
 
 /**
@@ -33,5 +39,11 @@ export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: Array<MockCloudEventAbstractFact
   alertsOnAlertPublished, // Note: alert.onAlertPublished matching is more generic
   storageV1,
   pubsubOnMessagePublished,
+  databaseOnRefCreated,
+  databaseOnRefDeleted,
+  databaseOnRefUpdated,
+  databaseOnRefWritten,
+
+  // CustomEventPublished must be called last
   eventarcOnCustomEventPublished,
 ];

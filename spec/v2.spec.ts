@@ -27,11 +27,13 @@ import { wrapV2 } from '../src/v2';
 import {
   CloudFunction,
   alerts,
+  database,
   pubsub,
   storage,
   eventarc,
   https,
 } from 'firebase-functions/v2';
+import { ReferenceOptions } from '../../firebase-functions/src/v2/providers/database';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
@@ -343,6 +345,159 @@ describe('v2', () => {
                 principalEmail: 'test@test.com',
               },
             },
+          });
+        });
+      });
+    });
+
+    describe('database', () => {
+      describe('database.onRefCreated()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const referenceOptions = {
+            ref: '/foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onRefCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            data: {
+              _data: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.database.v1.ReferenceEventData',
+                data: {},
+                delta: {},
+              },
+              _path: '/foo/bar',
+              app: [undefined],
+              instance: 'instance-1',
+            },
+            instance: 'instance-1',
+            firebaseDatabaseHost: 'firebaseDatabaseHost',
+            ref: '/foo/bar',
+            location: 'us-central1',
+            params: {},
+            source: '',
+            type: 'google.firebase.database.ref.v1.created',
+          });
+        });
+      });
+      describe('database.onRefDeleted()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const referenceOptions = {
+            ref: '/foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onRefDeleted(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            data: {
+              _data: {
+                ['@type']:
+                  'type.googleapis.com/google.events.firebase.database.v1.ReferenceEventData',
+                data: {},
+                delta: {},
+              },
+              _path: '/foo/bar',
+              app: [undefined],
+              instance: 'instance-1',
+            },
+            instance: 'instance-1',
+            firebaseDatabaseHost: 'firebaseDatabaseHost',
+            ref: '/foo/bar',
+            location: 'us-central1',
+            params: {},
+            source: '',
+            type: 'google.firebase.database.ref.v1.deleted',
+          });
+        });
+      });
+      describe('database.onRefUpdated()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const referenceOptions = {
+            ref: '/foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onRefUpdated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            data: {
+              after: {
+                _data: {},
+                _path: '/foo/bar',
+                app: [undefined],
+                instance: 'instance-1',
+              },
+              before: {
+                _data: {},
+                _path: '/foo/bar',
+                app: [undefined],
+                instance: 'instance-1',
+              },
+            },
+            instance: 'instance-1',
+            firebaseDatabaseHost: 'firebaseDatabaseHost',
+            ref: '/foo/bar',
+            location: 'us-central1',
+            params: {},
+            source: '',
+            type: 'google.firebase.database.ref.v1.updated',
+          });
+        });
+      });
+      describe('database.onRefWritten()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const referenceOptions = {
+            ref: '/foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onRefWritten(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            data: {
+              after: {
+                _data: {},
+                _path: '/foo/bar',
+                app: [undefined],
+                instance: 'instance-1',
+              },
+              before: {
+                _data: {},
+                _path: '/foo/bar',
+                app: [undefined],
+                instance: 'instance-1',
+              },
+            },
+            instance: 'instance-1',
+            firebaseDatabaseHost: 'firebaseDatabaseHost',
+            ref: '/foo/bar',
+            location: 'us-central1',
+            params: {},
+            source: '',
+            type: 'google.firebase.database.ref.v1.written',
           });
         });
       });
