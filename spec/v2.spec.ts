@@ -63,6 +63,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onNewAnrIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewAnrIssuePublished(handler);
@@ -93,6 +94,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onNewFatalIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewFatalIssuePublished(handler);
@@ -123,6 +125,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onNewNonfatalIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewNonfatalIssuePublished(
@@ -155,6 +158,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onRegressionAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onRegressionAlertPublished(
@@ -189,6 +193,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onStabilityDigestPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onStabilityDigestPublished(
@@ -229,6 +234,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onVelocityAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onVelocityAlertPublished(handler);
@@ -263,6 +269,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.appDistribution.onNewTesterIosDevicePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.appDistribution.onNewTesterIosDevicePublished(
@@ -293,6 +300,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.billing.onPlanAutomatedUpdatePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(
@@ -321,6 +329,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.billing.onPlanUpdatePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.billing.onPlanUpdatePublished(handler);
@@ -387,6 +396,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('database.onRefDeleted()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
@@ -423,6 +433,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('database.onRefUpdated()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
@@ -462,6 +473,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('database.onRefWritten()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
@@ -574,6 +586,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('storage.onObjectDeleted()', () => {
         it('should update CloudEvent appropriately', () => {
           const bucket = 'bucket';
@@ -618,6 +631,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('storage.onObjectFinalized()', () => {
         it('should update CloudEvent appropriately', () => {
           const bucket = 'bucket';
@@ -662,6 +676,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('storage.onObjectMetadataUpdated()', () => {
         it('should update CloudEvent appropriately', () => {
           const bucket = 'bucket';
@@ -819,6 +834,7 @@ describe('v2', () => {
     });
 
     describe('generated CloudEvent', () => {
+
       it('should create CloudEvent with appropriate fields for pubsub.onMessagePublished()', () => {
         const data = {
           message: {
@@ -836,6 +852,7 @@ describe('v2', () => {
           json: '{"hello_firebase": "world_firebase"}',
         });
       });
+
       it('should generate source from original CloudFunction', () => {
         const type = 'google.firebase.firebasealerts.alerts.v1.published';
         const cloudEventOverride = {
@@ -860,6 +877,7 @@ describe('v2', () => {
         expect(cloudEvent.type).equal(expectedType);
         expect(cloudEvent.source).equal(expectedSource);
       });
+
       it('should override source and fields', () => {
         const type = 'google.firebase.firebasealerts.alerts.v1.published';
         const source = '//firebasealerts.googleapis.com/projects/42';
@@ -879,6 +897,7 @@ describe('v2', () => {
         expect(mergedCloudEvent.type).equal(expectedType);
         expect(mergedCloudEvent.source).equal(expectedSource);
       });
+
       it('should deep-merge user supplied partial', () => {
         const cloudEventOverride = {
           data: {
