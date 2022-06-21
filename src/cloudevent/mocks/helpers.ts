@@ -1,5 +1,6 @@
 import { CloudEvent, CloudFunction, database } from 'firebase-functions/v2';
 import { Change } from 'firebase-functions';
+import {testApp} from '../../app';
 
 const { DataSnapshot } = database;
 
@@ -44,16 +45,13 @@ export function makeChangedDataSnapshot(
   const before = new DataSnapshot(
     event.data.data,
     event.ref,
-    undefined,
+    testApp().getApp(),
     instance
   );
   const after = new DataSnapshot(
-    {
-      ...event.data.data,
-      ...event.data.delta,
-    },
+    applyChange(event.data.data, event.data.delta),
     event.ref,
-    undefined,
+    testApp().getApp(),
     instance
   );
   return {
@@ -71,4 +69,38 @@ function makeEventId(): string {
       .toString(36)
       .substring(2, 15)
   );
+}
+
+// Clone and owned from firebase-functions
+function applyChange(src: any, dest: any) {
+  // if not mergeable, don't merge
+  if (!isObject(dest) || !isObject(src)) {
+    return dest;
+  }
+
+  return merge(src, dest);
+}
+
+function isObject(obj: any): boolean {
+  return typeof obj === 'object' && !!obj;
+}
+
+function merge(
+  src: Record<string, any>,
+  dest: Record<string, any>
+): Record<string, any> {
+  const res: Record<string, any> = {};
+  const keys = new Set([...Object.keys(src), ...Object.keys(dest)]);
+
+  for (const key of keys.values()) {
+    if (key in dest) {
+      if (dest[key] === null) {
+        continue;
+      }
+      res[key] = applyChange(src[key], dest[key]);
+    } else if (src[key] !== null) {
+      res[key] = src[key];
+    }
+  }
+  return res;
 }
