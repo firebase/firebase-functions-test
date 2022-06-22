@@ -44,7 +44,9 @@ export function makeChangedDataSnapshot(
 }
 
 /** @hidden */
-function makeRawRTDBCloudEvent(cloudFunction, cloudEventPartial): database.RawRTDBCloudEvent {
+function makeRawRTDBCloudEvent(
+  cloudFunction: CloudFunction<database.DatabaseEvent<database.DataSnapshot>>,
+  cloudEventPartial: DeepPartial<database.DatabaseEvent<any>>): database.RawRTDBCloudEvent {
   const instance = (cloudEventPartial?.instance as string) || 'instance-1';
   const firebaseDatabaseHost =
     (cloudEventPartial?.firebaseDatabaseHost as string) ||
