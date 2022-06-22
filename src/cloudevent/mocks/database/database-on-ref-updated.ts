@@ -3,8 +3,8 @@ import { CloudEvent, CloudFunction, database } from 'firebase-functions/v2';
 import {
   getBaseCloudEvent,
   getEventType,
-  makeChangedDataSnapshot,
 } from '../helpers';
+import {makeChangedDataSnapshot} from './helpers';
 
 export const databaseOnRefUpdated: MockCloudEventAbstractFactory<database.DatabaseEvent<
   database.DataSnapshot
@@ -21,30 +21,12 @@ export const databaseOnRefUpdated: MockCloudEventAbstractFactory<database.Databa
     const location = (cloudEventPartial?.location as string) || 'us-central1';
     const params: Record<string, string> = cloudEventPartial?.params || {};
 
-    const mockRawRTDBCloudEventData: database.RawRTDBCloudEventData = {
-      ['@type']:
-        'type.googleapis.com/google.events.firebase.database.v1.ReferenceEventData',
-      data: cloudEventPartial?.data?.data || {},
-      delta: cloudEventPartial?.data?.delta || {},
-    };
-
-    const mockRawRTDBCloudEvent: database.RawRTDBCloudEvent = {
-      // Spread common fields
-      ...getBaseCloudEvent(cloudFunction),
-
-      data: mockRawRTDBCloudEventData,
-      instance,
-      firebasedatabasehost: firebaseDatabaseHost,
-      ref,
-      location,
-    };
-
     return {
       // Spread common fields
       ...getBaseCloudEvent(cloudFunction),
 
       // Update fields specific to this CloudEvent
-      data: makeChangedDataSnapshot(mockRawRTDBCloudEvent, instance),
+      data: makeChangedDataSnapshot(cloudFunction, cloudEventPartial, instance),
 
       instance,
       firebaseDatabaseHost,

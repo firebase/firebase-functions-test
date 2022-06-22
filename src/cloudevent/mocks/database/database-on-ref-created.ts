@@ -1,14 +1,15 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
 import { CloudEvent, CloudFunction, database } from 'firebase-functions/v2';
-import { getBaseCloudEvent, getEventType, makeDataSnapshot } from '../helpers';
+import { getBaseCloudEvent, getEventType } from '../helpers';
+import {makeDataSnapshot} from './helpers';
 
 export const databaseOnRefCreated: MockCloudEventAbstractFactory<database.DatabaseEvent<
   database.DataSnapshot
 >> = {
   generateMock(
-    cloudFunction: CloudFunction<database.DatabaseEvent<any>>,
+    cloudFunction: CloudFunction<database.DatabaseEvent<database.DataSnapshot>>,
     cloudEventPartial?: DeepPartial<database.DatabaseEvent<any>>
-  ): database.DatabaseEvent<any> {
+  ): database.DatabaseEvent<database.DataSnapshot> {
     const instance = (cloudEventPartial?.instance as string) || 'instance-1';
     const firebaseDatabaseHost =
       (cloudEventPartial?.firebaseDatabaseHost as string) ||
@@ -17,30 +18,12 @@ export const databaseOnRefCreated: MockCloudEventAbstractFactory<database.Databa
     const location = (cloudEventPartial?.location as string) || 'us-central1';
     const params: Record<string, string> = cloudEventPartial?.params || {};
 
-    const mockRawRTDBCloudEventData: database.RawRTDBCloudEventData = {
-      ['@type']:
-        'type.googleapis.com/google.events.firebase.database.v1.ReferenceEventData',
-      data: cloudEventPartial?.data?.data || {},
-      delta: cloudEventPartial?.data?.delta || {},
-    };
-
-    const mockRawRTDBCloudEvent: database.RawRTDBCloudEvent = {
-      // Spread common fields
-      ...getBaseCloudEvent(cloudFunction),
-
-      data: mockRawRTDBCloudEventData,
-      instance,
-      firebasedatabasehost: firebaseDatabaseHost,
-      ref,
-      location,
-    };
-
     return {
       // Spread common fields
       ...getBaseCloudEvent(cloudFunction),
 
       // Update fields specific to this CloudEvent
-      data: makeDataSnapshot(mockRawRTDBCloudEvent, instance),
+      data: makeDataSnapshot(cloudFunction, cloudEventPartial, instance),
 
       instance,
       firebaseDatabaseHost,
