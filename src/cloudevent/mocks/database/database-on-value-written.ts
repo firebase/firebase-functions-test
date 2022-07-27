@@ -6,6 +6,7 @@ import {
 } from '../helpers';
 import {exampleDataSnapshotChange} from '../../../providers/database';
 import {Change} from 'firebase-functions';
+import {getCommonDatabaseFields} from './helpers';
 
 export const databaseOnValueWritten: MockCloudEventAbstractFactory<database.DatabaseEvent<
   Change<database.DataSnapshot>
@@ -14,15 +15,15 @@ export const databaseOnValueWritten: MockCloudEventAbstractFactory<database.Data
     cloudFunction: CloudFunction<database.DatabaseEvent<Change<database.DataSnapshot>>>,
     cloudEventPartial?: DeepPartial<database.DatabaseEvent<Change<database.DataSnapshot>>>
   ): database.DatabaseEvent<Change<database.DataSnapshot>> {
-    const instance = (cloudEventPartial?.instance as string) || 'instance-1';
-    const firebaseDatabaseHost =
-      (cloudEventPartial?.firebaseDatabaseHost as string) ||
-      'firebaseDatabaseHost';
-    const ref = (cloudEventPartial?.ref as string) || '/foo/bar';
-    const location = (cloudEventPartial?.location as string) || 'us-central1';
-    const params: Record<string, string> = cloudEventPartial?.params || {};
+    const {
+      instance,
+      firebaseDatabaseHost,
+      ref,
+      location,
+      params
+    } = getCommonDatabaseFields(cloudFunction, cloudEventPartial);
 
-    const data = cloudEventPartial?.data as Change<database.DataSnapshot> || exampleDataSnapshotChange();
+    const data = cloudEventPartial?.data as Change<database.DataSnapshot> || exampleDataSnapshotChange(ref);
 
     return {
       // Spread common fields

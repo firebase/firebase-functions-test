@@ -362,7 +362,7 @@ describe('v2', () => {
       describe('database.onValueCreated()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
-            ref: '/foo/bar',
+            ref: 'foo/bar',
             instance: 'instance-1',
           };
           const cloudFn = database.onValueCreated(referenceOptions, handler);
@@ -377,7 +377,7 @@ describe('v2', () => {
             data: cloudEvent.data,
             instance: 'instance-1',
             firebaseDatabaseHost: 'firebaseDatabaseHost',
-            ref: '/foo/bar',
+            ref: 'foo/bar',
             location: 'us-central1',
             params: {},
             source: '',
@@ -389,7 +389,7 @@ describe('v2', () => {
       describe('database.onValueDeleted()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
-            ref: '/foo/bar',
+            ref: 'foo/bar',
             instance: 'instance-1',
           };
           const cloudFn = database.onValueDeleted(referenceOptions, handler);
@@ -404,7 +404,7 @@ describe('v2', () => {
             data: cloudEvent.data,
             instance: 'instance-1',
             firebaseDatabaseHost: 'firebaseDatabaseHost',
-            ref: '/foo/bar',
+            ref: 'foo/bar',
             location: 'us-central1',
             params: {},
             source: '',
@@ -416,7 +416,7 @@ describe('v2', () => {
       describe('database.onValueUpdated()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
-            ref: '/foo/bar',
+            ref: 'foo/bar',
             instance: 'instance-1',
           };
           const cloudFn = database.onValueUpdated(referenceOptions, handler);
@@ -431,7 +431,7 @@ describe('v2', () => {
             data: cloudEvent.data,
             instance: 'instance-1',
             firebaseDatabaseHost: 'firebaseDatabaseHost',
-            ref: '/foo/bar',
+            ref: 'foo/bar',
             location: 'us-central1',
             params: {},
             source: '',
@@ -443,7 +443,7 @@ describe('v2', () => {
       describe('database.onValueWritten()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
-            ref: '/foo/bar',
+            ref: 'foo/bar',
             instance: 'instance-1',
           };
           const cloudFn = database.onValueWritten(referenceOptions, handler);
@@ -458,7 +458,7 @@ describe('v2', () => {
             data: cloudEvent.data,
             instance: 'instance-1',
             firebaseDatabaseHost: 'firebaseDatabaseHost',
-            ref: '/foo/bar',
+            ref: 'foo/bar',
             location: 'us-central1',
             params: {},
             source: '',
