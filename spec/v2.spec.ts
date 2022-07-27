@@ -33,7 +33,6 @@ import {
   eventarc,
   https,
 } from 'firebase-functions/v2';
-import { ReferenceOptions } from '../../firebase-functions/src/v2/providers/database';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
@@ -375,17 +374,7 @@ describe('v2', () => {
             time: cloudEvent.time,
             specversion: '1.0',
 
-            data: {
-              _data: {
-                ['@type']:
-                  'type.googleapis.com/google.events.firebase.database.v1.ReferenceEventData',
-                data: {},
-                delta: {},
-              },
-              _path: '/foo/bar',
-              app: [undefined],
-              instance: 'instance-1',
-            },
+            data: cloudEvent.data,
             instance: 'instance-1',
             firebaseDatabaseHost: 'firebaseDatabaseHost',
             ref: '/foo/bar',
@@ -412,17 +401,7 @@ describe('v2', () => {
             time: cloudEvent.time,
             specversion: '1.0',
 
-            data: {
-              _data: {
-                ['@type']:
-                  'type.googleapis.com/google.events.firebase.database.v1.ReferenceEventData',
-                data: {},
-                delta: {},
-              },
-              _path: '/foo/bar',
-              app: [undefined],
-              instance: 'instance-1',
-            },
+            data: cloudEvent.data,
             instance: 'instance-1',
             firebaseDatabaseHost: 'firebaseDatabaseHost',
             ref: '/foo/bar',
@@ -449,20 +428,7 @@ describe('v2', () => {
             time: cloudEvent.time,
             specversion: '1.0',
 
-            data: {
-              after: {
-                _data: {},
-                _path: '/foo/bar',
-                app: [undefined],
-                instance: 'instance-1',
-              },
-              before: {
-                _data: {},
-                _path: '/foo/bar',
-                app: [undefined],
-                instance: 'instance-1',
-              },
-            },
+            data: cloudEvent.data,
             instance: 'instance-1',
             firebaseDatabaseHost: 'firebaseDatabaseHost',
             ref: '/foo/bar',
@@ -489,20 +455,7 @@ describe('v2', () => {
             time: cloudEvent.time,
             specversion: '1.0',
 
-            data: {
-              after: {
-                _data: {},
-                _path: '/foo/bar',
-                app: [undefined],
-                instance: 'instance-1',
-              },
-              before: {
-                _data: {},
-                _path: '/foo/bar',
-                app: [undefined],
-                instance: 'instance-1',
-              },
-            },
+            data: cloudEvent.data,
             instance: 'instance-1',
             firebaseDatabaseHost: 'firebaseDatabaseHost',
             ref: '/foo/bar',

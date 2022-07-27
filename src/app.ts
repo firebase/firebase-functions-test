@@ -41,8 +41,9 @@ export namespace testApp {
 
     getApp(): firebase.app.App {
       if (typeof this.appSingleton === 'undefined') {
+        const config = process.env.FIREBASE_CONFIG ? JSON.parse(process.env.FIREBASE_CONFIG) : {};
         this.appSingleton = firebase.initializeApp(
-          JSON.parse(process.env.FIREBASE_CONFIG),
+          config,
           // Give this app a name so it does not conflict with apps that user initialized.
           'firebase-functions-test'
         );
