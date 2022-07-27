@@ -22,7 +22,7 @@ export const databaseOnValueWritten: MockCloudEventAbstractFactory<database.Data
     const location = (cloudEventPartial?.location as string) || 'us-central1';
     const params: Record<string, string> = cloudEventPartial?.params || {};
 
-    const data = cloudEventPartial?.data || exampleDataSnapshotChange();
+    const data = cloudEventPartial?.data as Change<database.DataSnapshot> || exampleDataSnapshotChange();
 
     return {
       // Spread common fields

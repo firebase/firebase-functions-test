@@ -18,7 +18,7 @@ export const databaseOnValueDeleted: MockCloudEventAbstractFactory<database.Data
     const location = (cloudEventPartial?.location as string) || 'us-central1';
     const params: Record<string, string> = cloudEventPartial?.params || {};
 
-    const data = cloudEventPartial?.data || exampleDataSnapshot();
+    const data = cloudEventPartial?.data as database.DataSnapshot || exampleDataSnapshot();
 
     return {
       // Spread common fields
