@@ -7,7 +7,7 @@ import {
 import {exampleDataSnapshotChange} from '../../../providers/database';
 import {Change} from 'firebase-functions';
 
-export const databaseOnRefUpdated: MockCloudEventAbstractFactory<database.DatabaseEvent<
+export const databaseOnValueWritten: MockCloudEventAbstractFactory<database.DatabaseEvent<
   Change<database.DataSnapshot>
 >> = {
   generateMock(
@@ -40,7 +40,7 @@ export const databaseOnRefUpdated: MockCloudEventAbstractFactory<database.Databa
   },
   match(cloudFunction: CloudFunction<CloudEvent<unknown>>): boolean {
     return (
-      getEventType(cloudFunction) === 'google.firebase.database.ref.v1.updated'
+      getEventType(cloudFunction) === 'google.firebase.database.ref.v1.written'
     );
   },
 };

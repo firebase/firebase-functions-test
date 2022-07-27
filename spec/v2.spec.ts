@@ -360,13 +360,13 @@ describe('v2', () => {
     });
 
     describe('database', () => {
-      describe('database.onRefCreated()', () => {
+      describe('database.onValueCreated()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
             ref: '/foo/bar',
             instance: 'instance-1',
           };
-          const cloudFn = database.onRefCreated(referenceOptions, handler);
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent).deep.equal({
@@ -397,13 +397,13 @@ describe('v2', () => {
         });
       });
 
-      describe('database.onRefDeleted()', () => {
+      describe('database.onValueDeleted()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
             ref: '/foo/bar',
             instance: 'instance-1',
           };
-          const cloudFn = database.onRefDeleted(referenceOptions, handler);
+          const cloudFn = database.onValueDeleted(referenceOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent).deep.equal({
@@ -434,13 +434,13 @@ describe('v2', () => {
         });
       });
 
-      describe('database.onRefUpdated()', () => {
+      describe('database.onValueUpdated()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
             ref: '/foo/bar',
             instance: 'instance-1',
           };
-          const cloudFn = database.onRefUpdated(referenceOptions, handler);
+          const cloudFn = database.onValueUpdated(referenceOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent).deep.equal({
@@ -474,13 +474,13 @@ describe('v2', () => {
         });
       });
 
-      describe('database.onRefWritten()', () => {
+      describe('database.onValueWritten()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
             ref: '/foo/bar',
             instance: 'instance-1',
           };
-          const cloudFn = database.onRefWritten(referenceOptions, handler);
+          const cloudFn = database.onValueWritten(referenceOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent).deep.equal({

@@ -1,4 +1,4 @@
-export { databaseOnRefCreated } from './database-on-ref-created';
-export { databaseOnRefDeleted } from './database-on-ref-deleted';
-export { databaseOnRefUpdated } from './database-on-ref-updated';
-export { databaseOnRefWritten } from './database-on-ref-written';
+export { databaseOnValueCreated } from './database-on-value-created';
+export { databaseOnValueDeleted } from './database-on-value-deleted';
+export { databaseOnValueUpdated } from './database-on-value-updated';
+export { databaseOnValueWritten } from './database-on-value-written';

@@ -3,7 +3,7 @@ import { CloudEvent, CloudFunction, database } from 'firebase-functions/v2';
 import { getBaseCloudEvent, getEventType } from '../helpers';
 import {exampleDataSnapshot} from '../../../providers/database';
 
-export const databaseOnRefCreated: MockCloudEventAbstractFactory<database.DatabaseEvent<
+export const databaseOnValueCreated: MockCloudEventAbstractFactory<database.DatabaseEvent<
   database.DataSnapshot
 >> = {
   generateMock(

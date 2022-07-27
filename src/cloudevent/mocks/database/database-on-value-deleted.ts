@@ -1,19 +1,15 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
 import { CloudEvent, CloudFunction, database } from 'firebase-functions/v2';
-import {
-  getBaseCloudEvent,
-  getEventType,
-} from '../helpers';
-import {exampleDataSnapshotChange} from '../../../providers/database';
-import {Change} from 'firebase-functions';
+import { getBaseCloudEvent, getEventType } from '../helpers';
+import {exampleDataSnapshot} from '../../../providers/database';
 
-export const databaseOnRefWritten: MockCloudEventAbstractFactory<database.DatabaseEvent<
-  Change<database.DataSnapshot>
+export const databaseOnValueDeleted: MockCloudEventAbstractFactory<database.DatabaseEvent<
+  database.DataSnapshot
 >> = {
   generateMock(
-    cloudFunction: CloudFunction<database.DatabaseEvent<Change<database.DataSnapshot>>>,
-    cloudEventPartial?: DeepPartial<database.DatabaseEvent<Change<database.DataSnapshot>>>
-  ): database.DatabaseEvent<Change<database.DataSnapshot>> {
+    cloudFunction: CloudFunction<database.DatabaseEvent<database.DataSnapshot>>,
+    cloudEventPartial?: DeepPartial<database.DatabaseEvent<DeepPartial<database.DataSnapshot>>>
+  ): database.DatabaseEvent<database.DataSnapshot> {
     const instance = (cloudEventPartial?.instance as string) || 'instance-1';
     const firebaseDatabaseHost =
       (cloudEventPartial?.firebaseDatabaseHost as string) ||
@@ -22,7 +18,7 @@ export const databaseOnRefWritten: MockCloudEventAbstractFactory<database.Databa
     const location = (cloudEventPartial?.location as string) || 'us-central1';
     const params: Record<string, string> = cloudEventPartial?.params || {};
 
-    const data = cloudEventPartial?.data || exampleDataSnapshotChange();
+    const data = cloudEventPartial?.data || exampleDataSnapshot();
 
     return {
       // Spread common fields
@@ -40,7 +36,7 @@ export const databaseOnRefWritten: MockCloudEventAbstractFactory<database.Databa
   },
   match(cloudFunction: CloudFunction<CloudEvent<unknown>>): boolean {
     return (
-      getEventType(cloudFunction) === 'google.firebase.database.ref.v1.written'
+      getEventType(cloudFunction) === 'google.firebase.database.ref.v1.deleted'
     );
   },
 };
