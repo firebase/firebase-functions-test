@@ -33,7 +33,7 @@ import {
   eventarc,
   https,
 } from 'firebase-functions/v2';
-import {makeDataSnapshot} from '../src/providers/database';
+import { makeDataSnapshot } from '../src/providers/database';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
@@ -393,9 +393,9 @@ describe('v2', () => {
           };
           const cloudFn = database.onValueCreated(referenceOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const dataVal = {snapshot: 'override'};
+          const dataVal = { snapshot: 'override' };
           const data = makeDataSnapshot(dataVal, referenceOptions.ref);
-          const cloudEvent = cloudFnWrap({data}).cloudEvent;
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
 
           expect(cloudEvent.data.val()).deep.equal(dataVal);
         });
@@ -434,9 +434,9 @@ describe('v2', () => {
           };
           const cloudFn = database.onValueDeleted(referenceOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const dataVal = {snapshot: 'override'};
+          const dataVal = { snapshot: 'override' };
           const data = makeDataSnapshot(dataVal, referenceOptions.ref);
-          const cloudEvent = cloudFnWrap({data}).cloudEvent;
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
 
           expect(cloudEvent.data.val()).deep.equal(dataVal);
         });
@@ -475,16 +475,16 @@ describe('v2', () => {
           };
           const cloudFn = database.onValueUpdated(referenceOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const afterDataVal = {snapshot: 'after'};
+          const afterDataVal = { snapshot: 'after' };
           const after = makeDataSnapshot(afterDataVal, referenceOptions.ref);
 
-          const beforeDataVal = {snapshot: 'before'};
+          const beforeDataVal = { snapshot: 'before' };
           const before = makeDataSnapshot(beforeDataVal, referenceOptions.ref);
 
-          const data = {before, after};
-          const cloudEvent = cloudFnWrap({data}).cloudEvent;
+          const data = { before, after };
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
 
-          expect(cloudEvent.data).deep.equal({before, after});
+          expect(cloudEvent.data).deep.equal({ before, after });
         });
       });
 
@@ -521,16 +521,16 @@ describe('v2', () => {
           };
           const cloudFn = database.onValueWritten(referenceOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const afterDataVal = {snapshot: 'after'};
+          const afterDataVal = { snapshot: 'after' };
           const after = makeDataSnapshot(afterDataVal, referenceOptions.ref);
 
-          const beforeDataVal = {snapshot: 'before'};
+          const beforeDataVal = { snapshot: 'before' };
           const before = makeDataSnapshot(beforeDataVal, referenceOptions.ref);
 
-          const data = {before, after};
-          const cloudEvent = cloudFnWrap({data}).cloudEvent;
+          const data = { before, after };
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
 
-          expect(cloudEvent.data).deep.equal({before, after});
+          expect(cloudEvent.data).deep.equal({ before, after });
         });
       });
     });
@@ -854,7 +854,6 @@ describe('v2', () => {
     });
 
     describe('generated CloudEvent', () => {
-
       it('should create CloudEvent with appropriate fields for pubsub.onMessagePublished()', () => {
         const data = {
           message: {

@@ -1,29 +1,35 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
 import { CloudEvent, CloudFunction, database } from 'firebase-functions/v2';
+import { getBaseCloudEvent, getEventType } from '../helpers';
 import {
-  getBaseCloudEvent,
-  getEventType,
-} from '../helpers';
-import {exampleDataSnapshot, exampleDataSnapshotChange} from '../../../providers/database';
-import {Change} from 'firebase-functions';
-import {getCommonDatabaseFields} from './helpers';
+  exampleDataSnapshot,
+  exampleDataSnapshotChange,
+} from '../../../providers/database';
+import { Change } from 'firebase-functions';
+import { getCommonDatabaseFields } from './helpers';
 
 export const databaseOnValueUpdated: MockCloudEventAbstractFactory<database.DatabaseEvent<
   Change<database.DataSnapshot>
 >> = {
   generateMock(
-    cloudFunction: CloudFunction<database.DatabaseEvent<Change<database.DataSnapshot>>>,
-    cloudEventPartial?: DeepPartial<database.DatabaseEvent<Change<database.DataSnapshot>>>
+    cloudFunction: CloudFunction<
+      database.DatabaseEvent<Change<database.DataSnapshot>>
+    >,
+    cloudEventPartial?: DeepPartial<
+      database.DatabaseEvent<Change<database.DataSnapshot>>
+    >
   ): database.DatabaseEvent<Change<database.DataSnapshot>> {
     const {
       instance,
       firebaseDatabaseHost,
       ref,
       location,
-      params
+      params,
     } = getCommonDatabaseFields(cloudFunction, cloudEventPartial);
 
-    const data = cloudEventPartial?.data as Change<database.DataSnapshot> || exampleDataSnapshotChange(ref);
+    const data =
+      (cloudEventPartial?.data as Change<database.DataSnapshot>) ||
+      exampleDataSnapshotChange(ref);
 
     return {
       // Spread common fields

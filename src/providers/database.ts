@@ -54,7 +54,9 @@ export function makeDataSnapshot(
 /** Fetch an example data snapshot already populated with data. Can be passed into a wrapped
  * database onCreate or onDelete function.
  */
-export function exampleDataSnapshot(refPath = 'messages/1234'): database.DataSnapshot {
+export function exampleDataSnapshot(
+  refPath = 'messages/1234'
+): database.DataSnapshot {
   return makeDataSnapshot({ foo: 'bar ' }, refPath);
 }
 
@@ -63,7 +65,7 @@ export function exampleDataSnapshot(refPath = 'messages/1234'): database.DataSna
  */
 export function exampleDataSnapshotChange(
   beforeRefPath = 'messages/1234',
-  afterRefPath = 'messages/1234',
+  afterRefPath = 'messages/1234'
 ): Change<database.DataSnapshot> {
   return Change.fromObjects(
     makeDataSnapshot({ foo: 'faz' }, beforeRefPath),
