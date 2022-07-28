@@ -33,6 +33,7 @@ import {
   eventarc,
   https,
 } from 'firebase-functions/v2';
+import {makeDataSnapshot} from '../src/providers/database';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
@@ -384,12 +385,26 @@ describe('v2', () => {
             type: 'google.firebase.database.ref.v1.created',
           });
         });
+
+        it('should use overridden data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const dataVal = {snapshot: 'override'};
+          const data = makeDataSnapshot(dataVal, referenceOptions.ref);
+          const cloudEvent = cloudFnWrap({data}).cloudEvent;
+
+          expect(cloudEvent.data.val()).deep.equal(dataVal);
+        });
       });
 
       describe('database.onValueDeleted()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
-            ref: 'foo/bar',
+            ref: 'foo/baz',
             instance: 'instance-1',
           };
           const cloudFn = database.onValueDeleted(referenceOptions, handler);
@@ -404,12 +419,26 @@ describe('v2', () => {
             data: cloudEvent.data,
             instance: 'instance-1',
             firebaseDatabaseHost: 'firebaseDatabaseHost',
-            ref: 'foo/bar',
+            ref: 'foo/baz',
             location: 'us-central1',
             params: {},
             source: '',
             type: 'google.firebase.database.ref.v1.deleted',
           });
+        });
+
+        it('should use overridden data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueDeleted(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const dataVal = {snapshot: 'override'};
+          const data = makeDataSnapshot(dataVal, referenceOptions.ref);
+          const cloudEvent = cloudFnWrap({data}).cloudEvent;
+
+          expect(cloudEvent.data.val()).deep.equal(dataVal);
         });
       });
 
@@ -438,6 +467,25 @@ describe('v2', () => {
             type: 'google.firebase.database.ref.v1.updated',
           });
         });
+
+        it('should use overridden data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueUpdated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const afterDataVal = {snapshot: 'after'};
+          const after = makeDataSnapshot(afterDataVal, referenceOptions.ref);
+
+          const beforeDataVal = {snapshot: 'before'};
+          const before = makeDataSnapshot(beforeDataVal, referenceOptions.ref);
+
+          const data = {before, after};
+          const cloudEvent = cloudFnWrap({data}).cloudEvent;
+
+          expect(cloudEvent.data).deep.equal({before, after});
+        });
       });
 
       describe('database.onValueWritten()', () => {
@@ -464,6 +512,25 @@ describe('v2', () => {
             source: '',
             type: 'google.firebase.database.ref.v1.written',
           });
+        });
+
+        it('should use overridden data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueWritten(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const afterDataVal = {snapshot: 'after'};
+          const after = makeDataSnapshot(afterDataVal, referenceOptions.ref);
+
+          const beforeDataVal = {snapshot: 'before'};
+          const before = makeDataSnapshot(beforeDataVal, referenceOptions.ref);
+
+          const data = {before, after};
+          const cloudEvent = cloudFnWrap({data}).cloudEvent;
+
+          expect(cloudEvent.data).deep.equal({before, after});
         });
       });
     });
