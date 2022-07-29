@@ -79,7 +79,8 @@ export function getCommonDatabaseFields(
 ) {
   const instance =
     (cloudEventPartial?.instance as string) ||
-    cloudFunction.__endpoint.eventTrigger.eventFilters.instance ||
+    cloudFunction.__endpoint?.eventTrigger?.eventFilterPathPatterns?.instance ||
+    cloudFunction.__endpoint?.eventTrigger?.eventFilters?.instance ||
     'instance-1';
   const firebaseDatabaseHost =
     (cloudEventPartial?.firebaseDatabaseHost as string) ||
