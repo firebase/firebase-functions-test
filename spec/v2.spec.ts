@@ -484,7 +484,8 @@ describe('v2', () => {
           const data = { before, after };
           const cloudEvent = cloudFnWrap({ data }).cloudEvent;
 
-          expect(cloudEvent.data).deep.equal({ before, after });
+          expect(cloudEvent.data.before.val()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.val()).deep.equal(afterDataVal);
         });
       });
 
@@ -530,7 +531,8 @@ describe('v2', () => {
           const data = { before, after };
           const cloudEvent = cloudFnWrap({ data }).cloudEvent;
 
-          expect(cloudEvent.data).deep.equal({ before, after });
+          expect(cloudEvent.data.before.val()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.val()).deep.equal(afterDataVal);
         });
       });
     });
