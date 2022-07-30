@@ -8,8 +8,8 @@ import { getBaseCloudEvent } from '../helpers';
 import { Change } from 'firebase-functions';
 
 export function getDatabaseSnapshotCloudEvent(
-  cloudFunction: CloudFunction<database.DatabaseEvent<any>>,
-  cloudEventPartial?: DeepPartial<database.DatabaseEvent<any>>
+  cloudFunction: CloudFunction<database.DatabaseEvent<database.DataSnapshot>>,
+  cloudEventPartial?: DeepPartial<database.DatabaseEvent<database.DataSnapshot>>
 ) {
   const {
     instance,
@@ -74,8 +74,16 @@ export function getDatabaseChangeSnapshotCloudEvent(
 }
 
 export function getCommonDatabaseFields(
-  cloudFunction: CloudFunction<database.DatabaseEvent<any>>,
-  cloudEventPartial?: DeepPartial<database.DatabaseEvent<any>>
+  cloudFunction: CloudFunction<
+    database.DatabaseEvent<
+      database.DataSnapshot | Change<database.DataSnapshot>
+    >
+  >,
+  cloudEventPartial?: DeepPartial<
+    database.DatabaseEvent<
+      database.DataSnapshot | Change<database.DataSnapshot>
+    >
+  >
 ) {
   const instance =
     (cloudEventPartial?.instance as string) ||
