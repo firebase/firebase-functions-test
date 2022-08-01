@@ -360,6 +360,97 @@ describe('v2', () => {
     });
 
     describe('database', () => {
+      describe('ref', () => {
+        it('should resolve default ref', () => {
+          const referenceOptions = {
+            ref: 'foo/bar/baz',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent.ref).equal('foo/bar/baz');
+        });
+
+        it('should resolve using params', () => {
+          const referenceOptions = {
+            ref: 'users/{user}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              user: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123');
+        });
+
+        it('should resolve using params in middle', () => {
+          const referenceOptions = {
+            ref: 'users/{user}/settings',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              user: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123/settings');
+        });
+
+        it('should resolve using multiple params in middle', () => {
+          const referenceOptions = {
+            ref: 'users/{user}/settings/{lang}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              lang: 'en',
+              user: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123/settings/en');
+        });
+
+        it('should resolve using single character param', () => {
+          const referenceOptions = {
+            ref: 'users/{x}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              x: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123');
+        });
+
+        it('should resolve with undefined string if variable is missing', () => {
+          const referenceOptions = {
+            ref: 'users/{user}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {},
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/undefined');
+        });
+      });
       describe('database.onValueCreated()', () => {
         it('should update CloudEvent appropriately', () => {
           const referenceOptions = {

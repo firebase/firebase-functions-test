@@ -93,12 +93,13 @@ export function getCommonDatabaseFields(
   const firebaseDatabaseHost =
     (cloudEventPartial?.firebaseDatabaseHost as string) ||
     'firebaseDatabaseHost';
-  const ref =
+  const rawRef =
     (cloudEventPartial?.ref as string) ||
     cloudFunction?.__endpoint?.eventTrigger?.eventFilterPathPatterns?.ref ||
     '/foo/bar';
   const location = (cloudEventPartial?.location as string) || 'us-central1';
   const params: Record<string, string> = cloudEventPartial?.params || {};
+  const ref = extractRef(rawRef, params);
 
   return {
     instance,
@@ -107,4 +108,18 @@ export function getCommonDatabaseFields(
     location,
     params,
   };
+}
+
+function extractRef(rawRef: string, params: Record<string, string>) {
+  const refSegments = rawRef.split('/');
+
+  return refSegments
+    .map((segment) => {
+      if (segment.startsWith('{') && segment.endsWith('}')) {
+        const param = segment.slice(1, -1);
+        return params[param] || 'undefined';
+      }
+      return segment;
+    })
+    .join('/');
 }
