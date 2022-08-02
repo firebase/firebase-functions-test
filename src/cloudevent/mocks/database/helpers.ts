@@ -116,7 +116,10 @@ function extractRef(rawRef: string, params: Record<string, string>) {
   return refSegments
     .map((segment) => {
       if (segment.startsWith('{') && segment.endsWith('}')) {
-        const param = segment.slice(1, -1);
+        const param = segment
+          .slice(1, -1)
+          .replace('=**', '')
+          .replace('=*', '');
         return params[param] || 'undefined';
       }
       return segment;

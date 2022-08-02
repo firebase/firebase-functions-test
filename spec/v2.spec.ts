@@ -450,6 +450,38 @@ describe('v2', () => {
           const cloudEvent = cloudFnWrap(partial).cloudEvent;
           expect(cloudEvent.ref).equal('users/undefined');
         });
+
+        it('should resolve with given single-capture syntax', () => {
+          const referenceOptions = {
+            ref: 'users/{user=*}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              user: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123');
+        });
+
+        it('should resolve with given multi-capture syntax', () => {
+          const referenceOptions = {
+            ref: 'users/{user=**}/en',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              user: '123/settings',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123/settings/en');
+        });
       });
       describe('database.onValueCreated()', () => {
         it('should update CloudEvent appropriately', () => {
