@@ -54,16 +54,21 @@ export function makeDataSnapshot(
 /** Fetch an example data snapshot already populated with data. Can be passed into a wrapped
  * database onCreate or onDelete function.
  */
-export function exampleDataSnapshot(): database.DataSnapshot {
-  return makeDataSnapshot({ foo: 'bar ' }, 'messages/1234');
+export function exampleDataSnapshot(
+  refPath = 'messages/1234'
+): database.DataSnapshot {
+  return makeDataSnapshot({ foo: 'bar ' }, refPath);
 }
 
 /** Fetch an example Change object of data snapshots already populated with data.
  * Can be passed into a wrapped database onUpdate or onWrite function.
  */
-export function exampleDataSnapshotChange(): Change<database.DataSnapshot> {
+export function exampleDataSnapshotChange(
+  beforeRefPath = 'messages/1234',
+  afterRefPath = 'messages/1234'
+): Change<database.DataSnapshot> {
   return Change.fromObjects(
-    makeDataSnapshot({ foo: 'faz' }, 'messages/1234'),
-    makeDataSnapshot({ foo: 'bar' }, 'messages/1234')
+    makeDataSnapshot({ foo: 'faz' }, beforeRefPath),
+    makeDataSnapshot({ foo: 'bar' }, afterRefPath)
   );
 }

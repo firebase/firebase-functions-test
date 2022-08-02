@@ -8,7 +8,6 @@ import {
   getEventType,
 } from '../helpers';
 import { getStorageObjectData } from './storage-data';
-import { pubsub } from 'firebase-functions/lib/v2';
 
 export const storageV1: MockCloudEventAbstractFactory<StorageEvent> = {
   generateMock(

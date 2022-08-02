@@ -1,5 +1,4 @@
 import { CloudEvent, CloudFunction } from 'firebase-functions/v2';
-import { DeepPartial } from '../types';
 
 export const APP_ID = '__APP_ID__';
 export const PROJECT_ID = '42';

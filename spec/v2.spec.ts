@@ -27,11 +27,13 @@ import { wrapV2 } from '../src/v2';
 import {
   CloudFunction,
   alerts,
+  database,
   pubsub,
   storage,
   eventarc,
   https,
 } from 'firebase-functions/v2';
+import { makeDataSnapshot } from '../src/providers/database';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
@@ -61,6 +63,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onNewAnrIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewAnrIssuePublished(handler);
@@ -91,6 +94,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onNewFatalIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewFatalIssuePublished(handler);
@@ -121,6 +125,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onNewNonfatalIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onNewNonfatalIssuePublished(
@@ -153,6 +158,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onRegressionAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onRegressionAlertPublished(
@@ -187,6 +193,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onStabilityDigestPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onStabilityDigestPublished(
@@ -227,6 +234,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.crashlytics.onVelocityAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.crashlytics.onVelocityAlertPublished(handler);
@@ -261,6 +269,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.appDistribution.onNewTesterIosDevicePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.appDistribution.onNewTesterIosDevicePublished(
@@ -291,6 +300,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.billing.onPlanAutomatedUpdatePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(
@@ -319,6 +329,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('alerts.billing.onPlanUpdatePublished()', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = alerts.billing.onPlanUpdatePublished(handler);
@@ -344,6 +355,307 @@ describe('v2', () => {
               },
             },
           });
+        });
+      });
+    });
+
+    describe('database', () => {
+      describe('ref', () => {
+        it('should resolve default ref', () => {
+          const referenceOptions = {
+            ref: 'foo/bar/baz',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent.ref).equal('foo/bar/baz');
+        });
+
+        it('should resolve using params', () => {
+          const referenceOptions = {
+            ref: 'users/{user}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              user: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123');
+        });
+
+        it('should resolve using params in middle', () => {
+          const referenceOptions = {
+            ref: 'users/{user}/settings',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              user: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123/settings');
+        });
+
+        it('should resolve using multiple params in middle', () => {
+          const referenceOptions = {
+            ref: 'users/{user}/settings/{lang}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              lang: 'en',
+              user: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123/settings/en');
+        });
+
+        it('should resolve using single character param', () => {
+          const referenceOptions = {
+            ref: 'users/{x}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              x: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123');
+        });
+
+        it('should resolve with undefined string if variable is missing', () => {
+          const referenceOptions = {
+            ref: 'users/{user}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {},
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/undefined');
+        });
+
+        it('should resolve with given single-capture syntax', () => {
+          const referenceOptions = {
+            ref: 'users/{user=*}',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              user: '123',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123');
+        });
+
+        it('should resolve with given multi-capture syntax', () => {
+          const referenceOptions = {
+            ref: 'users/{user=**}/en',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              user: '123/settings',
+            },
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.ref).equal('users/123/settings/en');
+        });
+      });
+      describe('database.onValueCreated()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            data: cloudEvent.data,
+            instance: 'instance-1',
+            firebaseDatabaseHost: 'firebaseDatabaseHost',
+            ref: 'foo/bar',
+            location: 'us-central1',
+            params: {},
+            source: '',
+            type: 'google.firebase.database.ref.v1.created',
+          });
+        });
+
+        it('should use overridden data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const dataVal = { snapshot: 'override' };
+          const data = makeDataSnapshot(dataVal, referenceOptions.ref);
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          expect(cloudEvent.data.val()).deep.equal(dataVal);
+        });
+      });
+
+      describe('database.onValueDeleted()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const referenceOptions = {
+            ref: 'foo/baz',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueDeleted(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            data: cloudEvent.data,
+            instance: 'instance-1',
+            firebaseDatabaseHost: 'firebaseDatabaseHost',
+            ref: 'foo/baz',
+            location: 'us-central1',
+            params: {},
+            source: '',
+            type: 'google.firebase.database.ref.v1.deleted',
+          });
+        });
+
+        it('should use overridden data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueDeleted(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const dataVal = { snapshot: 'override' };
+          const data = makeDataSnapshot(dataVal, referenceOptions.ref);
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          expect(cloudEvent.data.val()).deep.equal(dataVal);
+        });
+      });
+
+      describe('database.onValueUpdated()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueUpdated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            data: cloudEvent.data,
+            instance: 'instance-1',
+            firebaseDatabaseHost: 'firebaseDatabaseHost',
+            ref: 'foo/bar',
+            location: 'us-central1',
+            params: {},
+            source: '',
+            type: 'google.firebase.database.ref.v1.updated',
+          });
+        });
+
+        it('should use overridden data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueUpdated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const afterDataVal = { snapshot: 'after' };
+          const after = makeDataSnapshot(afterDataVal, referenceOptions.ref);
+
+          const beforeDataVal = { snapshot: 'before' };
+          const before = makeDataSnapshot(beforeDataVal, referenceOptions.ref);
+
+          const data = { before, after };
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          expect(cloudEvent.data.before.val()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.val()).deep.equal(afterDataVal);
+        });
+      });
+
+      describe('database.onValueWritten()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueWritten(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            // id and time are generated at runtime
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            data: cloudEvent.data,
+            instance: 'instance-1',
+            firebaseDatabaseHost: 'firebaseDatabaseHost',
+            ref: 'foo/bar',
+            location: 'us-central1',
+            params: {},
+            source: '',
+            type: 'google.firebase.database.ref.v1.written',
+          });
+        });
+
+        it('should use overridden data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueWritten(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const afterDataVal = { snapshot: 'after' };
+          const after = makeDataSnapshot(afterDataVal, referenceOptions.ref);
+
+          const beforeDataVal = { snapshot: 'before' };
+          const before = makeDataSnapshot(beforeDataVal, referenceOptions.ref);
+
+          const data = { before, after };
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          expect(cloudEvent.data.before.val()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.val()).deep.equal(afterDataVal);
         });
       });
     });
@@ -419,6 +731,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('storage.onObjectDeleted()', () => {
         it('should update CloudEvent appropriately', () => {
           const bucket = 'bucket';
@@ -463,6 +776,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('storage.onObjectFinalized()', () => {
         it('should update CloudEvent appropriately', () => {
           const bucket = 'bucket';
@@ -507,6 +821,7 @@ describe('v2', () => {
           });
         });
       });
+
       describe('storage.onObjectMetadataUpdated()', () => {
         it('should update CloudEvent appropriately', () => {
           const bucket = 'bucket';
@@ -681,6 +996,7 @@ describe('v2', () => {
           json: '{"hello_firebase": "world_firebase"}',
         });
       });
+
       it('should generate source from original CloudFunction', () => {
         const type = 'google.firebase.firebasealerts.alerts.v1.published';
         const cloudEventOverride = {
@@ -705,6 +1021,7 @@ describe('v2', () => {
         expect(cloudEvent.type).equal(expectedType);
         expect(cloudEvent.source).equal(expectedSource);
       });
+
       it('should override source and fields', () => {
         const type = 'google.firebase.firebasealerts.alerts.v1.published';
         const source = '//firebasealerts.googleapis.com/projects/42';
@@ -724,6 +1041,7 @@ describe('v2', () => {
         expect(mergedCloudEvent.type).equal(expectedType);
         expect(mergedCloudEvent.source).equal(expectedSource);
       });
+
       it('should deep-merge user supplied partial', () => {
         const cloudEventOverride = {
           data: {
