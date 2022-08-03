@@ -29,7 +29,7 @@ import { DeepPartial } from './cloudevent/types';
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
  */
 export type WrappedV2Function<T extends CloudEvent<unknown>> = (
-  cloudEventPartial?: DeepPartial<T>
+  cloudEventPartial?: DeepPartial<T | object>
 ) => any | Promise<any>;
 
 /**

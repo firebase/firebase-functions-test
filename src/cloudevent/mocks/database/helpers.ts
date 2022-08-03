@@ -6,10 +6,41 @@ import {
 } from '../../../providers/database';
 import { getBaseCloudEvent } from '../helpers';
 import { Change } from 'firebase-functions';
+import { makeDataSnapshot } from '../../../providers/database';
+
+function getOrCreateDataSnapshot(
+  data: database.DataSnapshot | object,
+  ref: string
+) {
+  if (data instanceof database.DataSnapshot) {
+    return data;
+  }
+  if (data instanceof Object) {
+    return makeDataSnapshot(data, ref);
+  }
+  return exampleDataSnapshot(ref);
+}
+
+function getOrCreateDataSnapshotChange(
+  data: Change<database.DataSnapshot> | any,
+  ref: string
+) {
+  if (data instanceof Change) {
+    return data;
+  }
+  if (data instanceof Object && data?.before && data?.after) {
+    const beforeDataSnapshot = getOrCreateDataSnapshot(data.before, ref);
+    const afterDataSnapshot = getOrCreateDataSnapshot(data.after, ref);
+    return new Change(beforeDataSnapshot, afterDataSnapshot);
+  }
+  return exampleDataSnapshotChange(ref);
+}
 
 export function getDatabaseSnapshotCloudEvent(
   cloudFunction: CloudFunction<database.DatabaseEvent<database.DataSnapshot>>,
-  cloudEventPartial?: DeepPartial<database.DatabaseEvent<database.DataSnapshot>>
+  cloudEventPartial?: DeepPartial<
+    database.DatabaseEvent<database.DataSnapshot | object>
+  >
 ) {
   const {
     instance,
@@ -19,9 +50,7 @@ export function getDatabaseSnapshotCloudEvent(
     params,
   } = getCommonDatabaseFields(cloudFunction, cloudEventPartial);
 
-  const data =
-    (cloudEventPartial?.data as database.DataSnapshot) ||
-    exampleDataSnapshot(ref);
+  const data = getOrCreateDataSnapshot(cloudEventPartial?.data, ref);
 
   return {
     // Spread common fields
@@ -43,7 +72,7 @@ export function getDatabaseChangeSnapshotCloudEvent(
     database.DatabaseEvent<Change<database.DataSnapshot>>
   >,
   cloudEventPartial?: DeepPartial<
-    database.DatabaseEvent<Change<database.DataSnapshot>>
+    database.DatabaseEvent<Change<database.DataSnapshot> | object>
   >
 ): database.DatabaseEvent<Change<database.DataSnapshot>> {
   const {
@@ -54,9 +83,7 @@ export function getDatabaseChangeSnapshotCloudEvent(
     params,
   } = getCommonDatabaseFields(cloudFunction, cloudEventPartial);
 
-  const data =
-    (cloudEventPartial?.data as Change<database.DataSnapshot>) ||
-    exampleDataSnapshotChange(ref);
+  const data = getOrCreateDataSnapshotChange(cloudEventPartial?.data, ref);
 
   return {
     // Spread common fields
