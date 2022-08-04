@@ -9,7 +9,7 @@ import { Change } from 'firebase-functions';
 import { makeDataSnapshot } from '../../../providers/database';
 
 function getOrCreateDataSnapshot(
-  data: database.DataSnapshot | object,
+  data: database.DataSnapshot | Object,
   ref: string
 ) {
   if (data instanceof database.DataSnapshot) {
