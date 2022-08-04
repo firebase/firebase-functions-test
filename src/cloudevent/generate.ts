@@ -1,8 +1,11 @@
-import { CloudEvent, pubsub } from 'firebase-functions/v2';
-import { CloudFunction } from 'firebase-functions/v2';
+import {
+  CloudEvent,
+  CloudFunction,
+  database,
+  pubsub,
+} from 'firebase-functions/v2';
 import { LIST_OF_MOCK_CLOUD_EVENT_PARTIALS } from './mocks/partials';
 import { DeepPartial } from './types';
-import { database } from 'firebase-functions/v2';
 import { Change } from 'firebase-functions';
 import merge from 'ts-deepmerge';
 
@@ -45,7 +48,7 @@ function mergeCloudEvents<EventType extends CloudEvent<unknown>>(
   cloudEventPartial: DeepPartial<EventType>
 ) {
   /**
-   * There are several CloudEvent.data types that can not be overridden with PoJson.
+   * There are several CloudEvent.data types that can not be overridden with json.
    * In these circumstances, we generate the CloudEvent.data given the user supplies
    * in the DeepPartial<CloudEvent>.
    *
@@ -72,7 +75,7 @@ function shouldDeleteUserSuppliedData<EventType extends CloudEvent<unknown>>(
   if (cloudEventPartial?.data === undefined) {
     return false;
   }
-  /** If the user intentionally provides one of the IMMUTABLE DataTypes, DON'T delete it! */
+  // If the user intentionally provides one of the IMMUTABLE DataTypes, DON'T delete it!
   if (
     IMMUTABLE_DATA_TYPES.some((type) => cloudEventPartial?.data instanceof type)
   ) {
