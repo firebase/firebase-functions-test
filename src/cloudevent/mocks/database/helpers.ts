@@ -8,8 +8,13 @@ import { getBaseCloudEvent } from '../helpers';
 import { Change } from 'firebase-functions';
 import { makeDataSnapshot } from '../../../providers/database';
 
+type ChangeLike = {
+  before: database.DataSnapshot | object;
+  after: database.DataSnapshot | object;
+};
+
 function getOrCreateDataSnapshot(
-  data: database.DataSnapshot | Object,
+  data: database.DataSnapshot | object,
   ref: string
 ) {
   if (data instanceof database.DataSnapshot) {
@@ -22,15 +27,15 @@ function getOrCreateDataSnapshot(
 }
 
 function getOrCreateDataSnapshotChange(
-  data: Change<database.DataSnapshot> | any,
+  data: DeepPartial<Change<database.DataSnapshot> | ChangeLike>,
   ref: string
 ) {
   if (data instanceof Change) {
     return data;
   }
   if (data instanceof Object && data?.before && data?.after) {
-    const beforeDataSnapshot = getOrCreateDataSnapshot(data.before, ref);
-    const afterDataSnapshot = getOrCreateDataSnapshot(data.after, ref);
+    const beforeDataSnapshot = getOrCreateDataSnapshot(data!.before, ref);
+    const afterDataSnapshot = getOrCreateDataSnapshot(data!.after, ref);
     return new Change(beforeDataSnapshot, afterDataSnapshot);
   }
   return exampleDataSnapshotChange(ref);
@@ -72,7 +77,7 @@ export function getDatabaseChangeSnapshotCloudEvent(
     database.DatabaseEvent<Change<database.DataSnapshot>>
   >,
   cloudEventPartial?: DeepPartial<
-    database.DatabaseEvent<Change<database.DataSnapshot> | object>
+    database.DatabaseEvent<Change<database.DataSnapshot> | ChangeLike>
   >
 ): database.DatabaseEvent<Change<database.DataSnapshot>> {
   const {
