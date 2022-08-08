@@ -522,6 +522,19 @@ describe('v2', () => {
 
           expect(cloudEvent.data.val()).deep.equal(dataVal);
         });
+
+        it('should accept json data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const dataVal = { snapshot: 'override' };
+          const cloudEvent = cloudFnWrap({ data: dataVal }).cloudEvent;
+
+          expect(cloudEvent.data.val()).deep.equal(dataVal);
+        });
       });
 
       describe('database.onValueDeleted()', () => {
@@ -560,6 +573,19 @@ describe('v2', () => {
           const dataVal = { snapshot: 'override' };
           const data = makeDataSnapshot(dataVal, referenceOptions.ref);
           const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          expect(cloudEvent.data.val()).deep.equal(dataVal);
+        });
+
+        it('should accept json data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueDeleted(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const dataVal = { snapshot: 'override' };
+          const cloudEvent = cloudFnWrap({ data: dataVal }).cloudEvent;
 
           expect(cloudEvent.data.val()).deep.equal(dataVal);
         });
@@ -610,6 +636,23 @@ describe('v2', () => {
           expect(cloudEvent.data.before.val()).deep.equal(beforeDataVal);
           expect(cloudEvent.data.after.val()).deep.equal(afterDataVal);
         });
+
+        it('should accept json data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueUpdated(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const afterDataVal = { snapshot: 'after' };
+          const beforeDataVal = { snapshot: 'before' };
+          const data = { before: beforeDataVal, after: afterDataVal };
+
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          expect(cloudEvent.data.before.val()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.val()).deep.equal(afterDataVal);
+        });
       });
 
       describe('database.onValueWritten()', () => {
@@ -652,6 +695,24 @@ describe('v2', () => {
           const before = makeDataSnapshot(beforeDataVal, referenceOptions.ref);
 
           const data = { before, after };
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          expect(cloudEvent.data.before.val()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.val()).deep.equal(afterDataVal);
+        });
+
+        it('should accept json data', () => {
+          const referenceOptions = {
+            ref: 'foo/bar',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueWritten(referenceOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const afterDataVal = { snapshot: 'after' };
+
+          const beforeDataVal = { snapshot: 'before' };
+
+          const data = { before: beforeDataVal, after: afterDataVal };
           const cloudEvent = cloudFnWrap({ data }).cloudEvent;
 
           expect(cloudEvent.data.before.val()).deep.equal(beforeDataVal);
