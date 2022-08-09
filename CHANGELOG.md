@@ -1,2 +1,0 @@
-- Add MockCloudEvents for RTDB-V2 (#156)
-- Update Rtdb test sdk to allow json for Mock CloudEvents (#159)
