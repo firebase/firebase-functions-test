@@ -30,6 +30,8 @@ import {
   config,
   database,
   firestore,
+  HttpsFunction,
+  Runnable,
 } from 'firebase-functions';
 
 /** Fields of the event context that can be overridden/customized. */
@@ -88,14 +90,16 @@ export type CallableContextOptions = {
 };
 
 /* Fields for both Event and Callable contexts, checked at runtime */
-export type ContextOptions = EventContextOptions | CallableContextOptions;
+export type ContextOptions<T = void> = T extends HttpsFunction & Runnable<T>
+  ? CallableContextOptions
+  : EventContextOptions;
 
 /** A function that can be called with test data and optional override values for the event context.
  * It will subsequently invoke the cloud function it wraps with the provided test data and a generated event context.
  */
-export type WrappedFunction<T> = (
+export type WrappedFunction<T, U = void> = (
   data: T,
-  options?: ContextOptions
+  options?: ContextOptions<U>
 ) => any | Promise<any>;
 
 /** A scheduled function that can be called with optional override values for the event context.
@@ -107,8 +111,11 @@ export type WrappedScheduledFunction = (
 
 /** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
 export function wrapV1<T>(
+  cloudFunction: HttpsFunction & Runnable<T>
+): WrappedFunction<T, HttpsFunction & Runnable<T>>;
+export function wrapV1<T>(
   cloudFunction: CloudFunction<T>
-): WrappedScheduledFunction | WrappedFunction<T> {
+): WrappedScheduledFunction | WrappedFunction<T, CloudFunction<T>> {
   if (!has(cloudFunction, '__trigger')) {
     throw new Error(
       'Wrap can only be called on functions written with the firebase-functions SDK.'
@@ -150,26 +157,26 @@ export function wrapV1<T>(
   const isCallableFunction =
     get(cloudFunction, '__trigger.labels.deployment-callable') === 'true';
 
-  let wrapped: WrappedFunction<T> = (data: T, options: ContextOptions) => {
+  let wrapped: WrappedFunction<T, typeof cloudFunction> = (data, options) => {
     // Although in Typescript we require `options` some of our JS samples do not pass it.
-    options = options || {};
+    const _options = { ...options };
     let context;
 
     if (isCallableFunction) {
       _checkOptionValidity(
         ['app', 'auth', 'instanceIdToken', 'rawRequest'],
-        options
+        _options
       );
-      let callableContextOptions = options as CallableContextOptions;
+      let callableContextOptions = _options as CallableContextOptions;
       context = {
         ...callableContextOptions,
       };
     } else {
       _checkOptionValidity(
         ['eventId', 'timestamp', 'params', 'auth', 'authType', 'resource'],
-        options
+        _options
       );
-      const defaultContext = _makeDefaultContext(cloudFunction, options, data);
+      const defaultContext = _makeDefaultContext(cloudFunction, _options, data);
 
       if (
         has(defaultContext, 'eventType') &&
@@ -179,7 +186,7 @@ export function wrapV1<T>(
         defaultContext.authType = 'UNAUTHENTICATED';
         defaultContext.auth = null;
       }
-      context = merge({}, defaultContext, options);
+      context = merge({}, defaultContext, _options);
     }
 
     return cloudFunction.run(data, context);
@@ -227,8 +234,13 @@ function _checkOptionValidity(
 }
 
 function _makeDefaultContext<T>(
+  cloudFunction: HttpsFunction & Runnable<T>,
+  options: CallableContextOptions,
+  triggerData?: T
+);
+function _makeDefaultContext<T>(
   cloudFunction: CloudFunction<T>,
-  options: ContextOptions,
+  options: EventContextOptions,
   triggerData?: T
 ): EventContext {
   let eventContextOptions = options as EventContextOptions;
