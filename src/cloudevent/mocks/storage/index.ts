@@ -3,6 +3,7 @@ import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
 import { StorageEvent } from 'firebase-functions/v2/storage';
 import {
   FILENAME,
+  extractStringFromStringOrStringParam,
   getBaseCloudEvent,
   getEventFilters,
   getEventType,
@@ -14,10 +15,11 @@ export const storageV1: MockCloudEventAbstractFactory<StorageEvent> = {
     cloudFunction: CloudFunction<StorageEvent>,
     cloudEventPartial?: DeepPartial<StorageEvent>
   ): StorageEvent {
-    const bucket =
+    const bucketOrExpression =
       cloudEventPartial?.bucket ||
       getEventFilters(cloudFunction)?.bucket ||
       'bucket_name';
+    const bucket = extractStringFromStringOrStringParam(bucketOrExpression);
     const source =
       cloudEventPartial?.source ||
       `//storage.googleapis.com/projects/_/buckets/${bucket}`;

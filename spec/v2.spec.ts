@@ -33,6 +33,7 @@ import {
   eventarc,
   https,
 } from 'firebase-functions/v2';
+import { defineString } from 'firebase-functions/v2/params';
 import { makeDataSnapshot } from '../src/providers/database';
 
 describe('v2', () => {
@@ -370,6 +371,19 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent.ref).equal('foo/bar/baz');
+        });
+
+        it('should resolve default ref given StringParam', () => {
+          process.env.rtdb_ref = 'foo/StringParam/baz';
+          const referenceOptions = {
+            ref: '',
+            instance: 'instance-1',
+          };
+          const cloudFn = database.onValueCreated(referenceOptions, handler);
+          cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.ref = defineString('rtdb_ref');
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent.ref).equal('foo/StringParam/baz');
         });
 
         it('should resolve using params', () => {

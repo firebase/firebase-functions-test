@@ -47,7 +47,7 @@
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
     "firebase-admin": "^10.1.0",
-    "firebase-functions": "^3.22.0",
+    "firebase-functions": "^3.23.0",
     "firebase-tools": "^8.9.2",
     "mocha": "^6.2.2",
     "prettier": "^1.19.1",
