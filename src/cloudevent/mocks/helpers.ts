@@ -11,7 +11,7 @@ export function getEventType(cloudFunction: CloudFunction<any>): string {
 
 export function getEventFilters(
   cloudFunction: CloudFunction<any>
-): Record<string, string| Expression<string>> {
+): Record<string, string | Expression<string>> {
   return cloudFunction?.__endpoint?.eventTrigger?.eventFilters || {};
 }
 
@@ -28,7 +28,9 @@ export function getBaseCloudEvent<EventType extends CloudEvent<unknown>>(
   } as EventType;
 }
 
-export function extractStringFromStringOrStringParam(stringOrExpression: string | Expression<string>) {
+export function extractStringFromStringOrStringParam(
+  stringOrExpression: string | Expression<string>
+) {
   if (typeof stringOrExpression === 'string') {
     return stringOrExpression;
   }

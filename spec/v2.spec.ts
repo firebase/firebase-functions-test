@@ -380,7 +380,9 @@ describe('v2', () => {
             instance: 'instance-1',
           };
           const cloudFn = database.onValueCreated(referenceOptions, handler);
-          cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.ref = defineString('rtdb_ref');
+          cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.ref = defineString(
+            'rtdb_ref'
+          );
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent.ref).equal('foo/StringParam/baz');

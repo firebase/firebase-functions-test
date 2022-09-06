@@ -5,7 +5,10 @@ import {
   exampleDataSnapshot,
   exampleDataSnapshotChange,
 } from '../../../providers/database';
-import { extractStringFromStringOrStringParam, getBaseCloudEvent } from '../helpers';
+import {
+  extractStringFromStringOrStringParam,
+  getBaseCloudEvent,
+} from '../helpers';
 import { Change } from 'firebase-functions';
 import { makeDataSnapshot } from '../../../providers/database';
 
