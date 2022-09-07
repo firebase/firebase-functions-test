@@ -28,7 +28,7 @@ export function getBaseCloudEvent<EventType extends CloudEvent<unknown>>(
   } as EventType;
 }
 
-export function extractStringFromStringOrStringParam(
+export function resolveStringExpression(
   stringOrExpression: string | Expression<string>
 ) {
   if (typeof stringOrExpression === 'string') {

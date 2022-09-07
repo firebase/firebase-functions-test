@@ -5,10 +5,7 @@ import {
   exampleDataSnapshot,
   exampleDataSnapshotChange,
 } from '../../../providers/database';
-import {
-  extractStringFromStringOrStringParam,
-  getBaseCloudEvent,
-} from '../helpers';
+import { resolveStringExpression, getBaseCloudEvent } from '../helpers';
 import { Change } from 'firebase-functions';
 import { makeDataSnapshot } from '../../../providers/database';
 
@@ -126,7 +123,7 @@ export function getCommonDatabaseFields(
     cloudFunction.__endpoint?.eventTrigger?.eventFilterPathPatterns?.instance ||
     cloudFunction.__endpoint?.eventTrigger?.eventFilters?.instance ||
     'instance-1';
-  const instance = extractStringFromStringOrStringParam(instanceOrExpression);
+  const instance = resolveStringExpression(instanceOrExpression);
   const firebaseDatabaseHost =
     (cloudEventPartial?.firebaseDatabaseHost as string) ||
     'firebaseDatabaseHost';
@@ -134,7 +131,7 @@ export function getCommonDatabaseFields(
     (cloudEventPartial?.ref as string) ||
     cloudFunction?.__endpoint?.eventTrigger?.eventFilterPathPatterns?.ref ||
     '/foo/bar';
-  const rawRef = extractStringFromStringOrStringParam(rawRefOrExpression);
+  const rawRef = resolveStringExpression(rawRefOrExpression);
   const location = (cloudEventPartial?.location as string) || 'us-central1';
   const params: Record<string, string> = cloudEventPartial?.params || {};
   const ref = extractRef(rawRef, params);
