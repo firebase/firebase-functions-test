@@ -1,3 +1,0 @@
-- Add support for Params (#168)
-- Use conditional typing for defining the right set of options (#166)
-- Bump ts-deepmerge from 2.0.1 to 2.0.2 (#161)
