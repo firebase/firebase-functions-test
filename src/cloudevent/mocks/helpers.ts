@@ -1,22 +1,25 @@
-import { CloudEvent, CloudFunction } from 'firebase-functions/v2';
-import { Expression } from 'firebase-functions/v2/params';
+import * as v1 from 'firebase-functions';
+import * as v2  from 'firebase-functions/v2';
+import { Expression } from 'firebase-functions/params';
 
 export const APP_ID = '__APP_ID__';
 export const PROJECT_ID = '42';
 export const FILENAME = 'file_name';
 
-export function getEventType(cloudFunction: CloudFunction<any>): string {
+type CloudFunction = v1.CloudFunction<any> | v2.CloudFunction<any>;
+
+export function getEventType(cloudFunction: CloudFunction): string {
   return cloudFunction?.__endpoint?.eventTrigger?.eventType || '';
 }
 
 export function getEventFilters(
-  cloudFunction: CloudFunction<any>
+  cloudFunction: CloudFunction
 ): Record<string, string | Expression<string>> {
   return cloudFunction?.__endpoint?.eventTrigger?.eventFilters || {};
 }
 
-export function getBaseCloudEvent<EventType extends CloudEvent<unknown>>(
-  cloudFunction: CloudFunction<EventType>
+export function getBaseCloudEvent<EventType extends v2.CloudEvent<unknown>>(
+  cloudFunction: v2.CloudFunction<EventType>
 ): EventType {
   return {
     specversion: '1.0',
