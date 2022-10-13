@@ -345,9 +345,14 @@ export function makeChange<T>(before: T, after: T): Change<T> {
 
 /** Mock values returned by `functions.config()`. */
 export function mockConfig(conf: { [key: string]: { [key: string]: any } }) {
-  if (config.singleton) {
-    delete config.singleton;
+  const resetCache = require('firebase-functions').resetCache;
+  if (resetCache) {
+    resetCache();
+  } else {
+    // Older versions of firebase-functions directly manipulated the config singleton
+    if ((config as any).singleton) {
+      delete (config as any).singleton;
+    }
   }
-
   process.env.CLOUD_RUNTIME_CONFIG = JSON.stringify(conf);
 }
