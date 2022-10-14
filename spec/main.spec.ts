@@ -39,11 +39,13 @@ describe('main', () => {
         set(cloudFunction, 'run', (data, context) => {
           return { data, context };
         });
-        set(cloudFunction, '__trigger', {
+        set(cloudFunction, '__endpoint', {
           eventTrigger: {
-            resource: 'ref/{wildcard}/nested/{anotherWildcard}',
+            eventFilters: {
+              resource: 'ref/{wildcard}/nested/{anotherWildcard}',
+            },
             eventType: eventType || 'event',
-            service: 'service',
+            retry: false,
           },
         });
         return cloudFunction as functions.CloudFunction<any>;
@@ -57,7 +59,9 @@ describe('main', () => {
       it('should generate the appropriate context if no fields specified', () => {
         const context = wrap(constructBackgroundCF())('data').context;
         expect(typeof context.eventId).to.equal('string');
-        expect(context.resource.service).to.equal('service');
+        expect(context.resource.service).to.equal(
+          'unknown-service.googleapis.com'
+        );
         expect(
           /ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/.test(
             context.resource.name
@@ -153,7 +157,7 @@ describe('main', () => {
           const cf = constructBackgroundCF(
             'google.firebase.database.ref.create'
           );
-          cf.__trigger.eventTrigger.resource =
+          cf.__endpoint.eventTrigger.eventFilters.resource =
             'companies/{company}/users/{user}';
           const wrapped = wrap(cf);
           const context = wrapped(
@@ -173,7 +177,7 @@ describe('main', () => {
 
         it('should extract the appropriate params for Firestore function trigger', () => {
           const cf = constructBackgroundCF('google.firestore.document.create');
-          cf.__trigger.eventTrigger.resource =
+          cf.__endpoint.eventTrigger.eventFilters.resource =
             'databases/(default)/documents/companies/{company}/users/{user}';
           const wrapped = wrap(cf);
           const context = wrapped(
@@ -195,7 +199,7 @@ describe('main', () => {
           const cf = constructBackgroundCF(
             'google.firebase.database.ref.create'
           );
-          cf.__trigger.eventTrigger.resource =
+          cf.__endpoint.eventTrigger.eventFilters.resource =
             'companies/{company}/users/{user}';
           const wrapped = wrap(cf);
           const context = wrapped(
@@ -243,11 +247,8 @@ describe('main', () => {
         set(cloudFunction, 'run', (data, context) => {
           return { data, context };
         });
-        set(cloudFunction, '__trigger', {
-          labels: {
-            'deployment-callable': 'true',
-          },
-          httpsTrigger: {},
+        set(cloudFunction, '__endpoint', {
+          callableTrigger: {},
         });
         wrappedCF = wrap(cloudFunction as functions.CloudFunction<any>);
       });
@@ -339,12 +340,6 @@ describe('main', () => {
       mockConfig(config);
 
       expect(functions.config()).to.deep.equal(config);
-    });
-
-    it('should not throw an error when functions.config.singleton is missing', () => {
-      delete functions.config.singleton;
-
-      expect(() => mockConfig(config)).to.not.throw(Error);
     });
   });
 });

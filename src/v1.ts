@@ -32,7 +32,15 @@ import {
   firestore,
   HttpsFunction,
   Runnable,
+  // @ts-ignore
+  resetCache,
 } from 'firebase-functions';
+import { Expression } from 'firebase-functions/params';
+import {
+  getEventFilters,
+  getEventType,
+  resolveStringExpression,
+} from './cloudevent/mocks/helpers';
 
 /** Fields of the event context that can be overridden/customized. */
 export type EventContextOptions = {
@@ -116,13 +124,13 @@ export function wrapV1<T>(
 export function wrapV1<T>(
   cloudFunction: CloudFunction<T>
 ): WrappedScheduledFunction | WrappedFunction<T, CloudFunction<T>> {
-  if (!has(cloudFunction, '__trigger')) {
+  if (!has(cloudFunction, '__endpoint')) {
     throw new Error(
       'Wrap can only be called on functions written with the firebase-functions SDK.'
     );
   }
 
-  if (get(cloudFunction, '__trigger.labels.deployment-scheduled') === 'true') {
+  if (has(cloudFunction, '__endpoint.scheduleTrigger')) {
     const scheduledWrapped: WrappedScheduledFunction = (
       options: ContextOptions
     ) => {
@@ -139,10 +147,7 @@ export function wrapV1<T>(
     return scheduledWrapped;
   }
 
-  if (
-    has(cloudFunction, '__trigger.httpsTrigger') &&
-    get(cloudFunction, '__trigger.labels.deployment-callable') !== 'true'
-  ) {
+  if (has(cloudFunction, '__endpoint.httpsTrigger')) {
     throw new Error(
       'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.'
     );
@@ -154,8 +159,7 @@ export function wrapV1<T>(
     );
   }
 
-  const isCallableFunction =
-    get(cloudFunction, '__trigger.labels.deployment-callable') === 'true';
+  const isCallableFunction = has(cloudFunction, '__endpoint.callableTrigger');
 
   let wrapped: WrappedFunction<T, typeof cloudFunction> = (data, options) => {
     // Although in Typescript we require `options` some of our JS samples do not pass it.
@@ -197,11 +201,12 @@ export function wrapV1<T>(
 
 /** @internal */
 export function _makeResourceName(
-  triggerResource: string,
+  triggerResource: string | Expression<string>,
   params = {}
 ): string {
+  const resource = resolveStringExpression(triggerResource);
   const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
-  let resourceName = triggerResource.replace(wildcardRegex, (wildcard) => {
+  let resourceName = resource.replace(wildcardRegex, (wildcard) => {
     let wildcardNoBraces = wildcard.slice(1, -1); // .slice removes '{' and '}' from wildcard
     let sub = get(params, wildcardNoBraces);
     return sub || wildcardNoBraces + random(1, 9);
@@ -244,8 +249,8 @@ function _makeDefaultContext<T>(
   triggerData?: T
 ): EventContext {
   let eventContextOptions = options as EventContextOptions;
-  const eventResource = cloudFunction.__trigger.eventTrigger?.resource;
-  const eventType = cloudFunction.__trigger.eventTrigger?.eventType;
+  const eventType = getEventType(cloudFunction);
+  const eventResource = getEventFilters(cloudFunction).resource;
 
   const optionsParams = eventContextOptions.params ?? {};
   let triggerParams = {};
@@ -281,7 +286,7 @@ function _makeDefaultContext<T>(
   const defaultContext: EventContext = {
     eventId: _makeEventId(),
     resource: eventResource && {
-      service: cloudFunction.__trigger.eventTrigger?.service,
+      service: serviceFromEventType(eventType),
       name: _makeResourceName(eventResource, params),
     },
     eventType,
@@ -292,20 +297,22 @@ function _makeDefaultContext<T>(
 }
 
 function _extractDatabaseParams(
-  triggerResource: string,
+  triggerResource: string | Expression<string>,
   data: database.DataSnapshot
 ): EventContext['params'] {
+  const resource = resolveStringExpression(triggerResource);
   const path = data.ref.toString().replace(data.ref.root.toString(), '');
-  return _extractParams(triggerResource, path);
+  return _extractParams(resource, path);
 }
 
 function _extractFirestoreDocumentParams(
-  triggerResource: string,
+  triggerResource: string | Expression<string>,
   data: firestore.DocumentSnapshot
 ): EventContext['params'] {
+  const resource = resolveStringExpression(triggerResource);
   // Resource format: databases/(default)/documents/<path>
   return _extractParams(
-    triggerResource.replace(/^databases\/[^\/]+\/documents\//, ''),
+    resource.replace(/^databases\/[^\/]+\/documents\//, ''),
     data.ref.path
   );
 }
@@ -338,6 +345,29 @@ export function _extractParams(
   return params;
 }
 
+function serviceFromEventType(eventType?: string): string {
+  if (eventType) {
+    const providerToService: Array<[string, string]> = [
+      ['google.analytics', 'app-measurement.com'],
+      ['google.firebase.auth', 'firebaseauth.googleapis.com'],
+      ['google.firebase.database', 'firebaseio.com'],
+      ['google.firestore', 'firestore.googleapis.com'],
+      ['google.pubsub', 'pubsub.googleapis.com'],
+      ['google.firebase.remoteconfig', 'firebaseremoteconfig.googleapis.com'],
+      ['google.storage', 'storage.googleapis.com'],
+      ['google.testing', 'testing.googleapis.com'],
+    ];
+
+    const match = providerToService.find(([provider]) => {
+      eventType.includes(provider);
+    });
+    if (match) {
+      return match[1];
+    }
+  }
+  return 'unknown-service.googleapis.com';
+}
+
 /** Make a Change object to be used as test data for Firestore and real time database onWrite and onUpdate functions. */
 export function makeChange<T>(before: T, after: T): Change<T> {
   return Change.fromObjects(before, after);
@@ -345,9 +375,8 @@ export function makeChange<T>(before: T, after: T): Change<T> {
 
 /** Mock values returned by `functions.config()`. */
 export function mockConfig(conf: { [key: string]: { [key: string]: any } }) {
-  if (config.singleton) {
-    delete config.singleton;
+  if (resetCache) {
+    resetCache();
   }
-
   process.env.CLOUD_RUNTIME_CONFIG = JSON.stringify(conf);
 }
