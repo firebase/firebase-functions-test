@@ -1,5 +1,4 @@
 import { CloudFunction, database } from 'firebase-functions/v2';
-import { Expression } from 'firebase-functions/v2/params';
 import { DeepPartial } from '../../types';
 import {
   exampleDataSnapshot,

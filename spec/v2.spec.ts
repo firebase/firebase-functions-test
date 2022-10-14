@@ -33,7 +33,7 @@ import {
   eventarc,
   https,
 } from 'firebase-functions/v2';
-import { defineString } from 'firebase-functions/v2/params';
+import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
 
 describe('v2', () => {
