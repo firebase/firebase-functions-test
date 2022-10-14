@@ -346,8 +346,6 @@ export function _extractParams(
 }
 
 function serviceFromEventType(eventType?: string): string {
-  let service = 'unknown-service.googleapis.com';
-
   if (eventType) {
     const providerToService: Array<[string, string]> = [
       ['google.analytics', 'app-measurement.com'],
@@ -364,10 +362,10 @@ function serviceFromEventType(eventType?: string): string {
       eventType.includes(provider);
     });
     if (match) {
-      service = match[1];
+      return match[1];
     }
   }
-  return service;
+  return 'unknown-service.googleapis.com';
 }
 
 /** Make a Change object to be used as test data for Firestore and real time database onWrite and onUpdate functions. */
