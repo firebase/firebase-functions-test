@@ -59,7 +59,9 @@ describe('main', () => {
       it('should generate the appropriate context if no fields specified', () => {
         const context = wrap(constructBackgroundCF())('data').context;
         expect(typeof context.eventId).to.equal('string');
-        expect(context.resource.service).to.equal('unknown-service.googleapis.com');
+        expect(context.resource.service).to.equal(
+          'unknown-service.googleapis.com'
+        );
         expect(
           /ref\/wildcard[1-9]\/nested\/anotherWildcard[1-9]/.test(
             context.resource.name
@@ -156,7 +158,7 @@ describe('main', () => {
             'google.firebase.database.ref.create'
           );
           cf.__endpoint.eventTrigger.eventFilters.resource =
-              'companies/{company}/users/{user}';
+            'companies/{company}/users/{user}';
           const wrapped = wrap(cf);
           const context = wrapped(
             features.database.makeDataSnapshot(
@@ -176,7 +178,7 @@ describe('main', () => {
         it('should extract the appropriate params for Firestore function trigger', () => {
           const cf = constructBackgroundCF('google.firestore.document.create');
           cf.__endpoint.eventTrigger.eventFilters.resource =
-              'databases/(default)/documents/companies/{company}/users/{user}';
+            'databases/(default)/documents/companies/{company}/users/{user}';
           const wrapped = wrap(cf);
           const context = wrapped(
             features.firestore.makeDocumentSnapshot(
@@ -198,7 +200,7 @@ describe('main', () => {
             'google.firebase.database.ref.create'
           );
           cf.__endpoint.eventTrigger.eventFilters.resource =
-              'companies/{company}/users/{user}';
+            'companies/{company}/users/{user}';
           const wrapped = wrap(cf);
           const context = wrapped(
             features.database.makeDataSnapshot(
