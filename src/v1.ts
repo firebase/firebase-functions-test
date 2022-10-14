@@ -32,6 +32,8 @@ import {
   firestore,
   HttpsFunction,
   Runnable,
+  // @ts-ignore
+  resetCache,
 } from 'firebase-functions';
 
 /** Fields of the event context that can be overridden/customized. */
@@ -345,9 +347,8 @@ export function makeChange<T>(before: T, after: T): Change<T> {
 
 /** Mock values returned by `functions.config()`. */
 export function mockConfig(conf: { [key: string]: { [key: string]: any } }) {
-  if (config.singleton) {
-    delete config.singleton;
+  if (resetCache) {
+    resetCache();
   }
-
   process.env.CLOUD_RUNTIME_CONFIG = JSON.stringify(conf);
 }

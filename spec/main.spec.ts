@@ -340,11 +340,5 @@ describe('main', () => {
 
       expect(functions.config()).to.deep.equal(config);
     });
-
-    it('should not throw an error when functions.config.singleton is missing', () => {
-      delete functions.config.singleton;
-
-      expect(() => mockConfig(config)).to.not.throw(Error);
-    });
   });
 });
