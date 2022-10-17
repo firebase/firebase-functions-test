@@ -3,20 +3,25 @@ import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
 import { ConfigUpdateData } from 'firebase-functions/v2/remoteConfig';
 import { getBaseCloudEvent, getEventType, PROJECT_ID } from '../helpers';
 
-export const remoteConfigOnConfigUpdated: MockCloudEventAbstractFactory<CloudEvent<ConfigUpdateData>> = {
+export const remoteConfigOnConfigUpdated: MockCloudEventAbstractFactory<CloudEvent<
+  ConfigUpdateData
+>> = {
   generateMock(
-    cloudFunction: CloudFunction<CloudEvent<ConfigUpdateData>>,
+    cloudFunction: CloudFunction<CloudEvent<ConfigUpdateData>>
   ): CloudEvent<ConfigUpdateData> {
     const source = `//firebaseremoteconfig.googleapis.com/projects/${PROJECT_ID}`;
     return {
       ...getBaseCloudEvent(cloudFunction),
       source,
-      data: getConfigUpdateData()
+      data: getConfigUpdateData(),
     };
   },
   match(cloudFunction: CloudFunction<CloudEvent<ConfigUpdateData>>): boolean {
-    return getEventType(cloudFunction) === 'google.firebase.remoteconfig.remoteConfig.v1.updated';
-  }
+    return (
+      getEventType(cloudFunction) ===
+      'google.firebase.remoteconfig.remoteConfig.v1.updated'
+    );
+  },
 };
 
 function getConfigUpdateData(): ConfigUpdateData {
@@ -32,6 +37,6 @@ function getConfigUpdateData(): ConfigUpdateData {
     description: 'config update test',
     updateOrigin: 'REMOTE_CONFIG_UPDATE_ORIGIN_UNSPECIFIED',
     updateType: 'REMOTE_CONFIG_UPDATE_TYPE_UNSPECIFIED',
-    rollbackSource: 0
+    rollbackSource: 0,
   };
 }

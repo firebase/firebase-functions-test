@@ -93,9 +93,9 @@ describe('v2', () => {
                 thresholdUnit: 'ms',
                 violationValue: 200,
                 violationUnit: 'ms',
-                investigateUri: 'firebase.google.com/firebase/console'
-              }
-            }
+                investigateUri: 'firebase.google.com/firebase/console',
+              },
+            },
           });
         });
       });
@@ -409,7 +409,7 @@ describe('v2', () => {
             source: '//firebaseremoteconfig.googleapis.com/projects/42',
             data: {
               versionNumber: 2,
-              updateTime: cloudEvent.data.updateTime  ,
+              updateTime: cloudEvent.data.updateTime,
               updateUser: {
                 name: 'testuser',
                 email: 'test@example.com',
@@ -418,8 +418,8 @@ describe('v2', () => {
               description: 'config update test',
               updateOrigin: 'REMOTE_CONFIG_UPDATE_ORIGIN_UNSPECIFIED',
               updateType: 'REMOTE_CONFIG_UPDATE_TYPE_UNSPECIFIED',
-              rollbackSource: 0
-            }
+              rollbackSource: 0,
+            },
           });
         });
       });
@@ -444,16 +444,17 @@ describe('v2', () => {
               outcomeSummary: 'OUTCOME_SUMMARY_UNSPECIFIED',
               resultStorage: {
                 toolResultsHistory: 'projects/42/histories/1234',
-                toolResultsExecution: 'projects/42/histories/1234/executions/5678',
+                toolResultsExecution:
+                  'projects/42/histories/1234/executions/5678',
                 resultsUri: 'console.firebase.google.com/test/results',
-                gcsPath: 'gs://bucket/path/to/test'
+                gcsPath: 'gs://bucket/path/to/test',
               },
               clientInfo: {
                 client: 'gcloud',
-                details: {}
+                details: {},
               },
-              testMatrixId: '1234'
-            }
+              testMatrixId: '1234',
+            },
           });
         });
       });

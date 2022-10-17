@@ -3,9 +3,11 @@ import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
 import { TestMatrixCompletedData } from 'firebase-functions/v2/testLab';
 import { getBaseCloudEvent, getEventType, PROJECT_ID } from '../helpers';
 
-export const testLabOnTestMatrixCompleted: MockCloudEventAbstractFactory<CloudEvent<TestMatrixCompletedData>> = {
+export const testLabOnTestMatrixCompleted: MockCloudEventAbstractFactory<CloudEvent<
+  TestMatrixCompletedData
+>> = {
   generateMock(
-    cloudFunction: CloudFunction<CloudEvent<TestMatrixCompletedData>>,
+    cloudFunction: CloudFunction<CloudEvent<TestMatrixCompletedData>>
   ): CloudEvent<TestMatrixCompletedData> {
     const source = `//firebasetestlab.googleapis.com/projects/${PROJECT_ID}`;
     return {
@@ -15,7 +17,10 @@ export const testLabOnTestMatrixCompleted: MockCloudEventAbstractFactory<CloudEv
     };
   },
   match(cloudFunction: CloudFunction<CloudEvent<TestMatrixCompletedData>>) {
-    return getEventType(cloudFunction) === 'google.firebase.testlab.testMatrix.v1.completed';
+    return (
+      getEventType(cloudFunction) ===
+      'google.firebase.testlab.testMatrix.v1.completed'
+    );
   },
 };
 
@@ -30,12 +35,12 @@ function getTestMatrixCompletedData(): TestMatrixCompletedData {
       toolResultsHistory: `projects/${PROJECT_ID}/histories/1234`,
       toolResultsExecution: `projects/${PROJECT_ID}/histories/1234/executions/5678`,
       resultsUri: 'console.firebase.google.com/test/results',
-      gcsPath: 'gs://bucket/path/to/test'
+      gcsPath: 'gs://bucket/path/to/test',
     },
     clientInfo: {
       client: 'gcloud',
-      details: {}
+      details: {},
     },
-    testMatrixId: '1234'
+    testMatrixId: '1234',
   };
 }

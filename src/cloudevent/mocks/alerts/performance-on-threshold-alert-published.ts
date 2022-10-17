@@ -2,7 +2,7 @@ import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
 import { CloudFunction } from 'firebase-functions/v2';
 import {
   PerformanceEvent,
-  ThresholdAlertPayload
+  ThresholdAlertPayload,
 } from 'firebase-functions/v2/alerts/performance';
 import {
   getBaseCloudEvent,
@@ -38,7 +38,7 @@ export const performanceThresholdOnThresholdAlertPublished: MockCloudEventAbstra
         'google.firebase.firebasealerts.alerts.v1.published' &&
       getEventFilters(cloudFunction)?.alerttype === 'performance.threshold'
     );
-  }
+  },
 };
 
 function getThresholdAlertPayload(): FirebaseAlertData<ThresholdAlertPayload> {
@@ -55,7 +55,7 @@ function getThresholdAlertPayload(): FirebaseAlertData<ThresholdAlertPayload> {
       thresholdUnit: 'ms',
       violationValue: 200,
       violationUnit: 'ms',
-      investigateUri: 'firebase.google.com/firebase/console'
-    }
+      investigateUri: 'firebase.google.com/firebase/console',
+    },
   };
 }
