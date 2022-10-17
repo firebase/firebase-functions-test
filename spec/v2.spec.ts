@@ -29,7 +29,9 @@ import {
   alerts,
   database,
   pubsub,
+  remoteConfig,
   storage,
+  testLab,
   eventarc,
   https,
 } from 'firebase-functions/v2';
@@ -60,6 +62,39 @@ describe('v2', () => {
               createTime: cloudEvent.data.createTime,
               endTime: cloudEvent.data.endTime,
               payload: {},
+            },
+          });
+        });
+      });
+
+      describe('alerts.performance.onThresholdAlertPublished()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const cloudFn = alerts.performance.onThresholdAlertPublished(handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+
+            alertType: 'performance.threshold',
+            appId: '__APP_ID__',
+            type: 'google.firebase.firebasealerts.alerts.v1.published',
+            source: '//firebasealerts.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              endTime: cloudEvent.data.endTime,
+              payload: {
+                eventName: 'test.com/api/123',
+                eventType: 'network_request',
+                metricType: 'duration',
+                numSamples: 200,
+                thresholdValue: 100,
+                thresholdUnit: 'ms',
+                violationValue: 200,
+                violationUnit: 'ms',
+                investigateUri: 'firebase.google.com/firebase/console',
+              },
             },
           });
         });
@@ -354,6 +389,71 @@ describe('v2', () => {
                 notificationType: 'upgrade',
                 principalEmail: 'test@test.com',
               },
+            },
+          });
+        });
+      });
+    });
+
+    describe('remoteConfig', () => {
+      describe('onConfigUpdated', () => {
+        it('should trigger mock config update event', () => {
+          const cloudFn = remoteConfig.onConfigUpdated(handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            specversion: '1.0',
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            type: 'google.firebase.remoteconfig.remoteConfig.v1.updated',
+            source: '//firebaseremoteconfig.googleapis.com/projects/42',
+            data: {
+              versionNumber: 2,
+              updateTime: cloudEvent.data.updateTime,
+              updateUser: {
+                name: 'testuser',
+                email: 'test@example.com',
+                imageUrl: 'test.com/img-url',
+              },
+              description: 'config update test',
+              updateOrigin: 'REMOTE_CONFIG_UPDATE_ORIGIN_UNSPECIFIED',
+              updateType: 'REMOTE_CONFIG_UPDATE_TYPE_UNSPECIFIED',
+              rollbackSource: 0,
+            },
+          });
+        });
+      });
+    });
+
+    describe('testLab', () => {
+      describe('onTestMatrixCompleted', () => {
+        it('should trigger mock test matrix event data', () => {
+          const cloudFn = testLab.onTestMatrixCompleted(handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent).deep.equal({
+            specversion: '1.0',
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            type: 'google.firebase.testlab.testMatrix.v1.completed',
+            source: '//firebasetestlab.googleapis.com/projects/42',
+            data: {
+              createTime: cloudEvent.data.createTime,
+              state: 'TEST_STATE_UNSPECIFIED',
+              invalidMatrixDetails: '',
+              outcomeSummary: 'OUTCOME_SUMMARY_UNSPECIFIED',
+              resultStorage: {
+                toolResultsHistory: 'projects/42/histories/1234',
+                toolResultsExecution:
+                  'projects/42/histories/1234/executions/5678',
+                resultsUri: 'console.firebase.google.com/test/results',
+                gcsPath: 'gs://bucket/path/to/test',
+              },
+              clientInfo: {
+                client: 'gcloud',
+                details: {},
+              },
+              testMatrixId: '1234',
             },
           });
         });
