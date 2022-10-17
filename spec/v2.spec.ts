@@ -397,7 +397,7 @@ describe('v2', () => {
 
     describe('remoteConfig', () => {
       describe('onConfigUpdated', () => {
-        it.only('should trigger mock config update event', () => {
+        it('should trigger mock config update event', () => {
           const cloudFn = remoteConfig.onConfigUpdated(handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
