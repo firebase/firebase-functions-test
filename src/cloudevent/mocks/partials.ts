@@ -9,6 +9,7 @@ import { alertsCrashlyticsOnVelocityAlertPublished } from './alerts/crashlytics-
 import { alertsAppDistributionOnNewTesterIosDevicePublished } from './alerts/app-distribution-on-new-tester-ios-device-published';
 import { alertsBillingOnPlanAutomatedUpdatePublished } from './alerts/billing-on-plan-automated-update-published';
 import { alertsBillingOnPlanUpdatePublished } from './alerts/billing-on-plan-update-published';
+import { performanceThresholdOnThresholdAlertPublished } from './alerts/performance-on-threshold-alert-published';
 import { eventarcOnCustomEventPublished } from './eventarc/eventarc-on-custom-event-published';
 import { pubsubOnMessagePublished } from './pubsub/pubsub-on-message-published';
 import {
@@ -18,6 +19,8 @@ import {
   databaseOnValueWritten,
 } from './database';
 import { storageV1 } from './storage';
+import { remoteConfigOnConfigUpdated } from './remoteconfig/remote-config-on-config-updated';
+import { testLabOnTestMatrixCompleted } from './testlab/test-lab-on-test-matrix-completed';
 
 /**
  * Note: Ordering matters. Some MockEventPartials will match more generally
@@ -36,7 +39,10 @@ export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: Array<MockCloudEventAbstractFact
   alertsAppDistributionOnNewTesterIosDevicePublished,
   alertsBillingOnPlanAutomatedUpdatePublished,
   alertsBillingOnPlanUpdatePublished,
+  performanceThresholdOnThresholdAlertPublished,
   alertsOnAlertPublished, // Note: alert.onAlertPublished matching is more generic
+  remoteConfigOnConfigUpdated,
+  testLabOnTestMatrixCompleted,
   storageV1,
   pubsubOnMessagePublished,
   databaseOnValueCreated,
