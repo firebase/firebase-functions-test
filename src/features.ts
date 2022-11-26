@@ -5,6 +5,7 @@ import * as database from './providers/database';
 import * as firestore from './providers/firestore';
 import * as pubsub from './providers/pubsub';
 import * as storage from './providers/storage';
+import { FirebaseFunctionsTest } from './lifecycle';
 
 export interface LazyFeatures {
   mockConfig: typeof mockConfig;
@@ -31,5 +32,5 @@ export const features: LazyFeatures = {
 };
 
 export interface FeaturesList extends LazyFeatures {
-  cleanup;
+  cleanup: InstanceType<typeof FirebaseFunctionsTest>['cleanup'];
 }
