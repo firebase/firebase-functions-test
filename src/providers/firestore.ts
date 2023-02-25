@@ -255,6 +255,7 @@ const FIRESTORE_ADDRESS = FIRESTORE_ADDRESS_ENVS.reduce(
   'localhost:8080'
 );
 const FIRESTORE_PORT = FIRESTORE_ADDRESS.split(':')[1];
+const FIRESTORE_HOST = FIRESTORE_ADDRESS.split(':')[0];
 
 /** Clears all data in firestore. Works only in offline mode.
  */
@@ -272,7 +273,7 @@ export function clearFirestoreData(options: { projectId: string } | string) {
 
     const config = {
       method: 'DELETE',
-      hostname: 'localhost',
+      hostname: FIRESTORE_HOST,
       port: FIRESTORE_PORT,
       path: `/emulator/v1/projects/${projectId}/databases/(default)/documents`,
     };
