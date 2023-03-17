@@ -4,7 +4,7 @@ import {
   exampleDataSnapshot,
   exampleDataSnapshotChange,
 } from '../../../providers/database';
-import { resolveStringExpression, getBaseCloudEvent } from '../helpers';
+import { resolveStringExpression, getBaseCloudEvent, extractRef } from '../helpers';
 import { Change } from 'firebase-functions';
 import { makeDataSnapshot } from '../../../providers/database';
 
@@ -144,19 +144,4 @@ export function getCommonDatabaseFields(
   };
 }
 
-function extractRef(rawRef: string, params: Record<string, string>) {
-  const refSegments = rawRef.split('/');
 
-  return refSegments
-    .map((segment) => {
-      if (segment.startsWith('{') && segment.endsWith('}')) {
-        const param = segment
-          .slice(1, -1)
-          .replace('=**', '')
-          .replace('=*', '');
-        return params[param] || 'undefined';
-      }
-      return segment;
-    })
-    .join('/');
-}

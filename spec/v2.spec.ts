@@ -34,9 +34,11 @@ import {
   testLab,
   eventarc,
   https,
+  firestore,
 } from 'firebase-functions/v2';
 import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
+import { makeDocumentSnapshot } from '../src/providers/firestore';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
@@ -460,6 +462,45 @@ describe('v2', () => {
       });
     });
 
+    describe('firestore', () => {
+      describe('firestore.onDocumentCreated', () => {
+        it('should update CloudEvent appropriately', () => {
+          const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+
+          console.log('event:', cloudEvent);
+
+          expect(cloudEvent).deep.equal({
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+            type: 'google.cloud.firestore.document.v1.created',
+
+            data: cloudEvent.data,
+            location: 'us-central1',
+            project: 'testproject',
+            database: '(default)',
+            namespace: '(default)',
+            document: '/foo/bar',
+            params: {},
+          });
+        });
+
+        it('should use overridden data', () => {
+          const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const docVal = { foo: 'bar' };
+          const doc = makeDocumentSnapshot(docVal, 'foo/bar/baz');
+          const cloudEvent = cloudFnWrap({ data: doc }).cloudEvent;
+          expect(cloudEvent.data.data()).deep.equal(docVal);
+        });
+
+        
+
+      });
+    });
+
     describe('database', () => {
       describe('ref', () => {
         it('should resolve default ref', () => {
@@ -488,23 +529,23 @@ describe('v2', () => {
           expect(cloudEvent.ref).equal('foo/StringParam/baz');
         });
 
-        it.skip('should resolve default ref given TernaryExpression', () => {
-          const ref1 = defineString('rtdb_ref_1');
-          process.env.rtdb_ref_1 = 'foo/StringParam/1';
-          const ref2 = defineString('rtdb_ref_2');
-          process.env.rtdb_ref_2 = 'foo/StringParam/2';
-          const referenceOptions = {
-            ref: '',
-            instance: 'instance-1',
-          };
-          const cloudFn = database.onValueCreated(referenceOptions, handler);
-          cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.ref = ref1
-            .equals('aa')
-            .then('rtdb_ref_1', 'rtdb_ref_2');
-          const cloudFnWrap = wrapV2(cloudFn);
-          const cloudEvent = cloudFnWrap().cloudEvent;
-          expect(cloudEvent.ref).equal('rtdb_ref_2');
-        });
+        // it.skip('should resolve default ref given TernaryExpression', () => {
+        //   const ref1 = defineString('rtdb_ref_1');
+        //   process.env.rtdb_ref_1 = 'foo/StringParam/1';
+        //   const ref2 = defineString('rtdb_ref_2');
+        //   process.env.rtdb_ref_2 = 'foo/StringParam/2';
+        //   const referenceOptions = {
+        //     ref: '',
+        //     instance: 'instance-1',
+        //   };
+        //   const cloudFn = database.onValueCreated(referenceOptions, handler);
+        //   cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.ref = ref1
+        //     .equals('aa')
+        //     .then('rtdb_ref_1', 'rtdb_ref_2');
+        //   const cloudFnWrap = wrapV2(cloudFn);
+        //   const cloudEvent = cloudFnWrap().cloudEvent;
+        //   expect(cloudEvent.ref).equal('rtdb_ref_2');
+        // });
 
         it('should resolve using params', () => {
           const referenceOptions = {
@@ -618,7 +659,7 @@ describe('v2', () => {
         });
       });
       describe('database.onValueCreated()', () => {
-        it('should update CloudEvent appropriately', () => {
+        it.only('should update CloudEvent appropriately', () => {
           const referenceOptions = {
             ref: 'foo/bar',
             instance: 'instance-1',

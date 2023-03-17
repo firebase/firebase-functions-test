@@ -50,3 +50,20 @@ function makeEventId(): string {
       .substring(2, 15)
   );
 }
+
+export function extractRef(rawRef: string, params: Record<string, string>) {
+  const refSegments = rawRef.split('/');
+
+  return refSegments
+    .map((segment) => {
+      if (segment.startsWith('{') && segment.endsWith('}')) {
+        const param = segment
+          .slice(1, -1)
+          .replace('=**', '')
+          .replace('=*', '');
+        return params[param] || 'undefined';
+      }
+      return segment;
+    })
+    .join('/');
+}
