@@ -1,15 +1,19 @@
-import { DocumentSnapshot, QueryDocumentSnapshot } from "firebase-admin/firestore";
+import { DocumentSnapshot } from "firebase-admin/firestore";
 import { Change, CloudFunction, firestore } from "firebase-functions/v2";
 import { exampleDataSnapshot, exampleDataSnapshotChange } from "../../../providers/database";
 import { makeDocumentSnapshot } from "../../../providers/firestore";
 import { DeepPartial } from "../../types";
 import { extractRef, getBaseCloudEvent, resolveStringExpression } from "../helpers";
 
-export function getQueryDocumentSnapshotCloudEvent(
-  cloudFunction: CloudFunction<firestore.FirestoreEvent<QueryDocumentSnapshot>>,
-  cloudEventPartial?: DeepPartial<firestore.FirestoreEvent<QueryDocumentSnapshot | object>>
+type ChangeLike = {
+  before: DocumentSnapshot | object;
+  after: DocumentSnapshot | object;
+}
+
+export function getDocumentSnapshotCloudEvent(
+  cloudFunction: CloudFunction<firestore.FirestoreEvent<DocumentSnapshot>>,
+  cloudEventPartial?: DeepPartial<firestore.FirestoreEvent<DocumentSnapshot | object>>
 ) {
-  // console.log(`\n\n\n\nafter: ${inspect(document)}\n\n\n\n`);
   const {
     location,
     project,
@@ -18,7 +22,7 @@ export function getQueryDocumentSnapshotCloudEvent(
     document,
     params
   } = getFirestoreEventFields(cloudFunction, cloudEventPartial);
-  const data = getOrCreateQueryDocumentSnapshot(cloudEventPartial?.data, document);
+  const data = getOrCreateDocumentSnapshot(cloudEventPartial?.data, document);
   return {
     ...getBaseCloudEvent(cloudFunction),
 
@@ -30,29 +34,12 @@ export function getQueryDocumentSnapshotCloudEvent(
     params,
 
     data
-
-    // QueryDocumentSnapshot:
-    // createTime
-    // updateTime
   }
 }
 
-type ChangeLike = {
-  before: QueryDocumentSnapshot | object;
-  after: QueryDocumentSnapshot | object;
-}
-
-// export function getDocumentSnapshotChangeCloudEvent(
-//   cloudFunction: CloudFunction<firestore.FirestoreEvent<Change<DocumentSnapshot>>>,
-//   cloudEventPartial?: DeepPartial<firestore.FirestoreEvent<Change<DocumentSnapshot> | ChangeLike>>,
-// ) {
-  
-
-// }
-
-export function getQueryDocumentSnapshotChangeCloudEvent(
-  cloudFunction: CloudFunction<firestore.FirestoreEvent<Change<QueryDocumentSnapshot>>>,
-  cloudEventPartial?: DeepPartial<firestore.FirestoreEvent<Change<QueryDocumentSnapshot> | ChangeLike>>,
+export function getDocumentSnapshotChangeCloudEvent(
+  cloudFunction: CloudFunction<firestore.FirestoreEvent<Change<DocumentSnapshot>>>,
+  cloudEventPartial?: DeepPartial<firestore.FirestoreEvent<Change<DocumentSnapshot> | ChangeLike>>,
 ) {
   const {
     location,
@@ -62,7 +49,7 @@ export function getQueryDocumentSnapshotChangeCloudEvent(
     document,
     params
   } = getFirestoreEventFields(cloudFunction, cloudEventPartial);
-  const data = getOrCreateQueryDocumentSnapshotChange(cloudEventPartial?.data, document);
+  const data = getOrCreateDocumentSnapshotChange(cloudEventPartial?.data, document);
   return {
     ...getBaseCloudEvent(cloudFunction),
 
@@ -74,22 +61,18 @@ export function getQueryDocumentSnapshotChangeCloudEvent(
     params,
 
     data
-
-    // QueryDocumentSnapshot:
-    // createTime
-    // updateTime
   }
 }
 
 function getFirestoreEventFields(
   cloudFunction: CloudFunction<
     firestore.FirestoreEvent<
-      QueryDocumentSnapshot | Change<QueryDocumentSnapshot>
+      DocumentSnapshot | Change<DocumentSnapshot>
     >
   >,
   cloudEventPartial?: DeepPartial<
     firestore.FirestoreEvent<
-      QueryDocumentSnapshot | Change<QueryDocumentSnapshot>
+      DocumentSnapshot | Change<DocumentSnapshot>
     >
   >,
 ) {
@@ -132,11 +115,11 @@ function getFirestoreEventFields(
   };
 }
 
-function getOrCreateQueryDocumentSnapshot(
-  data: QueryDocumentSnapshot | object,
+function getOrCreateDocumentSnapshot(
+  data: DocumentSnapshot | object,
   ref: string,
 ) {
-  if (data instanceof QueryDocumentSnapshot) {
+  if (data instanceof DocumentSnapshot) {
     return data;
   }
   if (data instanceof Object) {
@@ -145,16 +128,16 @@ function getOrCreateQueryDocumentSnapshot(
   return exampleDataSnapshot();
 }
 
-function getOrCreateQueryDocumentSnapshotChange(
-  data: DeepPartial<Change<QueryDocumentSnapshot> | ChangeLike>,
+function getOrCreateDocumentSnapshotChange(
+  data: DeepPartial<Change<DocumentSnapshot> | ChangeLike>,
   ref: string,
 ) {
   if (data instanceof Change) {
     return data;
   }
   if (data instanceof Object && data.before && data.after) {
-    const beforeSnapshot = getOrCreateQueryDocumentSnapshot(data.before, ref);
-    const afterSnapshot = getOrCreateQueryDocumentSnapshot(data.after, ref);
+    const beforeSnapshot = getOrCreateDocumentSnapshot(data.before, ref);
+    const afterSnapshot = getOrCreateDocumentSnapshot(data.after, ref);
     return new Change(beforeSnapshot, afterSnapshot);
   }
 

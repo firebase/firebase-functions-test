@@ -1,13 +1,11 @@
-import { DeepPartial, MockCloudEventAbstractFactory } from "../../types";
+import { MockCloudEventAbstractFactory } from "../../types";
 import { CloudEvent, CloudFunction, firestore } from "firebase-functions/v2";
-import { extractRef, getBaseCloudEvent, getEventType, resolveStringExpression } from "../helpers";
-import { makeDocumentSnapshot } from "../../../providers/firestore";
+import { getEventType } from "../helpers";
 import { QueryDocumentSnapshot } from "firebase-admin/firestore";
-import { inspect } from 'util';
-import { getQueryDocumentSnapshotCloudEvent } from "./helpers";
+import { getDocumentSnapshotCloudEvent } from "./helpers";
 
 export const firestoreOnDocumentCreated: MockCloudEventAbstractFactory<firestore.FirestoreEvent<QueryDocumentSnapshot>> = {
-  generateMock: getQueryDocumentSnapshotCloudEvent,
+  generateMock: getDocumentSnapshotCloudEvent,
   match(cloudFunction: CloudFunction<CloudEvent<unknown>>): boolean {
     return (
       getEventType(cloudFunction) === 'google.cloud.firestore.document.v1.created'

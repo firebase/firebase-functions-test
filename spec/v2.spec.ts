@@ -658,11 +658,63 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const afterDataVal = { snapshot: 'after' };
           const beforeDataVal = { snapshot: 'before' };
-          const data = { before: beforeDataVal, after: afterDataVal };
 
+          const data = { before: beforeDataVal, after: afterDataVal };
           const cloudEvent = cloudFnWrap({ data }).cloudEvent;
 
-          console.log(`\n\n\n\ncloudEvent: ${inspect(cloudEvent.data)}\n\n\n\n`);
+          expect(cloudEvent.data.before.data()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.data()).deep.equal(afterDataVal);
+        });
+      });
+
+      describe('firestore.onDocumentWritten', () => {
+        it('should update CloudEvent appropriately', () => {
+          const cloudFn = firestore.onDocumentWritten('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+
+          expect(cloudEvent).deep.equal({
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+            type: 'google.cloud.firestore.document.v1.written',
+            source: '',
+
+            data: cloudEvent.data,
+            location: 'us-central1',
+            project: 'testproject',
+            database: '(default)',
+            namespace: '(default)',
+            document: 'foo/bar/baz',
+            params: {},
+          });
+        });
+
+        it('should use overridden data', () => {
+          const cloudFn = firestore.onDocumentWritten('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+
+          const afterDataVal = { snapshot: 'after' };
+          const after = makeDocumentSnapshot(afterDataVal, 'foo/bar/baz');
+
+          const beforeDataVal = { snapshot: 'before' };
+          const before = makeDocumentSnapshot(beforeDataVal, 'foo/bar/baz');
+
+          const data = { before, after };
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          expect(cloudEvent.data.before.data()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.data()).deep.equal(afterDataVal);
+        });
+
+        it('should accept json data', () => {
+          const cloudFn = firestore.onDocumentWritten('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const afterDataVal = { snapshot: 'after' };
+          const beforeDataVal = { snapshot: 'before' };
+
+          const data = { before: beforeDataVal, after: afterDataVal };
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
 
           expect(cloudEvent.data.before.data()).deep.equal(beforeDataVal);
           expect(cloudEvent.data.after.data()).deep.equal(afterDataVal);
@@ -697,24 +749,6 @@ describe('v2', () => {
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent.ref).equal('foo/StringParam/baz');
         });
-
-        // it.skip('should resolve default ref given TernaryExpression', () => {
-        //   const ref1 = defineString('rtdb_ref_1');
-        //   process.env.rtdb_ref_1 = 'foo/StringParam/1';
-        //   const ref2 = defineString('rtdb_ref_2');
-        //   process.env.rtdb_ref_2 = 'foo/StringParam/2';
-        //   const referenceOptions = {
-        //     ref: '',
-        //     instance: 'instance-1',
-        //   };
-        //   const cloudFn = database.onValueCreated(referenceOptions, handler);
-        //   cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.ref = ref1
-        //     .equals('aa')
-        //     .then('rtdb_ref_1', 'rtdb_ref_2');
-        //   const cloudFnWrap = wrapV2(cloudFn);
-        //   const cloudEvent = cloudFnWrap().cloudEvent;
-        //   expect(cloudEvent.ref).equal('rtdb_ref_2');
-        // });
 
         it('should resolve using params', () => {
           const referenceOptions = {
