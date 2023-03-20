@@ -1,7 +1,6 @@
 import { DocumentSnapshot } from "firebase-admin/firestore";
 import { Change, CloudFunction, firestore } from "firebase-functions/v2";
-import { exampleDataSnapshot, exampleDataSnapshotChange } from "../../../providers/database";
-import { makeDocumentSnapshot } from "../../../providers/firestore";
+import { exampleDocumentSnapshot, exampleDocumentSnapshotChange, makeDocumentSnapshot } from "../../../providers/firestore";
 import { DeepPartial } from "../../types";
 import { extractRef, getBaseCloudEvent, resolveStringExpression } from "../helpers";
 
@@ -125,7 +124,7 @@ function getOrCreateDocumentSnapshot(
   if (data instanceof Object) {
     return makeDocumentSnapshot(data, ref);
   }
-  return exampleDataSnapshot();
+  return exampleDocumentSnapshot();
 }
 
 function getOrCreateDocumentSnapshotChange(
@@ -141,5 +140,5 @@ function getOrCreateDocumentSnapshotChange(
     return new Change(beforeSnapshot, afterSnapshot);
   }
 
-  return exampleDataSnapshotChange();
+  return exampleDocumentSnapshotChange();
 }
