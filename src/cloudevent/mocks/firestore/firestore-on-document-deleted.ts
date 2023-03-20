@@ -6,12 +6,11 @@ import { QueryDocumentSnapshot } from "firebase-admin/firestore";
 import { inspect } from 'util';
 import { getQueryDocumentSnapshotCloudEvent } from "./helpers";
 
-export const firestoreOnDocumentCreated: MockCloudEventAbstractFactory<firestore.FirestoreEvent<QueryDocumentSnapshot>> = {
+export const firestoreOnDocumentDeleted: MockCloudEventAbstractFactory<firestore.FirestoreEvent<QueryDocumentSnapshot>> = {
   generateMock: getQueryDocumentSnapshotCloudEvent,
   match(cloudFunction: CloudFunction<CloudEvent<unknown>>): boolean {
     return (
-      getEventType(cloudFunction) === 'google.cloud.firestore.document.v1.created'
+      getEventType(cloudFunction) === 'google.cloud.firestore.document.v1.deleted'
     );
   }
 }
-

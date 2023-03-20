@@ -22,6 +22,9 @@ import { storageV1 } from './storage';
 import { remoteConfigOnConfigUpdated } from './remoteconfig/remote-config-on-config-updated';
 import { testLabOnTestMatrixCompleted } from './testlab/test-lab-on-test-matrix-completed';
 import { firestoreOnDocumentCreated } from './firestore/firestore-on-document-created';
+import { firestoreOnDocumentDeleted } from './firestore/firestore-on-document-deleted';
+import { firestoreOnDocumentUpdated } from './firestore/firestore-on-document-updated';
+import { firestoreOnDocumentWritten } from './firestore/firestore-on-document-written';
 
 /**
  * Note: Ordering matters. Some MockEventPartials will match more generally
@@ -51,6 +54,9 @@ export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: Array<MockCloudEventAbstractFact
   databaseOnValueUpdated,
   databaseOnValueWritten,
   firestoreOnDocumentCreated,
+  firestoreOnDocumentDeleted,
+  firestoreOnDocumentUpdated,
+  firestoreOnDocumentWritten,
 
   // CustomEventPublished must be called last
   eventarcOnCustomEventPublished,

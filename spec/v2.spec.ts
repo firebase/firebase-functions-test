@@ -39,6 +39,7 @@ import {
 import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
 import { makeDocumentSnapshot } from '../src/providers/firestore';
+import {inspect } from 'util';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
@@ -463,26 +464,92 @@ describe('v2', () => {
     });
 
     describe('firestore', () => {
+      describe('should resolve document path', () => {
+        it('should resolve default document path', () => {
+          const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent.document).equal('foo/bar/baz');
+        });
+
+        it('should resolve default document given StringParam', () => {
+          process.env.doc_path = 'foo/StringParam/baz';
+          const cloudFn = firestore.onDocumentCreated('', handler);
+          cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.document = defineString(
+            'doc_path'
+          );
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent.document).equal('foo/StringParam/baz');
+        });
+
+        it('should resolve using params', () => {
+          const cloudFn = firestore.onDocumentCreated('users/{user}', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {
+              user: '123',
+            }
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.document).equal('users/123');
+        });
+
+        it('should resolve with undefined string if variable is missing', () => {
+          const cloudFn = firestore.onDocumentCreated('users/{user}', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            params: {},
+          };
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+          expect(cloudEvent.document).equal('users/undefined');
+        });
+      });
+
+      describe('document options', () => {
+        it('resolves default document options correctly', () => {
+          const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent.document).equal('foo/bar/baz');
+          expect(cloudEvent.database).equal('(default)');
+          expect(cloudEvent.namespace).equal('(default)');
+        });
+
+        it('reads custom DocumentOptions correctly', () => {
+          const documentOptions = {
+            document: 'foo/bar/baz',
+            database: 'custom-database',
+            namespace: 'custom-namespace'
+          };
+          const cloudFn = firestore.onDocumentCreated(documentOptions, handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+          expect(cloudEvent.document).equal(documentOptions.document);
+          expect(cloudEvent.database).equal(documentOptions.database);
+          expect(cloudEvent.namespace).equal(documentOptions.namespace);
+        });
+      });
+
       describe('firestore.onDocumentCreated', () => {
         it('should update CloudEvent appropriately', () => {
           const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
 
-          console.log('event:', cloudEvent);
-
           expect(cloudEvent).deep.equal({
             id: cloudEvent.id,
             time: cloudEvent.time,
             specversion: '1.0',
             type: 'google.cloud.firestore.document.v1.created',
+            source: '',
 
             data: cloudEvent.data,
             location: 'us-central1',
             project: 'testproject',
             database: '(default)',
             namespace: '(default)',
-            document: '/foo/bar',
+            document: 'foo/bar/baz',
             params: {},
           });
         });
@@ -490,14 +557,116 @@ describe('v2', () => {
         it('should use overridden data', () => {
           const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
           const cloudFnWrap = wrapV2(cloudFn);
-          const docVal = { foo: 'bar' };
-          const doc = makeDocumentSnapshot(docVal, 'foo/bar/baz');
-          const cloudEvent = cloudFnWrap({ data: doc }).cloudEvent;
-          expect(cloudEvent.data.data()).deep.equal(docVal);
+          const docData = { foo: 'bar' };
+          const data = makeDocumentSnapshot(docData, 'foo/bar/baz');
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+          expect(cloudEvent.data.data()).deep.equal(docData);
         });
 
-        
+        it('should accept json data', () => {
+          const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const docData = { foo: 'bar' };
+          const cloudEvent = cloudFnWrap({ data: docData }).cloudEvent;
+          expect(cloudEvent.data.data()).deep.equal(docData);
+        });
+      });
 
+      describe('firestore.onDocumentDeleted()', () => {
+        it('should update CloudEvent appropriately', () => {
+          const cloudFn = firestore.onDocumentDeleted('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+
+          expect(cloudEvent).deep.equal({
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+            type: 'google.cloud.firestore.document.v1.deleted',
+            source: '',
+
+            data: cloudEvent.data,
+            location: 'us-central1',
+            project: 'testproject',
+            database: '(default)',
+            namespace: '(default)',
+            document: 'foo/bar/baz',
+            params: {},
+          });
+        });
+
+        it('should use overridden data', () => {
+          const cloudFn = firestore.onDocumentDeleted('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const docData = { foo: 'bar' };
+          const data = makeDocumentSnapshot(docData, 'foo/bar/baz');
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+          expect(cloudEvent.data.data()).deep.equal(docData);
+        });
+
+        it('should accept json data', () => {
+          const cloudFn = firestore.onDocumentDeleted('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const docData = { foo: 'bar' };
+          const cloudEvent = cloudFnWrap({ data: docData }).cloudEvent;
+          expect(cloudEvent.data.data()).deep.equal(docData);
+        });
+      });
+
+      describe('firestore.onDocumentUpdated', () => {
+        it('should update CloudEvent appropriately', () => {
+          const cloudFn = firestore.onDocumentUpdated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const cloudEvent = cloudFnWrap().cloudEvent;
+
+          expect(cloudEvent).deep.equal({
+            id: cloudEvent.id,
+            time: cloudEvent.time,
+            specversion: '1.0',
+            type: 'google.cloud.firestore.document.v1.updated',
+            source: '',
+
+            data: cloudEvent.data,
+            location: 'us-central1',
+            project: 'testproject',
+            database: '(default)',
+            namespace: '(default)',
+            document: 'foo/bar/baz',
+            params: {},
+          });
+        });
+
+        it('should use overridden data', () => {
+          const cloudFn = firestore.onDocumentUpdated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+
+          const afterDataVal = { snapshot: 'after' };
+          const after = makeDocumentSnapshot(afterDataVal, 'foo/bar/baz');
+
+          const beforeDataVal = { snapshot: 'before' };
+          const before = makeDocumentSnapshot(beforeDataVal, 'foo/bar/baz');
+
+          const data = { before, after };
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          expect(cloudEvent.data.before.data()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.data()).deep.equal(afterDataVal);
+        });
+
+        it('should accept json data', () => {
+          const cloudFn = firestore.onDocumentUpdated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const afterDataVal = { snapshot: 'after' };
+          const beforeDataVal = { snapshot: 'before' };
+          const data = { before: beforeDataVal, after: afterDataVal };
+
+          const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
+          console.log(`\n\n\n\ncloudEvent: ${inspect(cloudEvent.data)}\n\n\n\n`);
+
+          expect(cloudEvent.data.before.data()).deep.equal(beforeDataVal);
+          expect(cloudEvent.data.after.data()).deep.equal(afterDataVal);
+        });
       });
     });
 
@@ -659,7 +828,7 @@ describe('v2', () => {
         });
       });
       describe('database.onValueCreated()', () => {
-        it.only('should update CloudEvent appropriately', () => {
+        it('should update CloudEvent appropriately', () => {
           const referenceOptions = {
             ref: 'foo/bar',
             instance: 'instance-1',
