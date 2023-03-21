@@ -9,6 +9,8 @@ type ChangeLike = {
   after: DocumentSnapshot | object;
 }
 
+
+/** Creates a mock CloudEvent that contains a DocumentSnapshot as its data. */
 export function getDocumentSnapshotCloudEvent(
   cloudFunction: CloudFunction<firestore.FirestoreEvent<DocumentSnapshot>>,
   cloudEventPartial?: DeepPartial<firestore.FirestoreEvent<DocumentSnapshot | object>>
@@ -36,6 +38,7 @@ export function getDocumentSnapshotCloudEvent(
   }
 }
 
+/** Creates a mock CloudEvent that contains a Change<DocumentSnapshot> as its data. */
 export function getDocumentSnapshotChangeCloudEvent(
   cloudFunction: CloudFunction<firestore.FirestoreEvent<Change<DocumentSnapshot>>>,
   cloudEventPartial?: DeepPartial<firestore.FirestoreEvent<Change<DocumentSnapshot> | ChangeLike>>,
@@ -63,6 +66,7 @@ export function getDocumentSnapshotChangeCloudEvent(
   }
 }
 
+/** Finds or provides reasonable defaults for mock FirestoreEvent data. */
 function getFirestoreEventFields(
   cloudFunction: CloudFunction<
     firestore.FirestoreEvent<
@@ -114,6 +118,7 @@ function getFirestoreEventFields(
   };
 }
 
+/** Make a DocumentSnapshot from the user-provided partial data. */
 function getOrCreateDocumentSnapshot(
   data: DocumentSnapshot | object,
   ref: string,
@@ -127,6 +132,7 @@ function getOrCreateDocumentSnapshot(
   return exampleDocumentSnapshot();
 }
 
+/** Make a DocumentSnapshotChange from the user-provided partial data. */
 function getOrCreateDocumentSnapshotChange(
   data: DeepPartial<Change<DocumentSnapshot> | ChangeLike>,
   ref: string,
@@ -138,7 +144,7 @@ function getOrCreateDocumentSnapshotChange(
   // Created or Deleted event for the onWritten trigger), then we 
   // include the user's before/after object in the mock event and
   // use an example snapshot for the other.
-  if (data instanceof Object && (data.before || data.after)) {
+  if (data?.before || data?.after) {
     const beforeSnapshot = getOrCreateDocumentSnapshot(data.before, ref);
     const afterSnapshot = getOrCreateDocumentSnapshot(data.after, ref);
     return new Change(beforeSnapshot, afterSnapshot);

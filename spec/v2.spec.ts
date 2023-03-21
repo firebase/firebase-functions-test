@@ -464,11 +464,12 @@ describe('v2', () => {
     });
 
     describe('firestore', () => {
-      describe('should resolve document path', () => {
+      describe('document path', () => {
         it('should resolve default document path', () => {
           const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
+
           expect(cloudEvent.document).equal('foo/bar/baz');
         });
 
@@ -480,6 +481,7 @@ describe('v2', () => {
           );
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
+
           expect(cloudEvent.document).equal('foo/StringParam/baz');
         });
 
@@ -492,6 +494,7 @@ describe('v2', () => {
             }
           };
           const cloudEvent = cloudFnWrap(partial).cloudEvent;
+
           expect(cloudEvent.document).equal('users/123');
         });
 
@@ -502,6 +505,7 @@ describe('v2', () => {
             params: {},
           };
           const cloudEvent = cloudFnWrap(partial).cloudEvent;
+
           expect(cloudEvent.document).equal('users/undefined');
         });
       });
@@ -511,6 +515,7 @@ describe('v2', () => {
           const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
+
           expect(cloudEvent.document).equal('foo/bar/baz');
           expect(cloudEvent.database).equal('(default)');
           expect(cloudEvent.namespace).equal('(default)');
@@ -525,6 +530,7 @@ describe('v2', () => {
           const cloudFn = firestore.onDocumentCreated(documentOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
+
           expect(cloudEvent.document).equal(documentOptions.document);
           expect(cloudEvent.database).equal(documentOptions.database);
           expect(cloudEvent.namespace).equal(documentOptions.namespace);
@@ -560,6 +566,7 @@ describe('v2', () => {
           const docData = { foo: 'bar' };
           const data = makeDocumentSnapshot(docData, 'foo/bar/baz');
           const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
           expect(cloudEvent.data.data()).deep.equal(docData);
         });
 
@@ -568,6 +575,7 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const docData = { foo: 'bar' };
           const cloudEvent = cloudFnWrap({ data: docData }).cloudEvent;
+
           expect(cloudEvent.data.data()).deep.equal(docData);
         });
       });
@@ -601,6 +609,7 @@ describe('v2', () => {
           const docData = { foo: 'bar' };
           const data = makeDocumentSnapshot(docData, 'foo/bar/baz');
           const cloudEvent = cloudFnWrap({ data }).cloudEvent;
+
           expect(cloudEvent.data.data()).deep.equal(docData);
         });
 
@@ -609,6 +618,7 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const docData = { foo: 'bar' };
           const cloudEvent = cloudFnWrap({ data: docData }).cloudEvent;
+          
           expect(cloudEvent.data.data()).deep.equal(docData);
         });
       });

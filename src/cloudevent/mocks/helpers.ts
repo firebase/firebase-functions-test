@@ -51,6 +51,7 @@ function makeEventId(): string {
   );
 }
 
+/** Resolves param values and inserts them into the provided ref string. */
 export function extractRef(rawRef: string, params: Record<string, string>) {
   const refSegments = rawRef.split('/');
 
