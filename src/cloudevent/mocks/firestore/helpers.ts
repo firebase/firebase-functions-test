@@ -134,11 +134,14 @@ function getOrCreateDocumentSnapshotChange(
   if (data instanceof Change) {
     return data;
   }
-  if (data instanceof Object && data.before && data.after) {
+  // If only the "before" or "after" is specified (to simulate a
+  // Created or Deleted event for the onWritten trigger), then we 
+  // include the user's before/after object in the mock event and
+  // use an example snapshot for the other.
+  if (data instanceof Object && (data.before || data.after)) {
     const beforeSnapshot = getOrCreateDocumentSnapshot(data.before, ref);
     const afterSnapshot = getOrCreateDocumentSnapshot(data.after, ref);
     return new Change(beforeSnapshot, afterSnapshot);
-  }
-
+  } 
   return exampleDocumentSnapshotChange();
 }
