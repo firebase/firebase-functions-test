@@ -39,7 +39,7 @@ import {
 import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
 import { makeDocumentSnapshot } from '../src/providers/firestore';
-import {inspect } from 'util';
+import { inspect } from 'util';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
@@ -491,7 +491,7 @@ describe('v2', () => {
           const partial = {
             params: {
               user: '123',
-            }
+            },
           };
           const cloudEvent = cloudFnWrap(partial).cloudEvent;
 
@@ -525,7 +525,7 @@ describe('v2', () => {
           const documentOptions = {
             document: 'foo/bar/baz',
             database: 'custom-database',
-            namespace: 'custom-namespace'
+            namespace: 'custom-namespace',
           };
           const cloudFn = firestore.onDocumentCreated(documentOptions, handler);
           const cloudFnWrap = wrapV2(cloudFn);

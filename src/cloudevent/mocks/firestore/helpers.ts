@@ -1,19 +1,28 @@
-import { DocumentSnapshot } from "firebase-admin/firestore";
-import { Change, CloudFunction, firestore } from "firebase-functions/v2";
-import { exampleDocumentSnapshot, exampleDocumentSnapshotChange, makeDocumentSnapshot } from "../../../providers/firestore";
-import { DeepPartial } from "../../types";
-import { extractRef, getBaseCloudEvent, resolveStringExpression } from "../helpers";
+import { DocumentSnapshot } from 'firebase-admin/firestore';
+import { Change, CloudFunction, firestore } from 'firebase-functions/v2';
+import {
+  exampleDocumentSnapshot,
+  exampleDocumentSnapshotChange,
+  makeDocumentSnapshot,
+} from '../../../providers/firestore';
+import { DeepPartial } from '../../types';
+import {
+  extractRef,
+  getBaseCloudEvent,
+  resolveStringExpression,
+} from '../helpers';
 
 type ChangeLike = {
   before: DocumentSnapshot | object;
   after: DocumentSnapshot | object;
-}
-
+};
 
 /** Creates a mock CloudEvent that contains a DocumentSnapshot as its data. */
 export function getDocumentSnapshotCloudEvent(
   cloudFunction: CloudFunction<firestore.FirestoreEvent<DocumentSnapshot>>,
-  cloudEventPartial?: DeepPartial<firestore.FirestoreEvent<DocumentSnapshot | object>>
+  cloudEventPartial?: DeepPartial<
+    firestore.FirestoreEvent<DocumentSnapshot | object>
+  >
 ) {
   const {
     location,
@@ -21,7 +30,7 @@ export function getDocumentSnapshotCloudEvent(
     database,
     namespace,
     document,
-    params
+    params,
   } = getFirestoreEventFields(cloudFunction, cloudEventPartial);
   const data = getOrCreateDocumentSnapshot(cloudEventPartial?.data, document);
   return {
@@ -34,14 +43,18 @@ export function getDocumentSnapshotCloudEvent(
     document,
     params,
 
-    data
-  }
+    data,
+  };
 }
 
 /** Creates a mock CloudEvent that contains a Change<DocumentSnapshot> as its data. */
 export function getDocumentSnapshotChangeCloudEvent(
-  cloudFunction: CloudFunction<firestore.FirestoreEvent<Change<DocumentSnapshot>>>,
-  cloudEventPartial?: DeepPartial<firestore.FirestoreEvent<Change<DocumentSnapshot> | ChangeLike>>,
+  cloudFunction: CloudFunction<
+    firestore.FirestoreEvent<Change<DocumentSnapshot>>
+  >,
+  cloudEventPartial?: DeepPartial<
+    firestore.FirestoreEvent<Change<DocumentSnapshot> | ChangeLike>
+  >
 ) {
   const {
     location,
@@ -49,9 +62,12 @@ export function getDocumentSnapshotChangeCloudEvent(
     database,
     namespace,
     document,
-    params
+    params,
   } = getFirestoreEventFields(cloudFunction, cloudEventPartial);
-  const data = getOrCreateDocumentSnapshotChange(cloudEventPartial?.data, document);
+  const data = getOrCreateDocumentSnapshotChange(
+    cloudEventPartial?.data,
+    document
+  );
   return {
     ...getBaseCloudEvent(cloudFunction),
 
@@ -62,49 +78,44 @@ export function getDocumentSnapshotChangeCloudEvent(
     document,
     params,
 
-    data
-  }
+    data,
+  };
 }
 
 /** Finds or provides reasonable defaults for mock FirestoreEvent data. */
 function getFirestoreEventFields(
   cloudFunction: CloudFunction<
-    firestore.FirestoreEvent<
-      DocumentSnapshot | Change<DocumentSnapshot>
-    >
+    firestore.FirestoreEvent<DocumentSnapshot | Change<DocumentSnapshot>>
   >,
   cloudEventPartial?: DeepPartial<
-    firestore.FirestoreEvent<
-      DocumentSnapshot | Change<DocumentSnapshot>
-    >
-  >,
+    firestore.FirestoreEvent<DocumentSnapshot | Change<DocumentSnapshot>>
+  >
 ) {
   const location = cloudEventPartial?.location || 'us-central1';
 
-  const project = 
-    cloudEventPartial?.project || 
-    process.env.GCLOUD_PROJECT ||
-    'testproject';
+  const project =
+    cloudEventPartial?.project || process.env.GCLOUD_PROJECT || 'testproject';
 
-  const databaseOrExpression = 
-    cloudEventPartial?.database || 
+  const databaseOrExpression =
+    cloudEventPartial?.database ||
     cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.database ||
     '(default)';
   const database = resolveStringExpression(databaseOrExpression);
 
-  const namespaceOrExpression = 
-    cloudEventPartial?.namespace || 
+  const namespaceOrExpression =
+    cloudEventPartial?.namespace ||
     cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.namespace ||
     '(default)';
   const namespace = resolveStringExpression(namespaceOrExpression);
 
   const params = cloudEventPartial?.params || {};
 
-  const documentOrExpression = 
-    cloudEventPartial?.document || 
+  const documentOrExpression =
+    cloudEventPartial?.document ||
     cloudFunction?.__endpoint?.eventTrigger?.eventFilters?.document ||
-    cloudFunction?.__endpoint?.eventTrigger?.eventFilterPathPatterns?.document || 
-    '/foo/bar';  
+    cloudFunction?.__endpoint?.eventTrigger?.eventFilterPathPatterns
+      ?.document ||
+    '/foo/bar';
   const documentRaw = resolveStringExpression(documentOrExpression);
   const document = extractRef(documentRaw, params);
 
@@ -114,14 +125,14 @@ function getFirestoreEventFields(
     database,
     namespace,
     document,
-    params
+    params,
   };
 }
 
 /** Make a DocumentSnapshot from the user-provided partial data. */
 function getOrCreateDocumentSnapshot(
   data: DocumentSnapshot | object,
-  ref: string,
+  ref: string
 ) {
   if (data instanceof DocumentSnapshot) {
     return data;
@@ -135,19 +146,19 @@ function getOrCreateDocumentSnapshot(
 /** Make a DocumentSnapshotChange from the user-provided partial data. */
 function getOrCreateDocumentSnapshotChange(
   data: DeepPartial<Change<DocumentSnapshot> | ChangeLike>,
-  ref: string,
+  ref: string
 ) {
   if (data instanceof Change) {
     return data;
   }
   // If only the "before" or "after" is specified (to simulate a
-  // Created or Deleted event for the onWritten trigger), then we 
+  // Created or Deleted event for the onWritten trigger), then we
   // include the user's before/after object in the mock event and
   // use an example snapshot for the other.
   if (data?.before || data?.after) {
     const beforeSnapshot = getOrCreateDocumentSnapshot(data.before, ref);
     const afterSnapshot = getOrCreateDocumentSnapshot(data.after, ref);
     return new Change(beforeSnapshot, afterSnapshot);
-  } 
+  }
   return exampleDocumentSnapshotChange();
 }

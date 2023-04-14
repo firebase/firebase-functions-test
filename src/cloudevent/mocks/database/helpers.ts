@@ -4,7 +4,11 @@ import {
   exampleDataSnapshot,
   exampleDataSnapshotChange,
 } from '../../../providers/database';
-import { resolveStringExpression, getBaseCloudEvent, extractRef } from '../helpers';
+import {
+  resolveStringExpression,
+  getBaseCloudEvent,
+  extractRef,
+} from '../helpers';
 import { Change } from 'firebase-functions';
 import { makeDataSnapshot } from '../../../providers/database';
 
@@ -143,5 +147,3 @@ export function getCommonDatabaseFields(
     params,
   };
 }
-
-

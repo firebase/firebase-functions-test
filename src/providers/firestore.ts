@@ -23,12 +23,15 @@
 import { Change } from 'firebase-functions';
 import { firestore, app } from 'firebase-admin';
 import { has, get, isEmpty, isPlainObject, mapValues } from 'lodash';
-import {inspect} from 'util';
+import { inspect } from 'util';
 
 import { testApp } from '../app';
 
 import * as http from 'http';
-import { DocumentSnapshot, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import {
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
+} from 'firebase-admin/firestore';
 
 function dateToTimestampProto(
   timeString?: string
