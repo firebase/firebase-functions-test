@@ -618,7 +618,7 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const docData = { foo: 'bar' };
           const cloudEvent = cloudFnWrap({ data: docData }).cloudEvent;
-          
+
           expect(cloudEvent.data.data()).deep.equal(docData);
         });
       });
@@ -759,6 +759,24 @@ describe('v2', () => {
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent.ref).equal('foo/StringParam/baz');
         });
+
+        // it('should resolve default ref given TernaryExpression', () => {
+        //   const ref1 = defineString('rtdb_ref_1');
+        //   process.env.rtdb_ref_1 = 'foo/StringParam/1';
+        //   const ref2 = defineString('rtdb_ref_2');
+        //   process.env.rtdb_ref_2 = 'foo/StringParam/2';
+        //   const referenceOptions = {
+        //     ref: '',
+        //     instance: 'instance-1',
+        //   };
+        //   const cloudFn = database.onValueCreated(referenceOptions, handler);
+        //   cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.ref = ref1
+        //     .equals('aa')
+        //     .then('rtdb_ref_1', 'rtdb_ref_2');
+        //   const cloudFnWrap = wrapV2(cloudFn);
+        //   const cloudEvent = cloudFnWrap().cloudEvent;
+        //   expect(cloudEvent.ref).equal('rtdb_ref_2');
+        // });
 
         it('should resolve using params', () => {
           const referenceOptions = {
