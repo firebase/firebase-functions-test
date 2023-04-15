@@ -18,6 +18,12 @@ import {
   databaseOnValueUpdated,
   databaseOnValueWritten,
 } from './database';
+import {
+  firestoreOnDocumentCreated,
+  firestoreOnDocumentDeleted,
+  firestoreOnDocumentUpdated,
+  firestoreOnDocumentWritten,
+} from './firestore';
 import { storageV1 } from './storage';
 import { remoteConfigOnConfigUpdated } from './remoteconfig/remote-config-on-config-updated';
 import { testLabOnTestMatrixCompleted } from './testlab/test-lab-on-test-matrix-completed';
@@ -49,6 +55,10 @@ export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: Array<MockCloudEventAbstractFact
   databaseOnValueDeleted,
   databaseOnValueUpdated,
   databaseOnValueWritten,
+  firestoreOnDocumentCreated,
+  firestoreOnDocumentDeleted,
+  firestoreOnDocumentUpdated,
+  firestoreOnDocumentWritten,
 
   // CustomEventPublished must be called last
   eventarcOnCustomEventPublished,

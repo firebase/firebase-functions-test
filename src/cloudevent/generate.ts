@@ -4,6 +4,10 @@ import {
   database,
   pubsub,
 } from 'firebase-functions/v2';
+import {
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
+} from 'firebase-admin/firestore';
 import { LIST_OF_MOCK_CLOUD_EVENT_PARTIALS } from './mocks/partials';
 import { DeepPartial } from './types';
 import { Change } from 'firebase-functions';
@@ -41,7 +45,13 @@ export function generateMockCloudEvent<EventType extends CloudEvent<unknown>>(
   return null;
 }
 
-const IMMUTABLE_DATA_TYPES = [database.DataSnapshot, Change, pubsub.Message];
+const IMMUTABLE_DATA_TYPES = [
+  database.DataSnapshot,
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
+  Change,
+  pubsub.Message,
+];
 
 function mergeCloudEvents<EventType extends CloudEvent<unknown>>(
   generatedCloudEvent: EventType,

@@ -1,0 +1,1 @@
+- Add testing support for 2nd gen firestore triggers (#200).
