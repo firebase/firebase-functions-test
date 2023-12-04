@@ -46,7 +46,7 @@
     "@types/chai": "~4.2.4",
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
-    "firebase-admin": "^10.1.0",
+    "firebase-admin": "^11.11.1",
     "firebase-functions": ">=4.3.0",
     "firebase-tools": "^8.9.2",
     "mocha": "^6.2.2",
