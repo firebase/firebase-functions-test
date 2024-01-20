@@ -1,1 +1,0 @@
-- Extend support for firebase-admin@12 (#220)
