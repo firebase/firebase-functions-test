@@ -1,11 +1,11 @@
-import { DocumentSnapshot } from 'firebase-admin/firestore';
-import { Change, CloudFunction, firestore } from 'firebase-functions/v2';
+import {DocumentSnapshot} from 'firebase-admin/firestore';
+import {Change, CloudFunction, firestore} from 'firebase-functions/v2';
 import {
   exampleDocumentSnapshot,
   exampleDocumentSnapshotChange,
   makeDocumentSnapshot,
 } from '../../../providers/firestore';
-import { DeepPartial } from '../../types';
+import {DeepPartial} from '../../types';
 import {
   extractRef,
   getBaseCloudEvent,
@@ -22,7 +22,7 @@ export function getDocumentSnapshotCloudEvent(
   cloudFunction: CloudFunction<firestore.FirestoreEvent<DocumentSnapshot>>,
   cloudEventPartial?: DeepPartial<
     firestore.FirestoreEvent<DocumentSnapshot | object>
-  >
+  >,
 ) {
   const {
     location,
@@ -44,6 +44,26 @@ export function getDocumentSnapshotCloudEvent(
     params,
 
     data,
+  };
+}
+
+export function getDocumentSnapshotCloudEventWithAuthContext(
+  cloudFunction: CloudFunction<firestore.FirestoreEvent<DocumentSnapshot>>,
+  cloudEventPartial?: DeepPartial<
+    firestore.FirestoreEvent<DocumentSnapshot | object>
+  >,
+) {
+  const eventWithoutAuthContext = getDocumentSnapshotCloudEvent(cloudFunction, cloudEventPartial);
+  const authContext: { authId?: string, authType?: string } = {};
+  if (cloudEventPartial?.authId) {
+    authContext.authId = cloudEventPartial.authId;
+  }
+  if (cloudEventPartial?.authType) {
+    authContext.authType = cloudEventPartial.authType;
+  }
+  return {
+    ...eventWithoutAuthContext,
+    ...authContext,
   };
 }
 
@@ -79,6 +99,28 @@ export function getDocumentSnapshotChangeCloudEvent(
     params,
 
     data,
+  };
+}
+
+export function getDocumentSnapshotChangeCloudEventWithAuthContext(
+  cloudFunction: CloudFunction<
+    firestore.FirestoreEvent<Change<DocumentSnapshot>>
+  >,
+  cloudEventPartial?: DeepPartial<
+    firestore.FirestoreEvent<Change<DocumentSnapshot> | ChangeLike>
+  >
+) {
+  const eventWithoutAuthContext = getDocumentSnapshotChangeCloudEvent(cloudFunction, cloudEventPartial);
+  const authContext: { authId?: string, authType?: string } = {};
+  if (cloudEventPartial?.authId) {
+    authContext.authId = cloudEventPartial.authId;
+  }
+  if (cloudEventPartial?.authType) {
+    authContext.authType = cloudEventPartial.authType;
+  }
+  return {
+    ...eventWithoutAuthContext,
+    ...authContext,
   };
 }
 
