@@ -48,9 +48,9 @@ export function getDocumentSnapshotCloudEvent(
 }
 
 export function getDocumentSnapshotCloudEventWithAuthContext(
-  cloudFunction: CloudFunction<firestore.FirestoreEvent<DocumentSnapshot>>,
+  cloudFunction: CloudFunction<firestore.FirestoreAuthEvent<DocumentSnapshot>>,
   cloudEventPartial?: DeepPartial<
-    firestore.FirestoreEvent<DocumentSnapshot | object>
+    firestore.FirestoreAuthEvent<DocumentSnapshot | object>
   >
 ) {
   const eventWithoutAuthContext = getDocumentSnapshotCloudEvent(
@@ -107,10 +107,10 @@ export function getDocumentSnapshotChangeCloudEvent(
 
 export function getDocumentSnapshotChangeCloudEventWithAuthContext(
   cloudFunction: CloudFunction<
-    firestore.FirestoreEvent<Change<DocumentSnapshot>>
+    firestore.FirestoreAuthEvent<Change<DocumentSnapshot>>
   >,
   cloudEventPartial?: DeepPartial<
-    firestore.FirestoreEvent<Change<DocumentSnapshot> | ChangeLike>
+    firestore.FirestoreAuthEvent<Change<DocumentSnapshot> | ChangeLike>
   >
 ) {
   const eventWithoutAuthContext = getDocumentSnapshotChangeCloudEvent(
