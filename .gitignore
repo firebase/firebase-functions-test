@@ -6,3 +6,4 @@ lib
 *.tgz
 .tmp
 *.log
+.idea

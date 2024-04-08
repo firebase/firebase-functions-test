@@ -27,6 +27,10 @@ import {
 import { storageV1 } from './storage';
 import { remoteConfigOnConfigUpdated } from './remoteconfig/remote-config-on-config-updated';
 import { testLabOnTestMatrixCompleted } from './testlab/test-lab-on-test-matrix-completed';
+import { firestoreOnDocumentCreatedWithAuthContext } from './firestore/firestore-on-document-created-with-auth-context';
+import { firestoreOnDocumentDeletedWithAuthContext } from './firestore/firestore-on-document-deleted-with-auth-context';
+import { firestoreOnDocumentUpdatedWithAuthContext } from './firestore/firestore-on-document-updated-with-auth-context';
+import { firestoreOnDocumentWrittenWithAuthContext } from './firestore/firestore-on-document-written-with-auth-context';
 
 /**
  * Note: Ordering matters. Some MockEventPartials will match more generally
@@ -59,6 +63,10 @@ export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: Array<MockCloudEventAbstractFact
   firestoreOnDocumentDeleted,
   firestoreOnDocumentUpdated,
   firestoreOnDocumentWritten,
+  firestoreOnDocumentCreatedWithAuthContext,
+  firestoreOnDocumentDeletedWithAuthContext,
+  firestoreOnDocumentUpdatedWithAuthContext,
+  firestoreOnDocumentWrittenWithAuthContext,
 
   // CustomEventPublished must be called last
   eventarcOnCustomEventPublished,

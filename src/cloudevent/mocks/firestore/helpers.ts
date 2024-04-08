@@ -47,6 +47,31 @@ export function getDocumentSnapshotCloudEvent(
   };
 }
 
+export function getDocumentSnapshotCloudEventWithAuthContext(
+  cloudFunction: CloudFunction<firestore.FirestoreAuthEvent<DocumentSnapshot>>,
+  cloudEventPartial?: DeepPartial<
+    firestore.FirestoreAuthEvent<DocumentSnapshot | object>
+  >
+) {
+  const eventWithoutAuthContext = getDocumentSnapshotCloudEvent(
+    cloudFunction,
+    cloudEventPartial
+  );
+  const authContext: { authId?: string; authType: firestore.AuthType } = {
+    authType: 'unknown',
+  };
+  if (cloudEventPartial?.authId) {
+    authContext.authId = cloudEventPartial.authId;
+  }
+  if (cloudEventPartial?.authType) {
+    authContext.authType = cloudEventPartial.authType;
+  }
+  return {
+    ...eventWithoutAuthContext,
+    ...authContext,
+  };
+}
+
 /** Creates a mock CloudEvent that contains a Change<DocumentSnapshot> as its data. */
 export function getDocumentSnapshotChangeCloudEvent(
   cloudFunction: CloudFunction<
@@ -79,6 +104,34 @@ export function getDocumentSnapshotChangeCloudEvent(
     params,
 
     data,
+  };
+}
+
+export function getDocumentSnapshotChangeCloudEventWithAuthContext(
+  cloudFunction: CloudFunction<
+    firestore.FirestoreAuthEvent<Change<DocumentSnapshot>>
+  >,
+  cloudEventPartial?: DeepPartial<
+    firestore.FirestoreAuthEvent<Change<DocumentSnapshot> | ChangeLike>
+  >
+) {
+  const eventWithoutAuthContext = getDocumentSnapshotChangeCloudEvent(
+    cloudFunction,
+    cloudEventPartial
+  );
+  const authContext: { authId?: string; authType: firestore.AuthType } = {
+    authType: 'unknown',
+  };
+  if (cloudEventPartial?.authId) {
+    authContext.authId = cloudEventPartial.authId;
+  }
+  if (cloudEventPartial?.authType) {
+    authContext.authType = cloudEventPartial.authType;
+  }
+
+  return {
+    ...eventWithoutAuthContext,
+    ...authContext,
   };
 }
 
