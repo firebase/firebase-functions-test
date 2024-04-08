@@ -57,7 +57,9 @@ export function getDocumentSnapshotCloudEventWithAuthContext(
     cloudFunction,
     cloudEventPartial
   );
-  const authContext: { authId?: string; authType?: string } = {};
+  const authContext: { authId?: string; authType: firestore.AuthType } = {
+    authType: 'unknown',
+  };
   if (cloudEventPartial?.authId) {
     authContext.authId = cloudEventPartial.authId;
   }
@@ -117,13 +119,16 @@ export function getDocumentSnapshotChangeCloudEventWithAuthContext(
     cloudFunction,
     cloudEventPartial
   );
-  const authContext: { authId?: string; authType?: string } = {};
+  const authContext: { authId?: string; authType: firestore.AuthType } = {
+    authType: 'unknown',
+  };
   if (cloudEventPartial?.authId) {
     authContext.authId = cloudEventPartial.authId;
   }
   if (cloudEventPartial?.authType) {
     authContext.authType = cloudEventPartial.authType;
   }
+
   return {
     ...eventWithoutAuthContext,
     ...authContext,

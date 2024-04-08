@@ -4,7 +4,7 @@ import { getEventType } from '../helpers';
 import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { getDocumentSnapshotCloudEventWithAuthContext } from './helpers';
 
-export const firestoreOnDocumentCreatedWithAuthContext: MockCloudEventAbstractFactory<firestore.FirestoreEvent<
+export const firestoreOnDocumentCreatedWithAuthContext: MockCloudEventAbstractFactory<firestore.FirestoreAuthEvent<
   QueryDocumentSnapshot
 >> = {
   generateMock: getDocumentSnapshotCloudEventWithAuthContext,
