@@ -1,1 +1,0 @@
-- Add support for testing Firestore 2nd gen Auth Context triggers. (#227)
