@@ -21,9 +21,14 @@
 // SOFTWARE.
 
 import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
+import {
+  HttpsFunction as HttpsV2Function,
+  Request,
+} from 'firebase-functions/v2/https';
 
 import { generateCombinedCloudEvent } from './cloudevent/generate';
 import { DeepPartial } from './cloudevent/types';
+import * as express from 'express';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
@@ -32,24 +37,41 @@ export type WrappedV2Function<T extends CloudEvent<unknown>> = (
   cloudEventPartial?: DeepPartial<T | object>
 ) => any | Promise<any>;
 
+export type WrappedV2HttpsFunction = (
+  req: express.Request,
+  res: express.Response
+) => any | Promise<any>;
+
+function isHttpsV2Function<T extends CloudEvent<unknown>>(
+  cf: CloudFunction<T> | HttpsV2Function
+): cf is HttpsV2Function {
+  return !!cf?.__endpoint?.callableTrigger;
+}
+
+function assertIsCloudFunction<T extends CloudEvent<unknown>>(
+  cf: CloudFunction<T> | HttpsV2Function
+): asserts cf is CloudFunction<T> {
+  if (!('run' in cf) || !cf.run) {
+    throw new Error(
+      'This library can only be used with functions written with firebase-functions v3.20.0 and above'
+    );
+  }
+}
+
 /**
  * Takes a v2 cloud function to be tested, and returns a {@link WrappedV2Function}
  * which can be called in test code.
  */
 export function wrapV2<T extends CloudEvent<unknown>>(
-  cloudFunction: CloudFunction<T>
-): WrappedV2Function<T> {
-  if (cloudFunction?.__endpoint?.callableTrigger) {
-    throw new Error(
-      'Wrap function is not available for callableTriggers functions.'
-    );
+  cloudFunction: CloudFunction<T> | HttpsV2Function
+): WrappedV2Function<T> | WrappedV2HttpsFunction {
+  if (isHttpsV2Function(cloudFunction)) {
+    return (req: Request, res: express.Response) => {
+      return cloudFunction(req, res);
+    };
   }
 
-  if (!cloudFunction.run) {
-    throw new Error(
-      'This library can only be used with functions written with firebase-functions v3.20.0 and above'
-    );
-  }
+  assertIsCloudFunction(cloudFunction);
 
   if (cloudFunction?.__endpoint?.platform !== 'gcfv2') {
     throw new Error('This function can only wrap V2 CloudFunctions.');
