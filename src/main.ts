@@ -21,8 +21,7 @@
 // SOFTWARE.
 
 import {
-  CloudFunction as CloudFunctionV1,
-  HttpsFunction,
+  CloudFunction as CloudFunctionV1, HttpsFunction,
   Runnable,
 } from 'firebase-functions';
 
@@ -31,15 +30,15 @@ import {
   CloudEvent,
 } from 'firebase-functions/v2';
 
-import { HttpsFunction as HttpsFunctionV2 } from 'firebase-functions/v2/https';
+import {CallableFunction, HttpsFunction as HttpsFunctionV2} from 'firebase-functions/v2/https';
 
 import { wrapV1, WrappedFunction, WrappedScheduledFunction } from './v1';
 
-import { wrapV2, WrappedV2Function, WrappedV2HttpsFunction } from './v2';
+import {wrapV2, WrappedV2Function, WrappedV2CallableFunction} from './v2';
 
-type HttpsFunctionOrCloudFunctionV1<T, U> = U extends HttpsFunction &
+type HttpsFunctionOrCloudFunctionV1<T, U> = U extends CallableFunction<any, T> &
   Runnable<T>
-  ? HttpsFunction & Runnable<T>
+  ? CallableFunction<any, T> & Runnable<T>
   : CloudFunctionV1<T>;
 
 // Re-exporting V1 (to reduce breakage)
@@ -59,7 +58,7 @@ export { WrappedV2Function } from './v2';
 export function wrap<T>(
   cloudFunction: HttpsFunction & Runnable<T>
 ): WrappedFunction<T, HttpsFunction & Runnable<T>>;
-export function wrap(cloudFunction: HttpsFunctionV2): WrappedV2HttpsFunction;
+export function wrap<T>(cloudFunction: CallableFunction<any, T>): WrappedV2CallableFunction<T>;
 export function wrap<T>(
   cloudFunction: CloudFunctionV1<T>
 ): WrappedScheduledFunction | WrappedFunction<T>;
@@ -72,7 +71,7 @@ export function wrap<T, V extends CloudEvent<unknown>>(
   | WrappedScheduledFunction
   | WrappedFunction<T>
   | WrappedV2Function<V>
-  | WrappedV2HttpsFunction {
+  | WrappedV2CallableFunction<T> {
   if (isV2CloudFunction<V>(cloudFunction)) {
     return wrapV2<V>(cloudFunction as CloudFunctionV2<V>);
   }

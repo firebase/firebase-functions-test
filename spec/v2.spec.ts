@@ -1423,8 +1423,8 @@ describe('v2', () => {
     });
 
     describe('callable functions', () => {
-      it('return an error because they are not supported', () => {
-        const cloudFunction = https.onCall((data) => data);
+      it('should return correct data', () => {
+        const cloudFunction = https.onCall((req) => 'hello');
         cloudFunction.__endpoint = {
           platform: 'gcfv2',
           labels: {},
@@ -1434,14 +1434,9 @@ describe('v2', () => {
           region: ['us-west1', 'us-central1'],
         };
 
-        try {
-          const wrappedCF = wrapV2(cloudFunction as any);
-          wrappedCF();
-        } catch (e) {
-          expect(e.message).to.equal(
-            'Wrap function is not available for callableTriggers functions.'
-          );
-        }
+        const wrappedCF = wrapV2(cloudFunction);
+        const result = wrappedCF({} as any);
+        expect(result).equal('hello');
       });
     });
 

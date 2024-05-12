@@ -20,14 +20,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
+import {CloudFunction, CloudEvent} from 'firebase-functions/v2';
 import {
-  HttpsFunction as HttpsV2Function,
-  Request,
+  CallableFunction,
+  CallableRequest
 } from 'firebase-functions/v2/https';
 
-import { generateCombinedCloudEvent } from './cloudevent/generate';
-import { DeepPartial } from './cloudevent/types';
+import {generateCombinedCloudEvent} from './cloudevent/generate';
+import {DeepPartial} from './cloudevent/types';
 import * as express from 'express';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
@@ -37,19 +37,18 @@ export type WrappedV2Function<T extends CloudEvent<unknown>> = (
   cloudEventPartial?: DeepPartial<T | object>
 ) => any | Promise<any>;
 
-export type WrappedV2HttpsFunction = (
-  req: express.Request,
-  res: express.Response
-) => any | Promise<any>;
+export type WrappedV2CallableFunction<T> = (
+  data: CallableRequest,
+) => T | Promise<T>;
 
-function isHttpsV2Function<T extends CloudEvent<unknown>>(
-  cf: CloudFunction<T> | HttpsV2Function
-): cf is HttpsV2Function {
+function isCallableV2Function<T extends CloudEvent<unknown>>(
+  cf: CloudFunction<T> | CallableFunction<any, any>
+): cf is CallableFunction<any, any> {
   return !!cf?.__endpoint?.callableTrigger;
 }
 
 function assertIsCloudFunction<T extends CloudEvent<unknown>>(
-  cf: CloudFunction<T> | HttpsV2Function
+  cf: CloudFunction<T> | CallableFunction<any, any>
 ): asserts cf is CloudFunction<T> {
   if (!('run' in cf) || !cf.run) {
     throw new Error(
@@ -63,11 +62,23 @@ function assertIsCloudFunction<T extends CloudEvent<unknown>>(
  * which can be called in test code.
  */
 export function wrapV2<T extends CloudEvent<unknown>>(
-  cloudFunction: CloudFunction<T> | HttpsV2Function
-): WrappedV2Function<T> | WrappedV2HttpsFunction {
-  if (isHttpsV2Function(cloudFunction)) {
-    return (req: Request, res: express.Response) => {
-      return cloudFunction(req, res);
+  cloudFunction: CloudFunction<T>
+): WrappedV2Function<T>;
+
+/**
+ * Takes a v2 HTTP function to be tested, and returns a {@link WrappedV2HttpsFunction}
+ * which can be called in test code.
+ */
+export function wrapV2(
+  cloudFunction: CallableFunction<any, any>
+): WrappedV2CallableFunction<any>;
+
+export function wrapV2<T extends CloudEvent<unknown>>(
+  cloudFunction: CloudFunction<T> | CallableFunction<any, any>
+): WrappedV2Function<T> | WrappedV2CallableFunction<any> {
+  if (isCallableV2Function(cloudFunction)) {
+    return (req: CallableRequest) => {
+      return cloudFunction.run(req);
     };
   }
 
