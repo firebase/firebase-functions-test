@@ -20,14 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import {CloudFunction, CloudEvent} from 'firebase-functions/v2';
-import {
-  CallableFunction,
-  CallableRequest
-} from 'firebase-functions/v2/https';
+import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
+import { CallableFunction, CallableRequest } from 'firebase-functions/v2/https';
 
-import {generateCombinedCloudEvent} from './cloudevent/generate';
-import {DeepPartial} from './cloudevent/types';
+import { generateCombinedCloudEvent } from './cloudevent/generate';
+import { DeepPartial } from './cloudevent/types';
 import * as express from 'express';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
@@ -38,7 +35,7 @@ export type WrappedV2Function<T extends CloudEvent<unknown>> = (
 ) => any | Promise<any>;
 
 export type WrappedV2CallableFunction<T> = (
-  data: CallableRequest,
+  data: CallableRequest
 ) => T | Promise<T>;
 
 function isCallableV2Function<T extends CloudEvent<unknown>>(
