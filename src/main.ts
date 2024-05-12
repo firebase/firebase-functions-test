@@ -36,9 +36,9 @@ import { wrapV1, WrappedFunction, WrappedScheduledFunction } from './v1';
 
 import {wrapV2, WrappedV2Function, WrappedV2CallableFunction} from './v2';
 
-type HttpsFunctionOrCloudFunctionV1<T, U> = U extends CallableFunction<any, T> &
+type HttpsFunctionOrCloudFunctionV1<T, U> = U extends HttpsFunction &
   Runnable<T>
-  ? CallableFunction<any, T> & Runnable<T>
+  ? HttpsFunction & Runnable<T>
   : CloudFunctionV1<T>;
 
 // Re-exporting V1 (to reduce breakage)
