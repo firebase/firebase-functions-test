@@ -1423,8 +1423,8 @@ describe('v2', () => {
     });
 
     describe('callable functions', () => {
-      it('should return correct data', () => {
-        const cloudFunction = https.onCall((req) => 'hello');
+      it('should return correct data', async () => {
+        const cloudFunction = https.onCall(() => 'hello');
         cloudFunction.__endpoint = {
           platform: 'gcfv2',
           labels: {},
@@ -1435,7 +1435,7 @@ describe('v2', () => {
         };
 
         const wrappedCF = wrapV2(cloudFunction);
-        const result = wrappedCF({} as any);
+        const result = await wrappedCF({} as any);
         expect(result).equal('hello');
       });
     });
