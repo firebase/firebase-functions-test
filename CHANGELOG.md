@@ -1,1 +1,0 @@
-- Add support for v2 callable functions (#229).
