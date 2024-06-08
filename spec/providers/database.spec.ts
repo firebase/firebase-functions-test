@@ -33,6 +33,14 @@ describe('providers/database', () => {
     expect(snapshot.ref.key).to.equal('path');
   });
 
+  it('should allow null child value in makeDataSnapshot', async () => {
+    const snapshot = makeDataSnapshot({ foo: null }, 'path');
+
+    expect(snapshot.exists()).be.false;
+    expect(snapshot.val()).to.deep.equal(null);
+    expect(snapshot.ref.key).to.equal('path');
+  });
+
   it('should use the default test apps databaseURL if no instance is specified in makeDataSnapshot', async () => {
     const snapshot = makeDataSnapshot(null, 'path', null);
 
