@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { Change } from 'firebase-functions';
+import { Change } from 'firebase-functions/v1';
 import { firestore, app } from 'firebase-admin';
 import { has, get, isEmpty, isPlainObject, mapValues } from 'lodash';
 import { inspect } from 'util';

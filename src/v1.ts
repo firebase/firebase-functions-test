@@ -34,7 +34,7 @@ import {
   Runnable,
   // @ts-ignore
   resetCache,
-} from 'firebase-functions';
+} from 'firebase-functions/v1';
 import { Expression } from 'firebase-functions/params';
 import {
   getEventFilters,

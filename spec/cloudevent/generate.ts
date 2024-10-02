@@ -22,7 +22,7 @@
 
 import { expect } from 'chai';
 
-import { alerts, storage } from 'firebase-functions/v2';
+import { alerts, storage } from 'firebase-functions';
 import { generateMockCloudEvent } from '../../src/cloudevent/generate';
 
 describe('generate (CloudEvent)', () => {

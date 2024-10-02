@@ -1,5 +1,5 @@
-import * as v1 from 'firebase-functions';
-import * as v2 from 'firebase-functions/v2';
+import * as v1 from 'firebase-functions/v1';
+import * as v2 from 'firebase-functions';
 import { Expression } from 'firebase-functions/params';
 
 export const APP_ID = '__APP_ID__';

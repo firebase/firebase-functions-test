@@ -1,10 +1,10 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
-import { CloudFunction } from 'firebase-functions/v2';
-import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
+import { CloudFunction } from 'firebase-functions';
+import { FirebaseAlertData } from 'firebase-functions/alerts';
 import {
   BillingEvent,
   PlanUpdatePayload,
-} from 'firebase-functions/v2/alerts/billing';
+} from 'firebase-functions/alerts/billing';
 import {
   getBaseCloudEvent,
   getEventFilters,

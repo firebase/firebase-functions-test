@@ -1,4 +1,4 @@
-import { CloudEvent, CloudFunction } from 'firebase-functions/v2';
+import { CloudEvent, CloudFunction } from 'firebase-functions';
 
 export type DeepPartial<T extends object> = {
   [Key in keyof T]?: T[Key] extends object ? DeepPartial<T[Key]> : T[Key];
