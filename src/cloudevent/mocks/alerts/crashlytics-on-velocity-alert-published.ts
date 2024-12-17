@@ -1,5 +1,5 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
-import { CloudFunction } from 'firebase-functions/v2';
+import { CloudFunction } from 'firebase-functions';
 import {
   getBaseCloudEvent,
   getEventFilters,
@@ -9,8 +9,8 @@ import {
 import {
   CrashlyticsEvent,
   VelocityAlertPayload,
-} from 'firebase-functions/v2/alerts/crashlytics';
-import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
+} from 'firebase-functions/alerts/crashlytics';
+import { FirebaseAlertData } from 'firebase-functions/alerts';
 
 export const alertsCrashlyticsOnVelocityAlertPublished: MockCloudEventAbstractFactory<CrashlyticsEvent<
   VelocityAlertPayload

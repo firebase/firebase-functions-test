@@ -1,4 +1,4 @@
-import { CloudFunction, database } from 'firebase-functions/v2';
+import { CloudFunction, database } from 'firebase-functions';
 import { DeepPartial } from '../../types';
 import {
   exampleDataSnapshot,
@@ -9,7 +9,7 @@ import {
   getBaseCloudEvent,
   extractRef,
 } from '../helpers';
-import { Change } from 'firebase-functions';
+import { Change } from 'firebase-functions/v1';
 import { makeDataSnapshot } from '../../../providers/database';
 
 type ChangeLike = {

@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { storage } from 'firebase-functions';
+import { storage } from 'firebase-functions/v1';
 
 /** Create an ObjectMetadata */
 export function makeObjectMetadata(

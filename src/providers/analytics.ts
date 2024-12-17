@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { analytics } from 'firebase-functions';
+import { analytics } from 'firebase-functions/v1';
 
 /** Create an AnalyticsEvent */
 export function makeAnalyticsEvent(

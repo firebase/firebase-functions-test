@@ -21,14 +21,14 @@
 // SOFTWARE.
 
 import { expect } from 'chai';
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import { set } from 'lodash';
 
 import { mockConfig, makeChange, wrap } from '../src/main';
 import { _makeResourceName, _extractParams } from '../src/v1';
 import { features } from '../src/features';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
-import { alerts } from 'firebase-functions/v2';
+import { alerts } from 'firebase-functions';
 import { wrapV2 } from '../src/v2';
 
 describe('main', () => {

@@ -35,7 +35,7 @@ import {
   eventarc,
   https,
   firestore,
-} from 'firebase-functions/v2';
+} from 'firebase-functions';
 import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
 import { makeDocumentSnapshot } from '../src/providers/firestore';

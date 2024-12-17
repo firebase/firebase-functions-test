@@ -4,7 +4,7 @@ import {
   CloudEvent,
   CloudFunction,
   firestore,
-} from 'firebase-functions/v2';
+} from 'firebase-functions';
 import { getEventType } from '../helpers';
 import { DocumentSnapshot } from 'firebase-admin/firestore';
 import { getDocumentSnapshotChangeCloudEventWithAuthContext } from './helpers';

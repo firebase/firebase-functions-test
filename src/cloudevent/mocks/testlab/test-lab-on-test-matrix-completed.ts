@@ -1,6 +1,6 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
-import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
-import { TestMatrixCompletedData } from 'firebase-functions/v2/testLab';
+import { CloudFunction, CloudEvent } from 'firebase-functions';
+import { TestMatrixCompletedData } from 'firebase-functions/testLab';
 import { getBaseCloudEvent, getEventType, PROJECT_ID } from '../helpers';
 
 export const testLabOnTestMatrixCompleted: MockCloudEventAbstractFactory<CloudEvent<

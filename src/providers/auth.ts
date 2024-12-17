@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { auth } from 'firebase-functions';
+import { auth } from 'firebase-functions/v1';
 
 /** Create a UserRecord. */
 export function makeUserRecord(

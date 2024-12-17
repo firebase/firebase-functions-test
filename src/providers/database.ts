@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { database, Change } from 'firebase-functions';
+import { database, Change } from 'firebase-functions/v1';
 import { app } from 'firebase-admin';
 
 import { testApp } from '../app';
