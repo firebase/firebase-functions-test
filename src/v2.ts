@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { CloudFunction, CloudEvent } from 'firebase-functions';
+import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
 import { CallableFunction, CallableRequest } from 'firebase-functions/https';
 
 import { generateCombinedCloudEvent } from './cloudevent/generate';

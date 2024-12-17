@@ -29,7 +29,7 @@ import {
 import {
   CloudFunction as CloudFunctionV2,
   CloudEvent,
-} from 'firebase-functions';
+} from 'firebase-functions/v2';
 
 import {
   CallableFunction,

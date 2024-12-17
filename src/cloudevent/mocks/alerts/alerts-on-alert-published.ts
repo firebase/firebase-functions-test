@@ -1,5 +1,5 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
-import { CloudFunction } from 'firebase-functions';
+import { CloudFunction } from 'firebase-functions/v2';
 import {
   APP_ID,
   getBaseCloudEvent,
