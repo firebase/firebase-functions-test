@@ -6,7 +6,7 @@ import {
   getEventType,
   PROJECT_ID,
 } from '../helpers';
-import { FirebaseAlertData, AlertEvent } from 'firebase-functions/alerts';
+import { FirebaseAlertData, AlertEvent } from 'firebase-functions/v2/alerts';
 
 export const alertsOnAlertPublished: MockCloudEventAbstractFactory<AlertEvent<
   FirebaseAlertData

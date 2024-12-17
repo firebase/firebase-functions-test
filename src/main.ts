@@ -34,7 +34,7 @@ import {
 import {
   CallableFunction,
   HttpsFunction as HttpsFunctionV2,
-} from 'firebase-functions/https';
+} from 'firebase-functions/v2/https';
 
 import { wrapV1, WrappedFunction, WrappedScheduledFunction } from './v1';
 

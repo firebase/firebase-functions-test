@@ -9,8 +9,8 @@ import {
 import {
   CrashlyticsEvent,
   NewAnrIssuePayload,
-} from 'firebase-functions/alerts/crashlytics';
-import { FirebaseAlertData } from 'firebase-functions/alerts';
+} from 'firebase-functions/v2/alerts/crashlytics';
+import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 
 export const alertsCrashlyticsOnNewAnrIssuePublished: MockCloudEventAbstractFactory<CrashlyticsEvent<
   NewAnrIssuePayload

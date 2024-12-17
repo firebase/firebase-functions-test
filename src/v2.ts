@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
-import { CallableFunction, CallableRequest } from 'firebase-functions/https';
+import { CallableFunction, CallableRequest } from 'firebase-functions/v2/https';
 
 import { generateCombinedCloudEvent } from './cloudevent/generate';
 import { DeepPartial } from './cloudevent/types';

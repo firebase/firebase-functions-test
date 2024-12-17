@@ -9,7 +9,7 @@ import {
 import {
   AppDistributionEvent,
   NewTesterDevicePayload,
-} from 'firebase-functions/alerts/appDistribution';
+} from 'firebase-functions/v2/alerts/appDistribution';
 
 export const alertsAppDistributionOnNewTesterIosDevicePublished: MockCloudEventAbstractFactory<AppDistributionEvent<
   NewTesterDevicePayload
