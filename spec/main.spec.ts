@@ -28,7 +28,7 @@ import { mockConfig, makeChange, wrap } from '../src/main';
 import { _makeResourceName, _extractParams } from '../src/v1';
 import { features } from '../src/features';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
-import { alerts } from 'firebase-functions';
+import { alerts } from 'firebase-functions/v2';
 import { wrapV2 } from '../src/v2';
 
 describe('main', () => {

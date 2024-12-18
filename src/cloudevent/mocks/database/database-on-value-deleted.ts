@@ -1,5 +1,5 @@
 import { MockCloudEventAbstractFactory } from '../../types';
-import { CloudEvent, CloudFunction, database } from 'firebase-functions';
+import { CloudEvent, CloudFunction, database } from 'firebase-functions/v2';
 import { getEventType } from '../helpers';
 import { getDatabaseSnapshotCloudEvent } from './helpers';
 

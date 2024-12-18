@@ -3,7 +3,7 @@ import {
   CloudFunction,
   database,
   pubsub,
-} from 'firebase-functions';
+} from 'firebase-functions/v2';
 import {
   DocumentSnapshot,
   QueryDocumentSnapshot,

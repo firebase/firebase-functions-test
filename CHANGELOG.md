@@ -1,0 +1,3 @@
+- Explicitly import from the v1 namespace to unbreak firebase-functions 6.x (#243).
+- Explciitly import from the v2 namespace so that #243 doesn't break firebase-functions versions below 6.x (#252)
+- Also adds firebase-admin 13.x as a supported version in peer-deps (#252)

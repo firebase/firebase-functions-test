@@ -1,5 +1,5 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
-import { CloudFunction } from 'firebase-functions';
+import { CloudFunction } from 'firebase-functions/v2';
 import {
   getBaseCloudEvent,
   getEventFilters,
@@ -9,7 +9,7 @@ import {
 import {
   AppDistributionEvent,
   NewTesterDevicePayload,
-} from 'firebase-functions/alerts/appDistribution';
+} from 'firebase-functions/v2/alerts/appDistribution';
 
 export const alertsAppDistributionOnNewTesterIosDevicePublished: MockCloudEventAbstractFactory<AppDistributionEvent<
   NewTesterDevicePayload

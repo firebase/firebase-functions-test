@@ -1,9 +1,9 @@
 import { DeepPartial, MockCloudEventAbstractFactory } from '../../types';
-import { CloudFunction } from 'firebase-functions';
+import { CloudFunction } from 'firebase-functions/v2';
 import {
   PerformanceEvent,
   ThresholdAlertPayload,
-} from 'firebase-functions/alerts/performance';
+} from 'firebase-functions/v2/alerts/performance';
 import {
   getBaseCloudEvent,
   getEventFilters,
@@ -11,7 +11,7 @@ import {
   PROJECT_ID,
   APP_ID,
 } from '../helpers';
-import { FirebaseAlertData } from 'firebase-functions/alerts';
+import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 
 export const performanceThresholdOnThresholdAlertPublished: MockCloudEventAbstractFactory<PerformanceEvent<
   ThresholdAlertPayload

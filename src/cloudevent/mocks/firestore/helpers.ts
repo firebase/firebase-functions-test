@@ -1,5 +1,5 @@
 import { DocumentSnapshot } from 'firebase-admin/firestore';
-import { Change, CloudFunction, firestore } from 'firebase-functions';
+import { Change, CloudFunction, firestore } from 'firebase-functions/v2';
 import {
   exampleDocumentSnapshot,
   exampleDocumentSnapshotChange,

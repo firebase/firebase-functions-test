@@ -29,12 +29,12 @@ import {
 import {
   CloudFunction as CloudFunctionV2,
   CloudEvent,
-} from 'firebase-functions';
+} from 'firebase-functions/v2';
 
 import {
   CallableFunction,
   HttpsFunction as HttpsFunctionV2,
-} from 'firebase-functions/https';
+} from 'firebase-functions/v2/https';
 
 import { wrapV1, WrappedFunction, WrappedScheduledFunction } from './v1';
 

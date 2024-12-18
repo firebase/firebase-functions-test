@@ -1,4 +1,4 @@
-import { CloudFunction, database } from 'firebase-functions';
+import { CloudFunction, database } from 'firebase-functions/v2';
 import { DeepPartial } from '../../types';
 import {
   exampleDataSnapshot,

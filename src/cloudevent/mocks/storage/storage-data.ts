@@ -1,4 +1,4 @@
-import { storage } from 'firebase-functions';
+import { storage } from 'firebase-functions/v2';
 import { FILENAME } from '../helpers';
 
 /** Storage Data */
