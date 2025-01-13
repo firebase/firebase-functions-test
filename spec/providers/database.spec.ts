@@ -31,6 +31,7 @@ describe('providers/database', () => {
 
     expect(snapshot.val()).to.deep.equal(null);
     expect(snapshot.ref.key).to.equal('path');
+    expect(snapshot.child('foo').val()).to.deep.equal(null);
   });
 
   it('should use the default test apps databaseURL if no instance is specified in makeDataSnapshot', async () => {
