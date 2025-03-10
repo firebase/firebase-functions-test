@@ -1,1 +1,0 @@
-- Support FIRESTORE_EMULATOR_HOST env var for Firestore triggers (#184)
