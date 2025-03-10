@@ -1,0 +1,1 @@
+- fix(firestore): use hostname from env variable (#184)
