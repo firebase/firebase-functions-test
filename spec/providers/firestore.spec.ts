@@ -14,7 +14,7 @@ describe('providers/firestore', () => {
     test = fft();
     fakeHttpResponse = {
       statusCode: 200,
-      on: ((event, cb) => cb())
+      on: (event, cb) => cb(),
     };
     fakeHttpRequestMethod = sinon.fake((config, cb) => {
       cb(fakeHttpResponse);
@@ -91,26 +91,32 @@ describe('providers/firestore', () => {
   it('should use host name from FIRESTORE_EMULATOR_HOST env in clearFirestoreData', async () => {
     process.env.FIRESTORE_EMULATOR_HOST = 'not-local-host:8080';
 
-    await test.firestore.clearFirestoreData({projectId: 'not-a-project'});
+    await test.firestore.clearFirestoreData({ projectId: 'not-a-project' });
 
-    expect(fakeHttpRequestMethod.calledOnceWith({
-      hostname: 'not-local-host',
-      method: 'DELETE',
-      path: '/emulator/v1/projects/not-a-project/databases/(default)/documents',
-      port: '8080'
-    })).to.be.true;
+    expect(
+      fakeHttpRequestMethod.calledOnceWith({
+        hostname: 'not-local-host',
+        method: 'DELETE',
+        path:
+          '/emulator/v1/projects/not-a-project/databases/(default)/documents',
+        port: '8080',
+      })
+    ).to.be.true;
   });
 
   it('should use host name from FIREBASE_FIRESTORE_EMULATOR_ADDRESS env in clearFirestoreData', async () => {
     process.env.FIREBASE_FIRESTORE_EMULATOR_ADDRESS = 'custom-host:9090';
 
-    await test.firestore.clearFirestoreData({projectId: 'not-a-project'});
+    await test.firestore.clearFirestoreData({ projectId: 'not-a-project' });
 
-    expect(fakeHttpRequestMethod.calledOnceWith({
-      hostname: 'custom-host',
-      method: 'DELETE',
-      path: '/emulator/v1/projects/not-a-project/databases/(default)/documents',
-      port: '9090'
-    })).to.be.true;
+    expect(
+      fakeHttpRequestMethod.calledOnceWith({
+        hostname: 'custom-host',
+        method: 'DELETE',
+        path:
+          '/emulator/v1/projects/not-a-project/databases/(default)/documents',
+        port: '9090',
+      })
+    ).to.be.true;
   });
 });
