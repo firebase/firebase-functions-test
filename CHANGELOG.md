@@ -1,1 +1,1 @@
-- fix(firestore): use hostname from env variable (#184)
+- Support FIRESTORE_EMULATOR_HOST env var for Firestore triggers (#184)
