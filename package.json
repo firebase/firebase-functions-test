@@ -39,7 +39,7 @@
   "homepage": "https://github.com/firebase/firebase-functions-test#readme",
   "dependencies": {
     "@types/lodash": "^4.14.104",
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.21",
     "ts-deepmerge": "^2.0.1"
   },
   "devDependencies": {
@@ -49,7 +49,7 @@
     "chai": "^4.2.0",
     "firebase-admin": "^12.0.0",
     "firebase-functions": "^4.9.0",
-    "firebase-tools": "^8.9.2",
+    "firebase-tools": "^14.3.0",
     "mocha": "^6.2.2",
     "prettier": "^1.19.1",
     "sinon": "^7.5.0",
