@@ -5,19 +5,7 @@ import * as database from './providers/database';
 import * as firestore from './providers/firestore';
 import * as pubsub from './providers/pubsub';
 import * as storage from './providers/storage';
-import { FirebaseFunctionsTest } from './lifecycle';
-
-export interface LazyFeatures {
-  mockConfig: typeof mockConfig;
-  wrap: typeof wrap;
-  makeChange: typeof makeChange;
-  analytics: typeof analytics;
-  auth: typeof auth;
-  database: typeof database;
-  firestore: typeof firestore;
-  pubsub: typeof pubsub;
-  storage: typeof storage;
-}
+import { LazyFeatures } from './types/commonTypes';
 
 export const features: LazyFeatures = {
   mockConfig,
@@ -30,7 +18,3 @@ export const features: LazyFeatures = {
   pubsub,
   storage,
 };
-
-export interface FeaturesList extends LazyFeatures {
-  cleanup: InstanceType<typeof FirebaseFunctionsTest>['cleanup'];
-}

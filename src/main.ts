@@ -25,25 +25,35 @@ import {
   HttpsFunction,
   Runnable,
 } from 'firebase-functions/v1';
-
 import {
   CloudFunction as CloudFunctionV2,
   CloudEvent,
 } from 'firebase-functions/v2';
-
 import {
   CallableFunction,
   HttpsFunction as HttpsFunctionV2,
 } from 'firebase-functions/v2/https';
 
-import { wrapV1, WrappedFunction, WrappedScheduledFunction } from './v1';
+import { wrapV1 } from './v1';
+import { wrapV2 } from './v2';
+import { WrappedFunction, WrappedScheduledFunction } from './types/v1Types';
+import { WrappedV2Function, WrappedV2CallableFunction } from './types/v2Types';
+import { HttpsFunctionOrCloudFunctionV1 } from './types/v1Types';
 
-import { wrapV2, WrappedV2Function, WrappedV2CallableFunction } from './v2';
-
-type HttpsFunctionOrCloudFunctionV1<T, U> = U extends HttpsFunction &
-  Runnable<T>
-  ? HttpsFunction & Runnable<T>
-  : CloudFunctionV1<T>;
+/**
+ * The key differences between V1 and V2 CloudFunctions are:
+ * <ul>
+ *    <li> V1 CloudFunction is sometimes a binary function
+ *    <li> V2 CloudFunction is always a unary function
+ *    <li> V1 CloudFunction.run is always a binary function
+ *    <li> V2 CloudFunction.run is always a unary function
+ * @return True iff the CloudFunction is a V2 function.
+ */
+function isV2CloudFunction<T extends CloudEvent<unknown>>(
+  cloudFunction: any
+): cloudFunction is CloudFunctionV2<T> {
+  return cloudFunction.length === 1 && cloudFunction?.run?.length === 1;
+}
 
 // Re-exporting V1 (to reduce breakage)
 export {
@@ -52,13 +62,10 @@ export {
   WrappedFunction,
   WrappedScheduledFunction,
   CallableContextOptions,
-  makeChange,
-  mockConfig,
-} from './v1';
-
+} from './types/v1Types';
+export { makeChange, mockConfig } from './v1';
 // V2 Exports
-export { WrappedV2Function } from './v2';
-
+export { WrappedV2Function } from './types/v2Types';
 export function wrap<T>(
   cloudFunction: HttpsFunction & Runnable<T>
 ): WrappedFunction<T, HttpsFunction & Runnable<T>>;
@@ -84,19 +91,4 @@ export function wrap<T, V extends CloudEvent<unknown>>(
   return wrapV1<T>(
     cloudFunction as HttpsFunctionOrCloudFunctionV1<T, typeof cloudFunction>
   );
-}
-
-/**
- * The key differences between V1 and V2 CloudFunctions are:
- * <ul>
- *    <li> V1 CloudFunction is sometimes a binary function
- *    <li> V2 CloudFunction is always a unary function
- *    <li> V1 CloudFunction.run is always a binary function
- *    <li> V2 CloudFunction.run is always a unary function
- * @return True iff the CloudFunction is a V2 function.
- */
-function isV2CloudFunction<T extends CloudEvent<unknown>>(
-  cloudFunction: any
-): cloudFunction is CloudFunctionV2<T> {
-  return cloudFunction.length === 1 && cloudFunction?.run?.length === 1;
 }

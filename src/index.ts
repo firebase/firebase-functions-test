@@ -24,7 +24,7 @@ import { AppOptions } from 'firebase-admin';
 import { merge } from 'lodash';
 
 import { FirebaseFunctionsTest } from './lifecycle';
-import { FeaturesList } from './features';
+import { FeaturesList } from './types/commonTypes';
 
 export = (
   firebaseConfig?: AppOptions,
