@@ -39,7 +39,6 @@ import {
 import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
 import { makeDocumentSnapshot } from '../src/providers/firestore';
-import { inspect } from 'util';
 
 describe('v2', () => {
   describe('#wrapV2', () => {

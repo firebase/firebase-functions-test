@@ -25,18 +25,7 @@ import { CallableFunction, CallableRequest } from 'firebase-functions/v2/https';
 
 import { generateCombinedCloudEvent } from './cloudevent/generate';
 import { DeepPartial } from './cloudevent/types';
-import * as express from 'express';
-
-/** A function that can be called with test data and optional override values for {@link CloudEvent}
- * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
- */
-export type WrappedV2Function<T extends CloudEvent<unknown>> = (
-  cloudEventPartial?: DeepPartial<T | object>
-) => any | Promise<any>;
-
-export type WrappedV2CallableFunction<T> = (
-  data: CallableRequest
-) => T | Promise<T>;
+import { WrappedV2CallableFunction, WrappedV2Function } from './types/v2Types';
 
 function isCallableV2Function<T extends CloudEvent<unknown>>(
   cf: CloudFunction<T> | CallableFunction<any, any>

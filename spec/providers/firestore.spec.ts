@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as firebase from 'firebase-admin';
 import * as sinon from 'sinon';
 import * as http from 'http';
-import { FeaturesList } from '../../src/features';
+import { FeaturesList } from '../../src/types/commonTypes';
 import fft = require('../../src/index');
 
 describe('providers/firestore', () => {
