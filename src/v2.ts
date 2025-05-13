@@ -35,7 +35,7 @@ export type WrappedV2Function<T extends CloudEvent<unknown>> = (
 ) => any | Promise<any>;
 
 export type WrappedV2CallableFunction<T> = (
-  data: CallableRequest
+  data: DeepPartial<CallableRequest>
 ) => T | Promise<T>;
 
 function isCallableV2Function<T extends CloudEvent<unknown>>(
