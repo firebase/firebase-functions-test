@@ -33,7 +33,10 @@ describe('mockSecretManager', () => {
   });
 
   it('supports non-string values (coerced to string)', () => {
-    const conf: Record<string, string> = { NUM_VALUE: '123', BOOL_VALUE: 'true' };
+    const conf: Record<string, string> = {
+      NUM_VALUE: '123',
+      BOOL_VALUE: 'true',
+    };
 
     mockSecretManager(conf);
 
