@@ -1,13 +1,29 @@
 import { expect } from 'chai';
 import * as firebase from 'firebase-admin';
+import * as sinon from 'sinon';
+import * as http from 'http';
 import { FeaturesList } from '../../src/features';
 import fft = require('../../src/index');
 
 describe('providers/firestore', () => {
   let test: FeaturesList;
+  let fakeHttpRequestMethod;
+  let fakeHttpResponse;
 
   beforeEach(() => {
     test = fft();
+    fakeHttpResponse = {
+      statusCode: 200,
+      on: (event, cb) => cb(),
+    };
+    fakeHttpRequestMethod = sinon.fake((config, cb) => {
+      cb(fakeHttpResponse);
+    });
+    sinon.replace(http, 'request', fakeHttpRequestMethod);
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   it('produces the right snapshot with makeDocumentSnapshot', async () => {
@@ -70,5 +86,37 @@ describe('providers/firestore', () => {
       firebase.firestore.DocumentReference
     );
     expect(snapshot.data().ref.toString()).to.equal(ref.toString());
+  });
+
+  it('should use host name from FIRESTORE_EMULATOR_HOST env in clearFirestoreData', async () => {
+    process.env.FIRESTORE_EMULATOR_HOST = 'not-local-host:8080';
+
+    await test.firestore.clearFirestoreData({ projectId: 'not-a-project' });
+
+    expect(
+      fakeHttpRequestMethod.calledOnceWith({
+        hostname: 'not-local-host',
+        method: 'DELETE',
+        path:
+          '/emulator/v1/projects/not-a-project/databases/(default)/documents',
+        port: '8080',
+      })
+    ).to.be.true;
+  });
+
+  it('should use host name from FIREBASE_FIRESTORE_EMULATOR_ADDRESS env in clearFirestoreData', async () => {
+    process.env.FIREBASE_FIRESTORE_EMULATOR_ADDRESS = 'custom-host:9090';
+
+    await test.firestore.clearFirestoreData({ projectId: 'not-a-project' });
+
+    expect(
+      fakeHttpRequestMethod.calledOnceWith({
+        hostname: 'custom-host',
+        method: 'DELETE',
+        path:
+          '/emulator/v1/projects/not-a-project/databases/(default)/documents',
+        port: '9090',
+      })
+    ).to.be.true;
   });
 });
