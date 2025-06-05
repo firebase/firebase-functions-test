@@ -2,7 +2,7 @@
 
 The `firebase-functions-test` is unit testing library for Cloud Functions for Firebase. It is a companion to [firebase-functions](https://github.com/Firebase/firebase-functions).
 
-_NOTE: This library can only be used with `firebase-functions` v3.20.1 or above._
+_NOTE: This library can only be used with `firebase-functions` v3.22.0 or above._
 
 ## Usage
 
