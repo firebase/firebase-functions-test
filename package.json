@@ -39,7 +39,6 @@
   "homepage": "https://github.com/firebase/firebase-functions-test#readme",
   "dependencies": {
     "@types/lodash": "^4.17.20",
-    "install": "^0.13.0",
     "lodash": "^4.17.5",
     "ts-deepmerge": "^2.0.1"
   },
