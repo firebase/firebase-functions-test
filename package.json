@@ -38,8 +38,8 @@
   },
   "homepage": "https://github.com/firebase/firebase-functions-test#readme",
   "dependencies": {
-    "@types/lodash": "^4.14.104",
-    "lodash": "^4.17.5",
+    "@types/lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "ts-deepmerge": "^2.0.1"
   },
   "devDependencies": {
