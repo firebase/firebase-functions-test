@@ -20,15 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
-import { CallableFunction, CallableRequest } from 'firebase-functions/v2/https';
-
-import { generateCombinedCloudEvent } from './cloudevent/generate';
-import { DeepPartial } from './cloudevent/types';
-import {
+import type { CloudFunction, CloudEvent } from 'firebase-functions/v2';
+import type { CallableFunction, CallableRequest } from 'firebase-functions/v2/https';
+import type {
   ScheduledEvent,
   ScheduleFunction,
 } from 'firebase-functions/v2/scheduler';
+
+import { generateCombinedCloudEvent } from './cloudevent/generate';
+import { DeepPartial } from './cloudevent/types';
 
 type V2WrappableFunctions =
   | CloudFunction<any>
