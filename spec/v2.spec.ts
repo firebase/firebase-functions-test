@@ -23,6 +23,7 @@
 import { expect } from 'chai';
 
 import { wrapV2 } from '../src/v2';
+import type { WrappedV2ScheduledFunction } from '../src/v2';
 
 import {
   CloudFunction,
@@ -35,6 +36,7 @@ import {
   eventarc,
   https,
   firestore,
+  scheduler,
 } from 'firebase-functions/v2';
 import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
@@ -1418,6 +1420,41 @@ describe('v2', () => {
             ),
             json: data.message.json,
           });
+        });
+      });
+    });
+
+    describe('scheduler', () => {
+      describe('onSchedule()', () => {
+        it('should return correct data', async () => {
+          const scheduledFunction = scheduler.onSchedule(
+            'every 5 minutes',
+            (_e) => {}
+          );
+
+          scheduledFunction.__endpoint = {
+            platform: 'gcfv2',
+            labels: {},
+            scheduleTrigger: {
+              schedule: 'every 5 minutes',
+            },
+            concurrency: 20,
+            minInstances: 3,
+            region: ['us-west1', 'us-central1'],
+          };
+
+          let wrappedFunction: WrappedV2ScheduledFunction;
+
+          expect(
+            () => (wrappedFunction = wrapV2(scheduledFunction))
+          ).not.to.throw();
+
+          const result = await wrappedFunction({
+            scheduleTime: '2024-01-01T00:00:00Z',
+            jobName: 'test-job',
+          });
+
+          expect(result).to.be.undefined;
         });
       });
     });
