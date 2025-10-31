@@ -138,7 +138,7 @@ export function wrapV2<T extends CloudEvent<unknown>>(
 function createScheduledWrapper(
   cloudFunction: ScheduleFunction
 ): WrappedV2ScheduledFunction {
-  return function(options: ScheduledEvent) {
+  return (options: ScheduledEvent) => {
     _checkOptionValidity(['jobName', 'scheduleTime'], options);
     return cloudFunction.run(options);
   };
