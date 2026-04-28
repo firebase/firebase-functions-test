@@ -99,4 +99,3 @@ availableSecrets:
   secretManager:
     - versionName: projects/firebase-functions-publishing/secrets/firebase-functions-github-pat/versions/latest
       env: 'GITHUB_TOKEN'
-
