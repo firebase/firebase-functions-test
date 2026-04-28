@@ -12,19 +12,6 @@ steps:
         '--key=${_KEY_NAME}',
       ]
 
-  # Decrypt the Twitter credentials.
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      [
-        'kms',
-        'decrypt',
-        '--ciphertext-file=twitter.json.enc',
-        '--plaintext-file=twitter.json',
-        '--location=global',
-        '--keyring=${_KEY_RING}',
-        '--key=${_KEY_NAME}',
-      ]
-
   # Decrypt the npm credentials.
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
@@ -61,11 +48,6 @@ steps:
   - name: 'gcr.io/cloud-builders/git'
     dir: '${_REPOSITORY_NAME}'
     args: ['config', '--global', 'user.name', 'Google Open Source Bot']
-
-  # Set up the Twitter credentials.
-  - name: 'gcr.io/$PROJECT_ID/fft-package-builder'
-    entrypoint: 'cp'
-    args: ['-v', 'twitter.json', '${_REPOSITORY_NAME}/scripts/twitter.json']
 
   # Set up the npm credentials.
   - name: 'gcr.io/$PROJECT_ID/fft-package-builder'
