@@ -58,7 +58,8 @@ echo "Moved to temporary directory."
 
 echo "Cloning repository..."
 if [[ -n "$GITHUB_TOKEN" ]]; then
-  git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPOSITORY_ORG}/${REPOSITORY_NAME}.git"
+  git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+  git clone "https://github.com/${REPOSITORY_ORG}/${REPOSITORY_NAME}.git"
 else
   git clone "git@github.com:${REPOSITORY_ORG}/${REPOSITORY_NAME}.git"
 fi
