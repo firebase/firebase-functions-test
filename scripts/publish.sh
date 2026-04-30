@@ -121,7 +121,3 @@ echo "Pushed to GitHub."
 echo "Publishing release notes..."
 hub release create --file "${RELEASE_NOTES_FILE}" "v${NEW_VERSION}"
 echo "Published release notes."
-
-
-
-
