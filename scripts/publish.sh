@@ -57,11 +57,7 @@ cd "${TEMPDIR}"
 echo "Moved to temporary directory."
 
 echo "Cloning repository..."
-if [[ -n "$GITHUB_TOKEN" ]]; then
-  git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPOSITORY_ORG}/${REPOSITORY_NAME}.git"
-else
-  git clone "git@github.com:${REPOSITORY_ORG}/${REPOSITORY_NAME}.git"
-fi
+git clone "git@github.com:${REPOSITORY_ORG}/${REPOSITORY_NAME}.git"
 cd "${REPOSITORY_NAME}"
 echo "Cloned repository."
 
@@ -125,7 +121,3 @@ echo "Pushed to GitHub."
 echo "Publishing release notes..."
 hub release create --file "${RELEASE_NOTES_FILE}" "v${NEW_VERSION}"
 echo "Published release notes."
-
-
-
-
