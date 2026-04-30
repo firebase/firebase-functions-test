@@ -57,7 +57,11 @@ cd "${TEMPDIR}"
 echo "Moved to temporary directory."
 
 echo "Cloning repository..."
-git clone "git@github.com:${REPOSITORY_ORG}/${REPOSITORY_NAME}.git"
+if [[ -n "$GITHUB_TOKEN" ]]; then
+  git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${REPOSITORY_ORG}/${REPOSITORY_NAME}.git"
+else
+  git clone "git@github.com:${REPOSITORY_ORG}/${REPOSITORY_NAME}.git"
+fi
 cd "${REPOSITORY_NAME}"
 echo "Cloned repository."
 
