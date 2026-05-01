@@ -80,9 +80,14 @@ export function wrap<T, V extends CloudEvent<unknown>>(
   | WrappedFunction<T>
   | WrappedV2Function<V>
   | WrappedV2CallableFunction<T> {
-  if (isV2CloudFunction<V>(cloudFunction)) {
-    return wrapV2<V>(cloudFunction as CloudFunctionV2<V>);
+  if (!cloudFunction) {
+    throw new Error('Cannot wrap: undefined cloud function');
   }
+
+  if (isV2CloudFunction<V>(cloudFunction)) {
+    return wrapV2<V>(cloudFunction);
+  }
+
   return wrapV1<T>(
     cloudFunction as HttpsFunctionOrCloudFunctionV1<T, typeof cloudFunction>
   );
@@ -93,12 +98,23 @@ export function wrap<T, V extends CloudEvent<unknown>>(
  * <ul>
  *    <li> V1 CloudFunction is sometimes a binary function
  *    <li> V2 CloudFunction is always a unary function
+ *    <li> V2 ScheduleFunction is a binary function (HttpsFunctionV2)
+ *
  *    <li> V1 CloudFunction.run is always a binary function
  *    <li> V2 CloudFunction.run is always a unary function
+ *    <li> V2 ScheduleFunction.run is always a unary function
+ * </ul>
+ *
  * @return True iff the CloudFunction is a V2 function.
  */
 function isV2CloudFunction<T extends CloudEvent<unknown>>(
-  cloudFunction: any
+  cloudFunction: CloudFunctionV1<T> | CloudFunctionV2<T> | HttpsFunctionV2
 ): cloudFunction is CloudFunctionV2<T> {
-  return cloudFunction.length === 1 && cloudFunction?.run?.length === 1;
+  if (!cloudFunction) {
+    return false;
+  }
+
+  type CloudFunctionType = CloudFunctionV1<T> | CloudFunctionV2<T>;
+
+  return (cloudFunction as CloudFunctionType).run.length === 1;
 }
