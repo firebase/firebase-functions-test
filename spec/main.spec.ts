@@ -239,6 +239,25 @@ describe('main', () => {
       });
     });
 
+    describe('v2 callable functions', () => {
+      it('should route to v2 path when outer and run have length 0', () => {
+        const cloudFunction = (..._args: unknown[]) => {};
+        set(cloudFunction, 'run', (req) => {
+          return { auth: req.auth };
+        });
+        set(cloudFunction, '__endpoint', {
+          platform: 'gcfv2',
+          callableTrigger: {},
+        });
+        const wrapped = wrap(cloudFunction as functions.CloudFunction<any>);
+        const result = wrapped({
+          data: { ping: true },
+          auth: { uid: 'test-user' },
+        });
+        expect(result.auth).to.deep.equal({ uid: 'test-user' });
+      });
+    });
+
     describe('callable functions', () => {
       let wrappedCF;
 
