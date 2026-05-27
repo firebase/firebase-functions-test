@@ -110,6 +110,10 @@ function isV2CloudFunction<T extends CloudEvent<unknown>>(
   cloudFunction: any
 ): cloudFunction is CloudFunctionV2<T> {
   if (cloudFunction?.__endpoint?.platform === 'gcfv2') {
+    // Prefer __endpoint.platform when available: this catches
+    // firebase-functions@7-style rest-param wrappers, where both function
+    // lengths can be 0. The arity check below remains as a fallback for older
+    // v2 functions that may not have __endpoint.platform set.
     return true;
   }
   return cloudFunction.length === 1 && cloudFunction?.run?.length === 1;
