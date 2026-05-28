@@ -25,6 +25,7 @@ import { CallableFunction, CallableRequest } from 'firebase-functions/v2/https';
 
 import { generateCombinedCloudEvent } from './cloudevent/generate';
 import { DeepPartial } from './cloudevent/types';
+import { getFirebaseFunctionsPeerDependency } from './utils';
 import * as express from 'express';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
@@ -44,13 +45,25 @@ function isCallableV2Function<T extends CloudEvent<unknown>>(
   return !!cf?.__endpoint?.callableTrigger;
 }
 
+function hasRun<T extends CloudEvent<unknown>>(
+  cf: CloudFunction<T> | CallableFunction<any, any>
+): cf is CloudFunction<T> {
+  return !!cf && 'run' in cf && !!cf.run;
+}
+
+function getUnsupportedCloudFunctionMessage() {
+  return (
+    'There was a problem wrapping your function. Expected a V2 CloudFunction with a run method. ' +
+    'This can happen when the function is not a V2 CloudFunction or was written with an unsupported version of firebase-functions. ' +
+    `Are you using firebase-functions ${getFirebaseFunctionsPeerDependency()}?`
+  );
+}
+
 function assertIsCloudFunction<T extends CloudEvent<unknown>>(
   cf: CloudFunction<T> | CallableFunction<any, any>
 ): asserts cf is CloudFunction<T> {
-  if (!('run' in cf) || !cf.run) {
-    throw new Error(
-      'This library can only be used with functions written with firebase-functions v3.20.0 and above'
-    );
+  if (!hasRun(cf)) {
+    throw new Error(getUnsupportedCloudFunctionMessage());
   }
 }
 
