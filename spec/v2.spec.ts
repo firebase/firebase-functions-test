@@ -39,11 +39,24 @@ import {
 import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
 import { makeDocumentSnapshot } from '../src/providers/firestore';
+import { makeChange } from '../src/v1';
 import { inspect } from 'util';
 
 describe('v2', () => {
   describe('#wrapV2', () => {
     const handler = (cloudEvent) => ({ cloudEvent });
+
+    function assertWrappedV2FunctionTypes() {
+      const cloudFn = firestore.onDocumentWritten('foo/bar/baz', handler);
+      const cloudFnWrap = wrapV2(cloudFn);
+      const before = makeDocumentSnapshot({ snapshot: 'before' }, 'foo/bar/baz');
+      const after = makeDocumentSnapshot({ snapshot: 'after' }, 'foo/bar/baz');
+      const change = makeChange(before, after);
+
+      cloudFnWrap({ data: change });
+      // @ts-expect-error V2 wrappers accept CloudEvent partials, not raw event data.
+      cloudFnWrap(change);
+    }
 
     describe('alerts', () => {
       describe('alerts.onAlertPublished()', () => {
