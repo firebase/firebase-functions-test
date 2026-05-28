@@ -25,8 +25,8 @@ const PACKAGE_JSON_PATHS = ['../package.json', '../../package.json'];
 export function getFirebaseFunctionsPeerDependency() {
   for (const packageJsonPath of PACKAGE_JSON_PATHS) {
     try {
-      const firebaseFunctionsVersion =
-        require(packageJsonPath).peerDependencies?.['firebase-functions'];
+      const firebaseFunctionsVersion = require(packageJsonPath)
+        .peerDependencies?.['firebase-functions'];
       if (firebaseFunctionsVersion) {
         return firebaseFunctionsVersion;
       }
