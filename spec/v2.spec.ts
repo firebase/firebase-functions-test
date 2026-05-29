@@ -46,7 +46,7 @@ describe('v2', () => {
   describe('#wrapV2', () => {
     const handler = (cloudEvent) => ({ cloudEvent });
 
-    function assertWrappedV2FunctionTypes() {
+    it('should restrict V2 wrapper arguments to CloudEvent partials', () => {
       const cloudFn = firestore.onDocumentWritten('foo/bar/baz', handler);
       const cloudFnWrap = wrapV2(cloudFn);
       const before = makeDocumentSnapshot({ snapshot: 'before' }, 'foo/bar/baz');
@@ -56,7 +56,7 @@ describe('v2', () => {
       cloudFnWrap({ data: change });
       // @ts-expect-error V2 wrappers accept CloudEvent partials, not raw event data.
       cloudFnWrap(change);
-    }
+    });
 
     describe('alerts', () => {
       describe('alerts.onAlertPublished()', () => {
