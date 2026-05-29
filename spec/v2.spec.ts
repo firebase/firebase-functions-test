@@ -49,7 +49,10 @@ describe('v2', () => {
     it('should restrict V2 wrapper arguments to CloudEvent partials', () => {
       const cloudFn = firestore.onDocumentWritten('foo/bar/baz', handler);
       const cloudFnWrap = wrapV2(cloudFn);
-      const before = makeDocumentSnapshot({ snapshot: 'before' }, 'foo/bar/baz');
+      const before = makeDocumentSnapshot(
+        { snapshot: 'before' },
+        'foo/bar/baz'
+      );
       const after = makeDocumentSnapshot({ snapshot: 'after' }, 'foo/bar/baz');
       const change = makeChange(before, after);
 
