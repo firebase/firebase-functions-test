@@ -48,7 +48,12 @@ function isCallableV2Function<T extends CloudEvent<unknown>>(
 function hasRun<T extends CloudEvent<unknown>>(
   cf: CloudFunction<T> | CallableFunction<any, any>
 ): cf is CloudFunction<T> {
-  return !!cf && 'run' in cf && !!cf.run;
+  return (
+    !!cf &&
+    (typeof cf === 'object' || typeof cf === 'function') &&
+    'run' in cf &&
+    !!cf.run
+  );
 }
 
 function getUnsupportedCloudFunctionMessage() {

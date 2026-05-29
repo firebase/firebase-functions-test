@@ -47,13 +47,13 @@ describe('v2', () => {
     it('should throw when passed an unsupported function', () => {
       const peerDependency = require(process.cwd() + '/package.json')
         .peerDependencies['firebase-functions'];
-
-      expect(() => wrapV2({} as any)).to.throw(
-        Error,
+      const message =
         'There was a problem wrapping your function. Expected a V2 CloudFunction with a run method. ' +
-          'This can happen when the function is not a V2 CloudFunction or was written with an unsupported version of firebase-functions. ' +
-          `Are you using firebase-functions ${peerDependency}?`
-      );
+        'This can happen when the function is not a V2 CloudFunction or was written with an unsupported version of firebase-functions. ' +
+        `Are you using firebase-functions ${peerDependency}?`;
+
+      expect(() => wrapV2({} as any)).to.throw(Error, message);
+      expect(() => wrapV2('not a function' as any)).to.throw(Error, message);
     });
 
     describe('alerts', () => {
