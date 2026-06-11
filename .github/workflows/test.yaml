@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 20.x
           - 22.x
+          - 24.x
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -36,8 +36,8 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 20.x
           - 22.x
+          - 24.x
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
