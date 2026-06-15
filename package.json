@@ -4,14 +4,14 @@
   "description": "A testing companion to firebase-functions.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "npm i && node_modules/.bin/tsc -p tsconfig.release.json",
-    "build:pack": "npm prune --production && rm -rf lib && npm install && node_modules/.bin/tsc -p tsconfig.release.json && npm pack && npm install",
-    "build:release": "npm ci --production && npm install --no-save typescript firebase-functions firebase-admin && node_modules/.bin/tsc -p tsconfig.release.json",
-    "lint": "node_modules/.bin/tslint src/{**/*,*}.ts spec/{**/*,*}.ts",
-    "pretest": "node_modules/.bin/tsc",
+    "build": "npm i && tsc -p tsconfig.release.json",
+    "build:pack": "npm prune --production && rm -rf lib && npm install && tsc -p tsconfig.release.json && npm pack && npm install",
+    "build:release": "npm ci --production && npm install --no-save typescript firebase-functions firebase-admin && tsc -p tsconfig.release.json",
+    "lint": "tslint src/{**/*,*}.ts spec/{**/*,*}.ts",
+    "pretest": "tsc",
     "test": "mocha .tmp/spec/index.spec.js",
     "posttest": "npm run lint && rm -rf .tmp",
-    "preintegrationTest": "node_modules/.bin/tsc",
+    "preintegrationTest": "tsc",
     "integrationTest": "firebase emulators:exec --project=not-a-project --only firestore 'mocha .tmp/spec/integration/**/*.spec.js'",
     "postintegrationTest": "rm -rf .tmp",
     "format": "prettier --check '**/*.{json,ts,yml,yaml}'",
@@ -54,7 +54,7 @@
     "prettier": "^1.19.1",
     "sinon": "^7.5.0",
     "tslint": "^5.20.0",
-    "typescript": "^4.2.5"
+    "typescript": "^5.7.3"
   },
   "peerDependencies": {
     "firebase-admin": "^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.0.0",
