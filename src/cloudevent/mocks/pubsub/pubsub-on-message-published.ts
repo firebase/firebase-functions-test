@@ -7,9 +7,9 @@ import {
   PROJECT_ID,
 } from '../helpers';
 
-export const pubsubOnMessagePublished: MockCloudEventAbstractFactory<CloudEvent<
-  pubsub.MessagePublishedData
->> = {
+export const pubsubOnMessagePublished: MockCloudEventAbstractFactory<
+  CloudEvent<pubsub.MessagePublishedData>
+> = {
   generateMock(
     cloudFunction: CloudFunction<CloudEvent<pubsub.MessagePublishedData>>,
     cloudEventPartial?: DeepPartial<CloudEvent<pubsub.MessagePublishedData>>

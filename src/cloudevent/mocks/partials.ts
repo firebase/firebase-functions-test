@@ -37,37 +37,36 @@ import { firestoreOnDocumentWrittenWithAuthContext } from './firestore/firestore
  * (eg {@link alertsOnAlertPublished}). In addition,
  * {@link eventarcOnCustomEventPublished} acts as a catch-all.
  */
-export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: MockCloudEventAbstractFactory<
-  any
->[] = [
-  alertsCrashlyticsOnNewAnrIssuePublished,
-  alertsCrashlyticsOnNewFatalIssuePublished,
-  alertsCrashlyticsOnNewNonfatalIssuePublished,
-  alertsCrashlyticsOnRegressionAlertPublished,
-  alertsCrashlyticsOnStabilityDigestPublished,
-  alertsCrashlyticsOnVelocityAlertPublished,
-  alertsAppDistributionOnNewTesterIosDevicePublished,
-  alertsBillingOnPlanAutomatedUpdatePublished,
-  alertsBillingOnPlanUpdatePublished,
-  performanceThresholdOnThresholdAlertPublished,
-  alertsOnAlertPublished, // Note: alert.onAlertPublished matching is more generic
-  remoteConfigOnConfigUpdated,
-  testLabOnTestMatrixCompleted,
-  storageV1,
-  pubsubOnMessagePublished,
-  databaseOnValueCreated,
-  databaseOnValueDeleted,
-  databaseOnValueUpdated,
-  databaseOnValueWritten,
-  firestoreOnDocumentCreated,
-  firestoreOnDocumentDeleted,
-  firestoreOnDocumentUpdated,
-  firestoreOnDocumentWritten,
-  firestoreOnDocumentCreatedWithAuthContext,
-  firestoreOnDocumentDeletedWithAuthContext,
-  firestoreOnDocumentUpdatedWithAuthContext,
-  firestoreOnDocumentWrittenWithAuthContext,
+export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: MockCloudEventAbstractFactory<any>[] =
+  [
+    alertsCrashlyticsOnNewAnrIssuePublished,
+    alertsCrashlyticsOnNewFatalIssuePublished,
+    alertsCrashlyticsOnNewNonfatalIssuePublished,
+    alertsCrashlyticsOnRegressionAlertPublished,
+    alertsCrashlyticsOnStabilityDigestPublished,
+    alertsCrashlyticsOnVelocityAlertPublished,
+    alertsAppDistributionOnNewTesterIosDevicePublished,
+    alertsBillingOnPlanAutomatedUpdatePublished,
+    alertsBillingOnPlanUpdatePublished,
+    performanceThresholdOnThresholdAlertPublished,
+    alertsOnAlertPublished, // Note: alert.onAlertPublished matching is more generic
+    remoteConfigOnConfigUpdated,
+    testLabOnTestMatrixCompleted,
+    storageV1,
+    pubsubOnMessagePublished,
+    databaseOnValueCreated,
+    databaseOnValueDeleted,
+    databaseOnValueUpdated,
+    databaseOnValueWritten,
+    firestoreOnDocumentCreated,
+    firestoreOnDocumentDeleted,
+    firestoreOnDocumentUpdated,
+    firestoreOnDocumentWritten,
+    firestoreOnDocumentCreatedWithAuthContext,
+    firestoreOnDocumentDeletedWithAuthContext,
+    firestoreOnDocumentUpdatedWithAuthContext,
+    firestoreOnDocumentWrittenWithAuthContext,
 
-  // CustomEventPublished must be called last
-  eventarcOnCustomEventPublished,
-];
+    // CustomEventPublished must be called last
+    eventarcOnCustomEventPublished,
+  ];
