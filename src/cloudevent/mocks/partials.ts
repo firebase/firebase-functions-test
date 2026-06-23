@@ -37,9 +37,9 @@ import { firestoreOnDocumentWrittenWithAuthContext } from './firestore/firestore
  * (eg {@link alertsOnAlertPublished}). In addition,
  * {@link eventarcOnCustomEventPublished} acts as a catch-all.
  */
-export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: Array<MockCloudEventAbstractFactory<
+export const LIST_OF_MOCK_CLOUD_EVENT_PARTIALS: MockCloudEventAbstractFactory<
   any
->> = [
+>[] = [
   alertsCrashlyticsOnNewAnrIssuePublished,
   alertsCrashlyticsOnNewFatalIssuePublished,
   alertsCrashlyticsOnNewNonfatalIssuePublished,
