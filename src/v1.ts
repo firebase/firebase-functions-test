@@ -347,7 +347,7 @@ export function _extractParams(
 
 function serviceFromEventType(eventType?: string): string {
   if (eventType) {
-    const providerToService: Array<[string, string]> = [
+    const providerToService: [string, string][] = [
       ['google.analytics', 'app-measurement.com'],
       ['google.firebase.auth', 'firebaseauth.googleapis.com'],
       ['google.firebase.database', 'firebaseio.com'],
