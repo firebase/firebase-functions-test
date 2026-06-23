@@ -40,7 +40,7 @@
   "dependencies": {
     "@types/lodash": "^4.14.104",
     "lodash": "^4.17.5",
-    "ts-deepmerge": "^2.0.1"
+    "ts-deepmerge": "^8.0.0"
   },
   "devDependencies": {
     "@types/chai": "~4.2.4",
