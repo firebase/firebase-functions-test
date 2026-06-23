@@ -12,9 +12,9 @@ import {
   PROJECT_ID,
 } from '../helpers';
 
-export const alertsBillingOnPlanUpdatePublished: MockCloudEventAbstractFactory<BillingEvent<
-  PlanUpdatePayload
->> = {
+export const alertsBillingOnPlanUpdatePublished: MockCloudEventAbstractFactory<
+  BillingEvent<PlanUpdatePayload>
+> = {
   generateMock(
     cloudFunction: CloudFunction<BillingEvent<PlanUpdatePayload>>
   ): BillingEvent<PlanUpdatePayload> {
