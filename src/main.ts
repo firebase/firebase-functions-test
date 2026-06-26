@@ -38,7 +38,12 @@ import {
 
 import { wrapV1, WrappedFunction, WrappedScheduledFunction } from './v1';
 
-import { wrapV2, WrappedV2Function, WrappedV2CallableFunction } from './v2';
+import {
+  wrapV2,
+  WrappedV2Function,
+  WrappedV2CallableFunction,
+  isCallableV2Function,
+} from './v2';
 
 type HttpsFunctionOrCloudFunctionV1<T, U> = U extends HttpsFunction &
   Runnable<T>
@@ -80,8 +85,12 @@ export function wrap<T, V extends CloudEvent<unknown>>(
   | WrappedFunction<T>
   | WrappedV2Function<V>
   | WrappedV2CallableFunction<T> {
+  if (isCallableV2Function(cloudFunction)) {
+    const v2Callable = cloudFunction as CallableFunction<any, T>;
+    return wrapV2(v2Callable);
+  }
   if (isV2CloudFunction<V>(cloudFunction)) {
-    return wrapV2<V>(cloudFunction as CloudFunctionV2<V>);
+    return wrapV2(cloudFunction as CloudFunctionV2<V>);
   }
   return wrapV1<T>(
     cloudFunction as HttpsFunctionOrCloudFunctionV1<T, typeof cloudFunction>
@@ -100,5 +109,12 @@ export function wrap<T, V extends CloudEvent<unknown>>(
 function isV2CloudFunction<T extends CloudEvent<unknown>>(
   cloudFunction: any
 ): cloudFunction is CloudFunctionV2<T> {
+  if (cloudFunction?.__endpoint?.platform === 'gcfv2') {
+    // Prefer __endpoint.platform when available: this catches
+    // firebase-functions@7-style rest-param wrappers, where both function
+    // lengths can be 0. The arity check below remains as a fallback for older
+    // v2 functions that may not have __endpoint.platform set.
+    return true;
+  }
   return cloudFunction.length === 1 && cloudFunction?.run?.length === 1;
 }
