@@ -45,6 +45,8 @@ type HttpsFunctionOrCloudFunctionV1<T, U> = U extends HttpsFunction &
   ? HttpsFunction & Runnable<T>
   : CloudFunctionV1<T>;
 
+export { mockSecretManager } from './secretManager';
+
 // Re-exporting V1 (to reduce breakage)
 export {
   ContextOptions,
