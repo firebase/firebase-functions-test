@@ -97,8 +97,7 @@ describe('providers/firestore', () => {
       fakeHttpRequestMethod.calledOnceWith({
         hostname: 'not-local-host',
         method: 'DELETE',
-        path:
-          '/emulator/v1/projects/not-a-project/databases/(default)/documents',
+        path: '/emulator/v1/projects/not-a-project/databases/(default)/documents',
         port: '8080',
       })
     ).to.be.true;
@@ -113,8 +112,7 @@ describe('providers/firestore', () => {
       fakeHttpRequestMethod.calledOnceWith({
         hostname: 'custom-host',
         method: 'DELETE',
-        path:
-          '/emulator/v1/projects/not-a-project/databases/(default)/documents',
+        path: '/emulator/v1/projects/not-a-project/databases/(default)/documents',
         port: '9090',
       })
     ).to.be.true;
