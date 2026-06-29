@@ -169,9 +169,8 @@ describe('v2', () => {
 
       describe('alerts.crashlytics.onNewNonfatalIssuePublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.crashlytics.onNewNonfatalIssuePublished(
-            handler
-          );
+          const cloudFn =
+            alerts.crashlytics.onNewNonfatalIssuePublished(handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent).deep.equal({
@@ -202,9 +201,8 @@ describe('v2', () => {
 
       describe('alerts.crashlytics.onRegressionAlertPublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.crashlytics.onRegressionAlertPublished(
-            handler
-          );
+          const cloudFn =
+            alerts.crashlytics.onRegressionAlertPublished(handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent).deep.equal({
@@ -237,9 +235,8 @@ describe('v2', () => {
 
       describe('alerts.crashlytics.onStabilityDigestPublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.crashlytics.onStabilityDigestPublished(
-            handler
-          );
+          const cloudFn =
+            alerts.crashlytics.onStabilityDigestPublished(handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent).deep.equal({
@@ -313,9 +310,8 @@ describe('v2', () => {
 
       describe('alerts.appDistribution.onNewTesterIosDevicePublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.appDistribution.onNewTesterIosDevicePublished(
-            handler
-          );
+          const cloudFn =
+            alerts.appDistribution.onNewTesterIosDevicePublished(handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent).deep.equal({
@@ -344,9 +340,8 @@ describe('v2', () => {
 
       describe('alerts.billing.onPlanAutomatedUpdatePublished()', () => {
         it('should update CloudEvent appropriately', () => {
-          const cloudFn = alerts.billing.onPlanAutomatedUpdatePublished(
-            handler
-          );
+          const cloudFn =
+            alerts.billing.onPlanAutomatedUpdatePublished(handler);
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent).deep.equal({
@@ -478,9 +473,8 @@ describe('v2', () => {
         it('should resolve default document given StringParam', () => {
           process.env.doc_path = 'foo/StringParam/baz';
           const cloudFn = firestore.onDocumentCreated('', handler);
-          cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.document = defineString(
-            'doc_path'
-          );
+          cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.document =
+            defineString('doc_path');
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
 
@@ -754,9 +748,8 @@ describe('v2', () => {
             instance: 'instance-1',
           };
           const cloudFn = database.onValueCreated(referenceOptions, handler);
-          cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.ref = defineString(
-            'rtdb_ref'
-          );
+          cloudFn.__endpoint.eventTrigger.eventFilterPathPatterns.ref =
+            defineString('rtdb_ref');
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEvent = cloudFnWrap().cloudEvent;
           expect(cloudEvent.ref).equal('foo/StringParam/baz');
@@ -1371,8 +1364,8 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = { data };
 
-          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data
-            .message;
+          const message =
+            cloudFnWrap(cloudEventPartial).cloudEvent.data.message;
           expect(message).deep.equal({
             // Mock data (can be overridden)
             attributes: {
@@ -1402,8 +1395,8 @@ describe('v2', () => {
           const cloudFnWrap = wrapV2(cloudFn);
           const cloudEventPartial = { data };
 
-          const message = cloudFnWrap(cloudEventPartial).cloudEvent.data
-            .message;
+          const message =
+            cloudFnWrap(cloudEventPartial).cloudEvent.data.message;
           expect(message).deep.equal({
             // Mock data (can be overridden)
             attributes: {

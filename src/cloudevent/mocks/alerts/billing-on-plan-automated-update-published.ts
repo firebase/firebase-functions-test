@@ -12,9 +12,9 @@ import {
   PROJECT_ID,
 } from '../helpers';
 
-export const alertsBillingOnPlanAutomatedUpdatePublished: MockCloudEventAbstractFactory<BillingEvent<
-  PlanAutomatedUpdatePayload
->> = {
+export const alertsBillingOnPlanAutomatedUpdatePublished: MockCloudEventAbstractFactory<
+  BillingEvent<PlanAutomatedUpdatePayload>
+> = {
   generateMock(
     cloudFunction: CloudFunction<BillingEvent<PlanAutomatedUpdatePayload>>
   ): BillingEvent<PlanAutomatedUpdatePayload> {
@@ -40,9 +40,7 @@ export const alertsBillingOnPlanAutomatedUpdatePublished: MockCloudEventAbstract
   },
 };
 
-function getBillingPlanAutomatedUpdateData(): FirebaseAlertData<
-  PlanAutomatedUpdatePayload
-> {
+function getBillingPlanAutomatedUpdateData(): FirebaseAlertData<PlanAutomatedUpdatePayload> {
   const now = new Date().toISOString();
   return {
     createTime: now,
