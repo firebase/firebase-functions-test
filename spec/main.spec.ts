@@ -239,6 +239,51 @@ describe('main', () => {
       });
     });
 
+    describe('v2 callable functions', () => {
+      it('should route to v2 path when outer and run have length 0', () => {
+        const cloudFunction = (..._args: unknown[]) => {};
+        set(cloudFunction, 'run', (...args: unknown[]) => {
+          const [req] = args;
+          return { auth: (req as any).auth };
+        });
+        set(cloudFunction, '__endpoint', {
+          platform: 'gcfv2',
+          callableTrigger: {},
+        });
+        const wrapped = wrap(cloudFunction as functions.CloudFunction<any>);
+        const result = wrapped({
+          data: { ping: true },
+          auth: { uid: 'test-user' },
+        });
+        expect(result.auth).to.deep.equal({ uid: 'test-user' });
+      });
+    });
+
+    describe('v1 callable functions with endpoint metadata', () => {
+      it('should route v1 callables with callableTrigger metadata to wrapV1', () => {
+        const cloudFunction = (input) => input;
+        set(cloudFunction, 'run', (data, context) => {
+          return { data, context };
+        });
+        set(cloudFunction, '__endpoint', {
+          platform: 'gcfv1',
+          callableTrigger: {},
+        });
+        const wrapped: any = wrap(cloudFunction as any);
+        const result = wrapped('data', {
+          auth: { uid: 'abc' },
+          app: { appId: 'efg' },
+          instanceIdToken: '123',
+          rawRequest: { body: 'hello' },
+        });
+        expect(result.data).to.equal('data');
+        expect(result.context.auth).to.deep.equal({ uid: 'abc' });
+        expect(result.context.app).to.deep.equal({ appId: 'efg' });
+        expect(result.context.instanceIdToken).to.equal('123');
+        expect(result.context.rawRequest).to.deep.equal({ body: 'hello' });
+      });
+    });
+
     describe('callable functions', () => {
       let wrappedCF;
 
