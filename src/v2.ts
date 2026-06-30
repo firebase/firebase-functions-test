@@ -37,13 +37,18 @@ export type WrappedV2Function<T extends CloudEvent<unknown>> = (
   cloudEventPartial?: DeepPartial<T | object>
 ) => any | Promise<any>;
 
-type WrappedV2CallableRequest<T> = {
-  data: T;
+type WrappedV2CallableRequest<T> = ([T] extends [undefined | void]
+  ? { data?: T }
+  : { data: T }) & {
   rawRequest?: Partial<Request>;
 } & Partial<Omit<CallableRequest<T>, 'data' | 'rawRequest'>>;
 
+type WrappedV2CallableArgs<T> = [T] extends [undefined | void]
+  ? [request?: WrappedV2CallableRequest<T>]
+  : [request: WrappedV2CallableRequest<T>];
+
 export type WrappedV2CallableFunction<T, Return> = (
-  data: WrappedV2CallableRequest<T>
+  ...args: WrappedV2CallableArgs<T>
 ) => Return;
 
 function isCallableV2Function<T extends CloudEvent<unknown>>(
@@ -82,8 +87,10 @@ export function wrapV2<T extends CloudEvent<unknown>>(
   cloudFunction: CloudFunction<T> | CallableFunction<any, any>
 ): WrappedV2Function<T> | WrappedV2CallableFunction<any, any> {
   if (isCallableV2Function(cloudFunction)) {
-    return (req: WrappedV2CallableRequest<any>) => {
-      return cloudFunction.run(req as CallableRequest<any>);
+    return (request?: WrappedV2CallableRequest<any>) => {
+      return cloudFunction.run(
+        (request ?? { data: undefined }) as CallableRequest<any>
+      );
     };
   }
 
