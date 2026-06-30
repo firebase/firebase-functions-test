@@ -12,9 +12,9 @@ import {
 } from 'firebase-functions/v2/alerts/crashlytics';
 import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 
-export const alertsCrashlyticsOnNewAnrIssuePublished: MockCloudEventAbstractFactory<CrashlyticsEvent<
-  NewAnrIssuePayload
->> = {
+export const alertsCrashlyticsOnNewAnrIssuePublished: MockCloudEventAbstractFactory<
+  CrashlyticsEvent<NewAnrIssuePayload>
+> = {
   generateMock(
     cloudFunction: CloudFunction<CrashlyticsEvent<NewAnrIssuePayload>>
   ): CrashlyticsEvent<NewAnrIssuePayload> {
@@ -39,9 +39,7 @@ export const alertsCrashlyticsOnNewAnrIssuePublished: MockCloudEventAbstractFact
   },
 };
 
-function getCrashlyticsNewAnrIssueData(): FirebaseAlertData<
-  NewAnrIssuePayload
-> {
+function getCrashlyticsNewAnrIssueData(): FirebaseAlertData<NewAnrIssuePayload> {
   const now = new Date().toISOString();
   return {
     createTime: now,
