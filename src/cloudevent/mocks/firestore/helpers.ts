@@ -24,14 +24,8 @@ export function getDocumentSnapshotCloudEvent(
     firestore.FirestoreEvent<DocumentSnapshot | object>
   >
 ) {
-  const {
-    location,
-    project,
-    database,
-    namespace,
-    document,
-    params,
-  } = getFirestoreEventFields(cloudFunction, cloudEventPartial);
+  const { location, project, database, namespace, document, params } =
+    getFirestoreEventFields(cloudFunction, cloudEventPartial);
   const data = getOrCreateDocumentSnapshot(cloudEventPartial?.data, document);
   return {
     ...getBaseCloudEvent(cloudFunction),
@@ -81,14 +75,8 @@ export function getDocumentSnapshotChangeCloudEvent(
     firestore.FirestoreEvent<Change<DocumentSnapshot> | ChangeLike>
   >
 ) {
-  const {
-    location,
-    project,
-    database,
-    namespace,
-    document,
-    params,
-  } = getFirestoreEventFields(cloudFunction, cloudEventPartial);
+  const { location, project, database, namespace, document, params } =
+    getFirestoreEventFields(cloudFunction, cloudEventPartial);
   const data = getOrCreateDocumentSnapshotChange(
     cloudEventPartial?.data,
     document
