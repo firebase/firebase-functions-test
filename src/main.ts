@@ -64,9 +64,9 @@ export { WrappedV2Function } from './v2';
 export function wrap<T>(
   cloudFunction: HttpsFunction & Runnable<T>
 ): WrappedFunction<T, HttpsFunction & Runnable<T>>;
-export function wrap<T>(
-  cloudFunction: CallableFunction<any, T>
-): WrappedV2CallableFunction<T>;
+export function wrap<T, Return>(
+  cloudFunction: CallableFunction<T, Return>
+): WrappedV2CallableFunction<T, Return>;
 export function wrap<T>(
   cloudFunction: CloudFunctionV1<T>
 ): WrappedScheduledFunction | WrappedFunction<T>;
@@ -79,7 +79,7 @@ export function wrap<T, V extends CloudEvent<unknown>>(
   | WrappedScheduledFunction
   | WrappedFunction<T>
   | WrappedV2Function<V>
-  | WrappedV2CallableFunction<T> {
+  | WrappedV2CallableFunction<any, any> {
   if (isV2CloudFunction<V>(cloudFunction)) {
     return wrapV2<V>(cloudFunction as CloudFunctionV2<V>);
   }
