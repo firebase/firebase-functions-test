@@ -76,9 +76,9 @@ export function makeDocumentSnapshot(
 ) {
   let firestoreService;
   let project;
-  if (has(options, 'app')) {
+  if (has(options, 'firebaseApp')) {
     firestoreService = firestore(options.firebaseApp);
-    project = get(options, 'app.options.projectId');
+    project = get(options, 'firebaseApp.options.projectId');
   } else {
     firestoreService = firestore(testApp().getApp());
     project = process.env.GCLOUD_PROJECT;
