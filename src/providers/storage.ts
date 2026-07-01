@@ -20,15 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { storage } from 'firebase-functions';
+import { storage } from 'firebase-functions/v1';
 
 /** Create an ObjectMetadata */
 export function makeObjectMetadata(
   /** Fields of ObjectMetadata that you'd like to specify. */
   fields: { [key: string]: string }
 ): storage.ObjectMetadata {
-  const configBucket = JSON.parse(process.env.FIREBASE_CONFIG || '{}')
-    .storageBucket;
+  const configBucket = JSON.parse(
+    process.env.FIREBASE_CONFIG || '{}'
+  ).storageBucket;
   const template = {
     kind: 'storage#object',
     id: '',

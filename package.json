@@ -1,13 +1,13 @@
 {
   "name": "firebase-functions-test",
-  "version": "0.2.3",
+  "version": "3.5.0",
   "description": "A testing companion to firebase-functions.",
   "main": "lib/index.js",
   "scripts": {
     "build": "npm i && node_modules/.bin/tsc -p tsconfig.release.json",
     "build:pack": "npm prune --production && rm -rf lib && npm install && node_modules/.bin/tsc -p tsconfig.release.json && npm pack && npm install",
-    "build:release": "npm install --production && npm install --no-save typescript firebase-functions firebase-admin && node_modules/.bin/tsc -p tsconfig.release.json",
-    "lint": "node_modules/.bin/tslint src/{**/*,*}.ts spec/{**/*,*}.ts",
+    "build:release": "npm ci --production && npm install --no-save typescript firebase-functions firebase-admin && node_modules/.bin/tsc -p tsconfig.release.json",
+    "lint": "eslint \"src/**/*.ts\" \"spec/**/*.ts\"",
     "pretest": "node_modules/.bin/tsc",
     "test": "mocha .tmp/spec/index.spec.js",
     "posttest": "npm run lint && rm -rf .tmp",
@@ -38,28 +38,34 @@
   },
   "homepage": "https://github.com/firebase/firebase-functions-test#readme",
   "dependencies": {
-    "@types/lodash": "^4.14.104",
-    "lodash": "^4.17.5"
+    "@types/lodash": "^4.14.202",
+    "lodash": "^4.17.21",
+    "ts-deepmerge": "^8.0.0"
   },
   "devDependencies": {
     "@types/chai": "~4.2.4",
-    "@types/mocha": "^5.2.7",
+    "@types/express": "4.17.8",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^18.19.130",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "chai": "^4.2.0",
-    "firebase-admin": "~8.9.0",
-    "firebase-functions": "^3.3.0",
-    "firebase-tools": "^8.9.2",
-    "mocha": "^6.2.2",
-    "prettier": "^1.19.1",
-    "sinon": "^7.5.0",
-    "tslint": "^5.20.0",
-    "typescript": "^3.6.4"
+    "eslint": "^8.57.1",
+    "firebase-admin": "^12.0.0",
+    "firebase-functions": "^4.9.0",
+    "firebase-tools": "^13.15.4",
+    "mocha": "^11.7.6",
+    "prettier": "^2.8.8",
+    "sinon": "^15.0.0",
+    "typescript": "^5.5.4"
   },
   "peerDependencies": {
-    "firebase-functions": ">=2.0.0",
-    "firebase-admin": ">=6.0.0"
+    "firebase-admin": "^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0 || ^12.0.0 || ^13.0.0",
+    "firebase-functions": ">=4.9.0",
+    "jest": ">=28.0.0"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=22.0.0"
   },
   "typings": "lib/index.d.ts"
 }

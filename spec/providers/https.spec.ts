@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import fft = require('../../src/index');
 
 const cfToUpperCaseOnRequest = functions.https.onRequest((req, res) => {

@@ -20,14 +20,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { Change } from 'firebase-functions';
-import { dateToTimestampProto } from 'firebase-functions/lib/encoder';
+import { Change } from 'firebase-functions/v1';
 import { firestore, app } from 'firebase-admin';
 import { has, get, isEmpty, isPlainObject, mapValues } from 'lodash';
+import { inspect } from 'util';
 
 import { testApp } from '../app';
 
 import * as http from 'http';
+import {
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
+} from 'firebase-admin/firestore';
+
+function dateToTimestampProto(
+  timeString?: string
+): { seconds: number; nanos: number } | undefined {
+  if (typeof timeString === 'undefined') {
+    return;
+  }
+  const date = new Date(timeString);
+  const seconds = Math.floor(date.getTime() / 1000);
+  let nanos = 0;
+  if (timeString.length > 20) {
+    const nanoString = timeString.substring(20, timeString.length - 1);
+    const trailingZeroes = 9 - nanoString.length;
+    nanos = parseInt(nanoString, 10) * Math.pow(10, trailingZeroes);
+  }
+  return { seconds, nanos };
+}
 
 /** Optional parameters for creating a DocumentSnapshot. */
 export interface DocumentSnapshotOptions {
@@ -103,9 +124,7 @@ export function exampleDocumentSnapshot(): firestore.DocumentSnapshot {
 /** Fetch an example Change object of document snapshots already populated with data.
  * Can be passed into a wrapped Firestore onUpdate or onWrite function.
  */
-export function exampleDocumentSnapshotChange(): Change<
-  firestore.DocumentSnapshot
-> {
+export function exampleDocumentSnapshotChange(): Change<firestore.DocumentSnapshot> {
   return Change.fromObjects(
     makeDocumentSnapshot(
       {
@@ -173,6 +192,10 @@ export function objectToValueProto(data: object) {
       };
     }
     if (val === null) {
+      // TODO: Look this up. This is a google.protobuf.NulLValue,
+      // and everything in google.protobuf has a customized JSON encoder.
+      // OTOH, Firestore's generated .d.ts files don't take this into
+      // account and have the default proto layout.
       return {
         nullValue: 'NULL_VALUE',
       };
@@ -199,6 +222,14 @@ export function objectToValueProto(data: object) {
         timestampValue: val.toDate().toISOString(),
       };
     }
+    if (val instanceof firestore.GeoPoint) {
+      return {
+        geoPointValue: {
+          latitude: val.latitude,
+          longitude: val.longitude,
+        },
+      };
+    }
     if (isPlainObject(val)) {
       return {
         mapValue: {
@@ -210,7 +241,7 @@ export function objectToValueProto(data: object) {
       'Cannot encode ' +
         val +
         'to a Firestore Value.' +
-        ' Local testing does not yet support Firestore geo points.'
+        ` Local testing does not yet support objects of type ${val?.constructor?.name}.`
     );
   };
 
@@ -222,15 +253,14 @@ const FIRESTORE_ADDRESS_ENVS = [
   'FIREBASE_FIRESTORE_EMULATOR_ADDRESS',
 ];
 
-const FIRESTORE_ADDRESS = FIRESTORE_ADDRESS_ENVS.reduce(
-  (addr, name) => process.env[name] || addr,
-  'localhost:8080'
-);
-const FIRESTORE_PORT = FIRESTORE_ADDRESS.split(':')[1];
-
 /** Clears all data in firestore. Works only in offline mode.
  */
 export function clearFirestoreData(options: { projectId: string } | string) {
+  const FIRESTORE_ADDRESS = FIRESTORE_ADDRESS_ENVS.reduce(
+    (addr, name) => process.env[name] || addr,
+    'localhost:8080'
+  );
+
   return new Promise((resolve, reject) => {
     let projectId;
 
@@ -244,8 +274,8 @@ export function clearFirestoreData(options: { projectId: string } | string) {
 
     const config = {
       method: 'DELETE',
-      hostname: 'localhost',
-      port: FIRESTORE_PORT,
+      hostname: FIRESTORE_ADDRESS.split(':')[0],
+      port: FIRESTORE_ADDRESS.split(':')[1],
       path: `/emulator/v1/projects/${projectId}/databases/(default)/documents`,
     };
 

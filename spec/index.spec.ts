@@ -39,7 +39,6 @@ describe('index', () => {
       'analytics',
       'auth',
       'cleanup',
-      'crashlytics',
       'database',
       'firestore',
       'makeChange',
@@ -68,6 +67,9 @@ describe('index', () => {
 
 import './lifecycle.spec';
 import './main.spec';
+import './secretmanager.spec';
+import './v2.spec';
+import './cloudevent/generate';
 import './app.spec';
 import './providers/https.spec';
 import './providers/firestore.spec';
@@ -78,4 +80,3 @@ import './providers/scheduled.spec';
 // import './providers/https.spec';
 // import './providers/pubsub.spec';
 // import './providers/storage.spec';
-// import './providers/crashlytics.spec';

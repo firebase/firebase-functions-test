@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { pubsub } from 'firebase-functions';
+import { pubsub } from 'firebase-functions/v1';
 
 /** Create a Message from a JSON object. */
 export function makeMessage(

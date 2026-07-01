@@ -20,227 +20,85 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { has, merge, random, get } from 'lodash';
+import {
+  CloudFunction as CloudFunctionV1,
+  HttpsFunction,
+  Runnable,
+} from 'firebase-functions/v1';
 
-import { CloudFunction, EventContext, Change, https, config } from 'firebase-functions';
+import {
+  CloudFunction as CloudFunctionV2,
+  CloudEvent,
+} from 'firebase-functions/v2';
 
-/** Fields of the event context that can be overridden/customized. */
-export type EventContextOptions = {
-  /** ID of the event. If omitted, a random ID will be generated. */
-  eventId?: string;
-  /** ISO time string of when the event occurred. If omitted, the current time is used. */
-  timestamp?: string;
-  /** The values for the wildcards in the reference path that a database or Firestore function is listening to.
-   * If omitted, random values will be generated.
-   */
-  params?: { [option: string]: any };
-  /** (Only for database functions and https.onCall.) Firebase auth variable representing the user that triggered
-   *  the function. Defaults to null.
-   */
-  auth?: any;
-  /** (Only for database and https.onCall functions.) The authentication state of the user that triggered the function.
-   * Default is 'UNAUTHENTICATED'.
-   */
-  authType?: 'ADMIN' | 'USER' | 'UNAUTHENTICATED';
+import {
+  CallableFunction,
+  HttpsFunction as HttpsFunctionV2,
+} from 'firebase-functions/v2/https';
 
-  /** Resource is a standard format for defining a resource (google.rpc.context.AttributeContext.Resource).
-   * In Cloud Functions, it is the resource that triggered the function - such as a storage bucket.
-   */
-  resource?: {
-    service: string;
-    name: string;
-    type?: string;
-    labels?: {
-      [tag: string]: string;
-    };
-  };
-};
+import { wrapV1, WrappedFunction, WrappedScheduledFunction } from './v1';
 
-/** Fields of the callable context that can be overridden/customized. */
-export type CallableContextOptions = {
-  /**
-   * The result of decoding and verifying a Firebase Auth ID token.
-   */
-  auth?: any;
+import { wrapV2, WrappedV2Function, WrappedV2CallableFunction } from './v2';
 
-  /**
-   * An unverified token for a Firebase Instance ID.
-   */
-  instanceIdToken?: string;
+type HttpsFunctionOrCloudFunctionV1<T, U> = U extends HttpsFunction &
+  Runnable<T>
+  ? HttpsFunction & Runnable<T>
+  : CloudFunctionV1<T>;
 
-  /**
-   * The raw HTTP request object.
-   */
-  rawRequest?: https.Request;
-};
+export { mockSecretManager } from './secretManager';
 
-/* Fields for both Event and Callable contexts, checked at runtime */
-export type ContextOptions = EventContextOptions | CallableContextOptions;
+// Re-exporting V1 (to reduce breakage)
+export {
+  ContextOptions,
+  EventContextOptions,
+  WrappedFunction,
+  WrappedScheduledFunction,
+  CallableContextOptions,
+  makeChange,
+  mockConfig,
+} from './v1';
 
-/** A function that can be called with test data and optional override values for the event context.
- * It will subsequently invoke the cloud function it wraps with the provided test data and a generated event context.
- */
-export type WrappedFunction = (
-  data: any,
-  options?: ContextOptions
-) => any | Promise<any>;
+// V2 Exports
+export { WrappedV2Function } from './v2';
 
-/** A scheduled function that can be called with optional override values for the event context.
- * It will subsequently invoke the cloud function it wraps with a generated event context.
- */
-export type WrappedScheduledFunction = (
-  options?: ContextOptions
-) => any | Promise<any>;
-
-/** Takes a cloud function to be tested, and returns a WrappedFunction which can be called in test code. */
 export function wrap<T>(
-  cloudFunction: CloudFunction<T>
-): WrappedScheduledFunction | WrappedFunction {
-  if (!has(cloudFunction, '__trigger')) {
-    throw new Error(
-      'Wrap can only be called on functions written with the firebase-functions SDK.'
-    );
+  cloudFunction: HttpsFunction & Runnable<T>
+): WrappedFunction<T, HttpsFunction & Runnable<T>>;
+export function wrap<T>(
+  cloudFunction: CallableFunction<any, T>
+): WrappedV2CallableFunction<T>;
+export function wrap<T>(
+  cloudFunction: CloudFunctionV1<T>
+): WrappedScheduledFunction | WrappedFunction<T>;
+export function wrap<T extends CloudEvent<unknown>>(
+  cloudFunction: CloudFunctionV2<T>
+): WrappedV2Function<T>;
+export function wrap<T, V extends CloudEvent<unknown>>(
+  cloudFunction: CloudFunctionV1<T> | CloudFunctionV2<V> | HttpsFunctionV2
+):
+  | WrappedScheduledFunction
+  | WrappedFunction<T>
+  | WrappedV2Function<V>
+  | WrappedV2CallableFunction<T> {
+  if (isV2CloudFunction<V>(cloudFunction)) {
+    return wrapV2<V>(cloudFunction as CloudFunctionV2<V>);
   }
-
-  if (get(cloudFunction, '__trigger.labels.deployment-scheduled') === 'true') {
-    const scheduledWrapped: WrappedScheduledFunction = (
-      options: ContextOptions
-    ) => {
-      // Although in Typescript we require `options` some of our JS samples do not pass it.
-      options = options || {};
-
-      _checkOptionValidity(['eventId', 'timestamp'], options);
-      const defaultContext = _makeDefaultContext(cloudFunction, options);
-      const context = merge({}, defaultContext, options);
-
-      // @ts-ignore
-      return cloudFunction.run(context);
-    };
-    return scheduledWrapped;
-  }
-
-  if (
-    has(cloudFunction, '__trigger.httpsTrigger') &&
-    get(cloudFunction, '__trigger.labels.deployment-callable') !== 'true'
-  ) {
-    throw new Error(
-      'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.'
-    );
-  }
-
-  if (!has(cloudFunction, 'run')) {
-    throw new Error(
-      'This library can only be used with functions written with firebase-functions v1.0.0 and above'
-    );
-  }
-
-  const isCallableFunction =
-    get(cloudFunction, '__trigger.labels.deployment-callable') === 'true';
-
-  let wrapped: WrappedFunction = (data: T, options: ContextOptions) => {
-    // Although in Typescript we require `options` some of our JS samples do not pass it.
-    options = options || {};
-    let context;
-
-    if (isCallableFunction) {
-      _checkOptionValidity(['auth', 'instanceIdToken', 'rawRequest'], options);
-      let callableContextOptions = options as CallableContextOptions;
-      context = {
-        ...callableContextOptions,
-      };
-    } else {
-      _checkOptionValidity(
-        ['eventId', 'timestamp', 'params', 'auth', 'authType', 'resource'],
-        options
-      );
-      const defaultContext = _makeDefaultContext(cloudFunction, options);
-
-      if (
-        has(defaultContext, 'eventType') &&
-        defaultContext.eventType !== undefined &&
-        defaultContext.eventType.match(/firebase.database/)
-      ) {
-        defaultContext.authType = 'UNAUTHENTICATED';
-        defaultContext.auth = null;
-      }
-      context = merge({}, defaultContext, options);
-    }
-
-    return cloudFunction.run(data, context);
-  };
-
-  return wrapped;
-}
-
-/** @internal */
-export function _makeResourceName(
-  triggerResource: string,
-  params = {}
-): string {
-  const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
-  let resourceName = triggerResource.replace(wildcardRegex, (wildcard) => {
-    let wildcardNoBraces = wildcard.slice(1, -1); // .slice removes '{' and '}' from wildcard
-    let sub = get(params, wildcardNoBraces);
-    return sub || wildcardNoBraces + random(1, 9);
-  });
-  return resourceName;
-}
-
-function _makeEventId(): string {
-  return (
-    Math.random()
-      .toString(36)
-      .substring(2, 15) +
-    Math.random()
-      .toString(36)
-      .substring(2, 15)
+  return wrapV1<T>(
+    cloudFunction as HttpsFunctionOrCloudFunctionV1<T, typeof cloudFunction>
   );
 }
 
-function _checkOptionValidity(
-  validFields: string[],
-  options: { [s: string]: any }
-) {
-  Object.keys(options).forEach((key) => {
-    if (validFields.indexOf(key) === -1) {
-      throw new Error(
-        `Options object ${JSON.stringify(options)} has invalid key "${key}"`
-      );
-    }
-  });
-}
-
-function _makeDefaultContext<T>(
-  cloudFunction: CloudFunction<T>,
-  options: ContextOptions
-): EventContext {
-  let eventContextOptions = options as EventContextOptions;
-  const defaultContext: EventContext = {
-    eventId: _makeEventId(),
-    resource: cloudFunction.__trigger.eventTrigger && {
-      service: cloudFunction.__trigger.eventTrigger.service,
-      name: _makeResourceName(
-        cloudFunction.__trigger.eventTrigger.resource,
-        has(eventContextOptions, 'params') && eventContextOptions.params
-      ),
-    },
-    eventType: get(cloudFunction, '__trigger.eventTrigger.eventType'),
-    timestamp: new Date().toISOString(),
-    params: {},
-  };
-  return defaultContext;
-}
-
-/** Make a Change object to be used as test data for Firestore and real time database onWrite and onUpdate functions. */
-export function makeChange<T>(before: T, after: T): Change<T> {
-  return Change.fromObjects(before, after);
-}
-
-/** Mock values returned by `functions.config()`. */
-export function mockConfig(conf: { [key: string]: { [key: string]: any } }) {
-  if (config.singleton) {
-    delete config.singleton;
-  }
-
-  process.env.CLOUD_RUNTIME_CONFIG = JSON.stringify(conf);
+/**
+ * The key differences between V1 and V2 CloudFunctions are:
+ * <ul>
+ *    <li> V1 CloudFunction is sometimes a binary function
+ *    <li> V2 CloudFunction is always a unary function
+ *    <li> V1 CloudFunction.run is always a binary function
+ *    <li> V2 CloudFunction.run is always a unary function
+ * @return True iff the CloudFunction is a V2 function.
+ */
+function isV2CloudFunction<T extends CloudEvent<unknown>>(
+  cloudFunction: any
+): cloudFunction is CloudFunctionV2<T> {
+  return cloudFunction.length === 1 && cloudFunction?.run?.length === 1;
 }

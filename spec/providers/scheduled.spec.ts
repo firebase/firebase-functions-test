@@ -1,5 +1,5 @@
 import * as sinon from 'sinon';
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import fft = require('../../src/index');
 import { WrappedScheduledFunction } from '../../src/main';
 
