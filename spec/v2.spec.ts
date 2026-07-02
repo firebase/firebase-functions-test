@@ -1428,7 +1428,7 @@ describe('v2', () => {
         };
 
         const wrappedCF = wrapV2(cloudFunction);
-        const result = await wrappedCF({} as any);
+        const result = await wrappedCF();
         expect(result).equal('hello');
       });
     });
