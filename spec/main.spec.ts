@@ -22,8 +22,6 @@
 
 import { expect } from 'chai';
 import * as functions from 'firebase-functions/v1';
-import { set } from 'lodash';
-
 import { mockConfig, makeChange, wrap } from '../src/main';
 import { _makeResourceName, _extractParams } from '../src/v1';
 import { features } from '../src/features';
@@ -36,10 +34,10 @@ describe('main', () => {
     describe('background functions', () => {
       const constructBackgroundCF = (eventType?: string) => {
         const cloudFunction = (input) => input;
-        set(cloudFunction, 'run', (data, context) => {
+        (cloudFunction as any).run = (data, context) => {
           return { data, context };
-        });
-        set(cloudFunction, '__endpoint', {
+        };
+        (cloudFunction as any).__endpoint = {
           eventTrigger: {
             eventFilters: {
               resource: 'ref/{wildcard}/nested/{anotherWildcard}',
@@ -47,7 +45,7 @@ describe('main', () => {
             eventType: eventType || 'event',
             retry: false,
           },
-        });
+        };
         return cloudFunction as functions.CloudFunction<any>;
       };
 
@@ -244,12 +242,12 @@ describe('main', () => {
 
       before(() => {
         const cloudFunction = (input) => input;
-        set(cloudFunction, 'run', (data, context) => {
+        (cloudFunction as any).run = (data, context) => {
           return { data, context };
-        });
-        set(cloudFunction, '__endpoint', {
+        };
+        (cloudFunction as any).__endpoint = {
           callableTrigger: {},
-        });
+        };
         wrappedCF = wrap(cloudFunction as functions.CloudFunction<any>);
       });
 

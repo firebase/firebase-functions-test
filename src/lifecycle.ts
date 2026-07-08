@@ -20,9 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { isEmpty } from 'lodash';
 import { AppOptions } from 'firebase-admin';
-import { forEach } from 'lodash';
 
 import { testApp } from './app';
 
@@ -53,7 +51,7 @@ export class FirebaseFunctionsTest {
       CLOUD_RUNTIME_CONFIG: process.env.CLOUD_RUNTIME_CONFIG,
     };
 
-    if (isEmpty(firebaseConfig)) {
+    if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
       process.env.FIREBASE_CONFIG = JSON.stringify({
         databaseURL: 'https://not-a-project.firebaseio.com',
         storageBucket: 'not-a-project.appspot.com',
@@ -72,13 +70,13 @@ export class FirebaseFunctionsTest {
 
   /** Complete clean up tasks. */
   cleanup() {
-    forEach(this._oldEnv, (val, varName) => {
+    for (const [varName, val] of Object.entries(this._oldEnv)) {
       if (typeof val !== 'undefined') {
         process.env[varName] = val;
       } else {
         delete process.env[varName];
       }
-    });
+    }
     testApp().deleteApp();
   }
 }
