@@ -22,7 +22,15 @@
 
 import { pubsub } from 'firebase-functions/v1';
 
-/** Create a Message from a JSON object. */
+/**
+ * Create a Message from a JSON object.
+ *
+ * Note: this helper is for v1 `functions.pubsub.topic(...).onPublish` functions
+ * only. Do not pass its result to `wrapV2`; for v2 `onMessagePublished`
+ * functions, pass a plain CloudEvent partial instead, e.g.
+ * `wrapV2(fn)({ data: { message: { json: { hello: 'world' } } } })` or
+ * `wrapV2(fn)({ data: { message: { data: base64String } } })`.
+ */
 export function makeMessage(
   /** Content of message. */
   json: { [key: string]: any },
@@ -30,7 +38,15 @@ export function makeMessage(
   attributes?: { [key: string]: string }
 ): pubsub.Message;
 
-/** Create a Message from a base-64 encoded string. */
+/**
+ * Create a Message from a base-64 encoded string.
+ *
+ * Note: this helper is for v1 `functions.pubsub.topic(...).onPublish` functions
+ * only. Do not pass its result to `wrapV2`; for v2 `onMessagePublished`
+ * functions, pass a plain CloudEvent partial instead, e.g.
+ * `wrapV2(fn)({ data: { message: { json: { hello: 'world' } } } })` or
+ * `wrapV2(fn)({ data: { message: { data: base64String } } })`.
+ */
 export function makeMessage(
   /** Base-64 encoded message string. */
   encodedString: string,
