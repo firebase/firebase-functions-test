@@ -405,13 +405,23 @@ export function _firebaseFunctionsMajorVersion(): number | undefined {
   return undefined;
 }
 
+let isConfigRemovedCache: boolean | undefined;
+
 /**
  * Returns true if the installed firebase-functions no longer supports
- * `functions.config()` (removed in v7).
+ * `functions.config()` (removed in v7). The result is cached, since the
+ * installed version cannot change within a process.
  * Exported for internal testing purposes only.
  * @internal
  */
 export function _isConfigRemoved(): boolean {
+  if (isConfigRemovedCache === undefined) {
+    isConfigRemovedCache = detectConfigRemoved();
+  }
+  return isConfigRemovedCache;
+}
+
+function detectConfigRemoved(): boolean {
   if (typeof config !== 'function') {
     return true;
   }
