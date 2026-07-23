@@ -88,6 +88,34 @@ describe('providers/firestore', () => {
     expect(snapshot.data().ref.toString()).to.equal(ref.toString());
   });
 
+  it('should use firebaseApp projectId in makeDocumentSnapshot options', async () => {
+    const customApp = firebase.initializeApp(
+      {
+        projectId: 'custom-project',
+      },
+      'custom-firestore-app'
+    );
+
+    try {
+      const snapshot = test.firestore.makeDocumentSnapshot(
+        {
+          email_address: 'test@test.com',
+        },
+        'collection/doc-id',
+        { firebaseApp: customApp }
+      );
+
+      expect(snapshot.data()).to.deep.equal({
+        email_address: 'test@test.com',
+      });
+      expect(snapshot.ref.formattedName).to.equal(
+        'projects/custom-project/databases/(default)/documents/collection/doc-id'
+      );
+    } finally {
+      await customApp.delete();
+    }
+  });
+
   it('should use host name from FIRESTORE_EMULATOR_HOST env in clearFirestoreData', async () => {
     process.env.FIRESTORE_EMULATOR_HOST = 'not-local-host:8080';
 
