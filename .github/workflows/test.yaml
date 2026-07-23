@@ -15,6 +15,9 @@ jobs:
         node-version:
           - 22.x
           - 24.x
+        firebase-functions:
+          - pinned
+          - '7'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -30,7 +33,22 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run format
-      - run: npm run test
+      - name: Run tests (pinned firebase-functions)
+        if: matrix.firebase-functions == 'pinned'
+        run: npm run test
+      # Specs do not compile against firebase-functions v7 typings, so
+      # compile against the pinned version, swap in v7, and run the
+      # compiled output. This mirrors how users hit version drift: their
+      # compiled code running against a newer firebase-functions.
+      - name: Compile specs against pinned firebase-functions
+        if: matrix.firebase-functions == '7'
+        run: npx tsc
+      - name: Swap in firebase-functions@7
+        if: matrix.firebase-functions == '7'
+        run: npm install --no-save firebase-functions@^7
+      - name: Run tests (firebase-functions@7)
+        if: matrix.firebase-functions == '7'
+        run: npx mocha .tmp/spec/index.spec.js
   integration:
     runs-on: ubuntu-latest
     strategy:
