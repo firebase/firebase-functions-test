@@ -20,6 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { has, merge, random, get } from 'lodash';
 
 import {
@@ -369,8 +372,99 @@ export function makeChange<T>(before: T, after: T): Change<T> {
   return Change.fromObjects(before, after);
 }
 
+/**
+ * Detects the major version of the installed firebase-functions package.
+ * Exported for internal testing purposes only.
+ * @internal
+ */
+export function _firebaseFunctionsMajorVersion(): number | undefined {
+  try {
+    // `firebase-functions/package.json` is not exposed by the package's
+    // exports map, so resolve the main entry point and walk up to the
+    // package root instead.
+    let dir = path.dirname(require.resolve('firebase-functions'));
+    while (dir !== path.dirname(dir)) {
+      const pkgPath = path.join(dir, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        if (
+          pkg.name === 'firebase-functions' &&
+          typeof pkg.version === 'string'
+        ) {
+          const major = parseInt(pkg.version.split('.')[0], 10);
+          if (!Number.isNaN(major)) {
+            return major;
+          }
+        }
+      }
+      dir = path.dirname(dir);
+    }
+  } catch (e) {
+    // Fall through to feature detection.
+  }
+  return undefined;
+}
+
+let isConfigRemovedCache: boolean | undefined;
+
+/**
+ * Returns true if the installed firebase-functions no longer supports
+ * `functions.config()` (removed in v7). The result is cached, since the
+ * installed version cannot change within a process.
+ * Exported for internal testing purposes only.
+ * @internal
+ */
+export function _isConfigRemoved(): boolean {
+  if (isConfigRemovedCache === undefined) {
+    isConfigRemovedCache = detectConfigRemoved();
+  }
+  return isConfigRemovedCache;
+}
+
+function detectConfigRemoved(): boolean {
+  if (typeof config !== 'function') {
+    return true;
+  }
+  const major = _firebaseFunctionsMajorVersion();
+  if (major !== undefined) {
+    return major >= 7;
+  }
+  // Fallback: feature-detect on the v1 entry point. In v7+, config()
+  // throws unconditionally; in v4-v6 it parses CLOUD_RUNTIME_CONFIG.
+  // K_CONFIGURATION must be cleared for the probe, since v4-v6's config()
+  // also throws unconditionally when it is set (GCFv2 detection).
+  const previous = process.env.CLOUD_RUNTIME_CONFIG;
+  const previousKConfiguration = process.env.K_CONFIGURATION;
+  process.env.CLOUD_RUNTIME_CONFIG = '{}';
+  delete process.env.K_CONFIGURATION;
+  try {
+    config();
+    return false;
+  } catch (e) {
+    return true;
+  } finally {
+    if (previous === undefined) {
+      delete process.env.CLOUD_RUNTIME_CONFIG;
+    } else {
+      process.env.CLOUD_RUNTIME_CONFIG = previous;
+    }
+    if (previousKConfiguration === undefined) {
+      delete process.env.K_CONFIGURATION;
+    } else {
+      process.env.K_CONFIGURATION = previousKConfiguration;
+    }
+  }
+}
+
 /** Mock values returned by `functions.config()`. */
 export function mockConfig(conf: { [key: string]: { [key: string]: any } }) {
+  if (_isConfigRemoved()) {
+    throw new Error(
+      'mockConfig() is not supported with firebase-functions v7+ because ' +
+        'functions.config() was removed. Migrate to environment parameters ' +
+        'using the params module.'
+    );
+  }
   if (resetCache) {
     resetCache();
   }

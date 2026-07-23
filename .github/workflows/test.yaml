@@ -4,6 +4,9 @@ on:
   - pull_request
   - push
 
+permissions:
+  contents: read
+
 env:
   CI: true
 
@@ -15,22 +18,44 @@ jobs:
         node-version:
           - 22.x
           - 24.x
+        firebase-functions:
+          - pinned
+          - '7'
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Cache npm
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
       - run: npm ci
-      - run: npm run lint
-      - run: npm run format
-      - run: npm run test
+      - name: Lint
+        if: matrix.firebase-functions == 'pinned'
+        run: npm run lint
+      - name: Format
+        if: matrix.firebase-functions == 'pinned'
+        run: npm run format
+      - name: Run tests (pinned firebase-functions)
+        if: matrix.firebase-functions == 'pinned'
+        run: npm run test
+      # Specs do not compile against firebase-functions v7 typings, so
+      # compile against the pinned version, swap in v7, and run the
+      # compiled output. This mirrors how users hit version drift: their
+      # compiled code running against a newer firebase-functions.
+      - name: Compile specs against pinned firebase-functions
+        if: matrix.firebase-functions == '7'
+        run: npx tsc
+      - name: Swap in firebase-functions@7
+        if: matrix.firebase-functions == '7'
+        run: npm install --no-save firebase-functions@^7
+      - name: Run tests (firebase-functions@7)
+        if: matrix.firebase-functions == '7'
+        run: npx mocha .tmp/spec/index.spec.js
   integration:
     runs-on: ubuntu-latest
     strategy:
@@ -39,13 +64,13 @@ jobs:
           - 22.x
           - 24.x
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@a37ce9120846195fa4ece8f58b268e6043cb2f26 # v3.7.0
+      - uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3.9.1
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Cache npm
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}

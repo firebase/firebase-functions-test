@@ -25,7 +25,7 @@ import * as functions from 'firebase-functions/v1';
 import { set } from 'lodash';
 
 import { mockConfig, makeChange, wrap } from '../src/main';
-import { _makeResourceName, _extractParams } from '../src/v1';
+import { _makeResourceName, _extractParams, _isConfigRemoved } from '../src/v1';
 import { features } from '../src/features';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
 import { alerts } from 'firebase-functions/v2';
@@ -329,17 +329,32 @@ describe('main', () => {
       delete process.env.CLOUD_RUNTIME_CONFIG;
     });
 
-    it('should mock functions.config()', () => {
-      mockConfig(config);
-      expect(functions.config()).to.deep.equal(config);
-    });
+    if (_isConfigRemoved()) {
+      // functions.config() was removed in firebase-functions v7, so
+      // mockConfig() must fail loudly with migration guidance.
+      it('should throw explaining that functions.config() was removed', () => {
+        expect(() => mockConfig(config)).to.throw(
+          'mockConfig() is not supported with firebase-functions v7+'
+        );
+      });
 
-    it('should purge singleton config object when it is present', () => {
-      mockConfig(config);
-      config.foo = { baz: 'qux' };
-      mockConfig(config);
+      it('should not set CLOUD_RUNTIME_CONFIG when throwing', () => {
+        expect(() => mockConfig(config)).to.throw();
+        expect(process.env.CLOUD_RUNTIME_CONFIG).to.be.undefined;
+      });
+    } else {
+      it('should mock functions.config()', () => {
+        mockConfig(config);
+        expect(functions.config()).to.deep.equal(config);
+      });
 
-      expect(functions.config()).to.deep.equal(config);
-    });
+      it('should purge singleton config object when it is present', () => {
+        mockConfig(config);
+        config.foo = { baz: 'qux' };
+        mockConfig(config);
+
+        expect(functions.config()).to.deep.equal(config);
+      });
+    }
   });
 });
