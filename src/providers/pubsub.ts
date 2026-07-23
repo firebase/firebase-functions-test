@@ -42,7 +42,10 @@ export function makeMessage(
  * Create a Message from a base-64 encoded string.
  *
  * Note: this helper is for v1 `functions.pubsub.topic(...).onPublish` functions
- * only. See the overload above for testing v2 `onMessagePublished` functions.
+ * only. Do not pass its result to `wrapV2`; for v2 `onMessagePublished`
+ * functions, pass a plain CloudEvent partial instead, e.g.
+ * `wrapV2(fn)({ data: { message: { json: { hello: 'world' } } } })` or
+ * `wrapV2(fn)({ data: { message: { data: base64String } } })`.
  */
 export function makeMessage(
   /** Base-64 encoded message string. */
