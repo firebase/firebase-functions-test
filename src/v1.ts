@@ -216,12 +216,8 @@ export function _makeResourceName(
 
 function _makeEventId(): string {
   return (
-    Math.random()
-      .toString(36)
-      .substring(2, 15) +
-    Math.random()
-      .toString(36)
-      .substring(2, 15)
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
   );
 }
 
@@ -347,7 +343,7 @@ export function _extractParams(
 
 function serviceFromEventType(eventType?: string): string {
   if (eventType) {
-    const providerToService: Array<[string, string]> = [
+    const providerToService: [string, string][] = [
       ['google.analytics', 'app-measurement.com'],
       ['google.firebase.auth', 'firebaseauth.googleapis.com'],
       ['google.firebase.database', 'firebaseio.com'],
@@ -358,9 +354,9 @@ function serviceFromEventType(eventType?: string): string {
       ['google.testing', 'testing.googleapis.com'],
     ];
 
-    const match = providerToService.find(([provider]) => {
-      eventType.includes(provider);
-    });
+    const match = providerToService.find(([provider]) =>
+      eventType.includes(provider)
+    );
     if (match) {
       return match[1];
     }

@@ -8,9 +8,9 @@ import {
 } from '../helpers';
 import { FirebaseAlertData, AlertEvent } from 'firebase-functions/v2/alerts';
 
-export const alertsOnAlertPublished: MockCloudEventAbstractFactory<AlertEvent<
-  FirebaseAlertData
->> = {
+export const alertsOnAlertPublished: MockCloudEventAbstractFactory<
+  AlertEvent<FirebaseAlertData>
+> = {
   generateMock(
     cloudFunction: CloudFunction<AlertEvent<FirebaseAlertData>>
   ): AlertEvent<FirebaseAlertData> {

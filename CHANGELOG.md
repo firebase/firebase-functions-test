@@ -1,0 +1,1 @@
+- chore: drop support for Node 18 and below (minimum supported version is now Node 20)

@@ -11,9 +11,9 @@ import {
   NewTesterDevicePayload,
 } from 'firebase-functions/v2/alerts/appDistribution';
 
-export const alertsAppDistributionOnNewTesterIosDevicePublished: MockCloudEventAbstractFactory<AppDistributionEvent<
-  NewTesterDevicePayload
->> = {
+export const alertsAppDistributionOnNewTesterIosDevicePublished: MockCloudEventAbstractFactory<
+  AppDistributionEvent<NewTesterDevicePayload>
+> = {
   generateMock(
     cloudFunction: CloudFunction<AppDistributionEvent<NewTesterDevicePayload>>
   ): AppDistributionEvent<NewTesterDevicePayload> {

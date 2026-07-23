@@ -124,9 +124,7 @@ export function exampleDocumentSnapshot(): firestore.DocumentSnapshot {
 /** Fetch an example Change object of document snapshots already populated with data.
  * Can be passed into a wrapped Firestore onUpdate or onWrite function.
  */
-export function exampleDocumentSnapshotChange(): Change<
-  firestore.DocumentSnapshot
-> {
+export function exampleDocumentSnapshotChange(): Change<firestore.DocumentSnapshot> {
   return Change.fromObjects(
     makeDocumentSnapshot(
       {
