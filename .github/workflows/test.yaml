@@ -31,8 +31,12 @@ jobs:
           key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
 
       - run: npm ci
-      - run: npm run lint
-      - run: npm run format
+      - name: Lint
+        if: matrix.firebase-functions == 'pinned'
+        run: npm run lint
+      - name: Format
+        if: matrix.firebase-functions == 'pinned'
+        run: npm run format
       - name: Run tests (pinned firebase-functions)
         if: matrix.firebase-functions == 'pinned'
         run: npm run test

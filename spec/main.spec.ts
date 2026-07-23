@@ -25,11 +25,7 @@ import * as functions from 'firebase-functions/v1';
 import { set } from 'lodash';
 
 import { mockConfig, makeChange, wrap } from '../src/main';
-import {
-  _makeResourceName,
-  _extractParams,
-  _firebaseFunctionsMajorVersion,
-} from '../src/v1';
+import { _makeResourceName, _extractParams, _isConfigRemoved } from '../src/v1';
 import { features } from '../src/features';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
 import { alerts } from 'firebase-functions/v2';
@@ -333,7 +329,7 @@ describe('main', () => {
       delete process.env.CLOUD_RUNTIME_CONFIG;
     });
 
-    if ((_firebaseFunctionsMajorVersion() ?? 0) >= 7) {
+    if (_isConfigRemoved()) {
       // functions.config() was removed in firebase-functions v7, so
       // mockConfig() must fail loudly with migration guidance.
       it('should throw explaining that functions.config() was removed', () => {

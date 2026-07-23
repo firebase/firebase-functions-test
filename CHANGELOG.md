@@ -1,1 +1,2 @@
 - chore: drop support for Node 18 and below (minimum supported version is now Node 20)
+- fix: mockConfig() now throws a clear migration error when firebase-functions v7+ is installed, since functions.config() was removed upstream (#334)

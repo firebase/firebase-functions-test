@@ -24,14 +24,14 @@ import { expect } from 'chai';
 
 import { FirebaseFunctionsTest } from '../src/lifecycle';
 import { mockConfig } from '../src/main';
-import { _firebaseFunctionsMajorVersion } from '../src/v1';
+import { _isConfigRemoved } from '../src/v1';
 import { afterEach } from 'mocha';
 
 // mockConfig() throws on firebase-functions v7+ because functions.config()
 // was removed. These tests only care about CLOUD_RUNTIME_CONFIG being
 // restored by cleanup(), so set the variable directly on v7+.
 function setRuntimeConfig(conf: { [key: string]: { [key: string]: any } }) {
-  if ((_firebaseFunctionsMajorVersion() ?? 0) >= 7) {
+  if (_isConfigRemoved()) {
     process.env.CLOUD_RUNTIME_CONFIG = JSON.stringify(conf);
   } else {
     mockConfig(conf);
