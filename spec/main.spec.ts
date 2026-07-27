@@ -327,17 +327,15 @@ describe('main', () => {
       delete process.env.CLOUD_RUNTIME_CONFIG;
     });
 
-    it('should mock functions.config()', () => {
+    it('should set CLOUD_RUNTIME_CONFIG', () => {
       mockConfig(config);
-      expect(functions.config()).to.deep.equal(config);
+      expect(JSON.parse(process.env.CLOUD_RUNTIME_CONFIG!)).to.deep.equal(config);
     });
 
-    it('should purge singleton config object when it is present', () => {
-      mockConfig(config);
-      config.foo = { baz: 'qux' };
-      mockConfig(config);
-
-      expect(functions.config()).to.deep.equal(config);
+    it('should throw because functions.config() is removed in v7', () => {
+      expect(() => (functions as any).config()).to.throw(
+        'functions.config() has been removed in firebase-functions v7'
+      );
     });
   });
 });

@@ -35,7 +35,6 @@ import {
   EventContext,
   Change,
   https,
-  config,
   database,
   firestore,
   HttpsFunction,
