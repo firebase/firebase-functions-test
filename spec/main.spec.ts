@@ -329,7 +329,9 @@ describe('main', () => {
 
     it('should set CLOUD_RUNTIME_CONFIG', () => {
       mockConfig(config);
-      expect(JSON.parse(process.env.CLOUD_RUNTIME_CONFIG!)).to.deep.equal(config);
+      expect(JSON.parse(process.env.CLOUD_RUNTIME_CONFIG!)).to.deep.equal(
+        config
+      );
     });
 
     it('should throw because functions.config() is removed in v7', () => {
