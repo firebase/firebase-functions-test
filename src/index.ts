@@ -21,7 +21,6 @@
 // SOFTWARE.
 
 import { AppOptions } from 'firebase-admin';
-import { merge } from 'lodash';
 
 import { FirebaseFunctionsTest } from './lifecycle';
 import { FeaturesList } from './features';
@@ -35,8 +34,9 @@ export = (
   // Ensure other files get loaded after init function, since they load `firebase-functions`
   // which will issue warning if process.env.FIREBASE_CONFIG is not yet set.
   let features = require('./features').features;
-  features = merge({}, features, {
+  features = {
+    ...features,
     cleanup: () => test.cleanup(),
-  });
+  };
   return features;
 };

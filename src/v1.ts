@@ -20,14 +20,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { has, merge, random, get } from 'lodash';
+import { merge } from 'ts-deepmerge';
+
+function random(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function isObjectOrFunction(val: any): boolean {
+  return val !== null && (typeof val === 'object' || typeof val === 'function');
+}
 
 import {
   CloudFunction,
   EventContext,
   Change,
   https,
-  config,
   database,
   firestore,
   HttpsFunction,
@@ -124,13 +131,16 @@ export function wrapV1<T>(
 export function wrapV1<T>(
   cloudFunction: CloudFunction<T>
 ): WrappedScheduledFunction | WrappedFunction<T, CloudFunction<T>> {
-  if (!has(cloudFunction, '__endpoint')) {
+  if (!isObjectOrFunction(cloudFunction) || !('__endpoint' in cloudFunction)) {
     throw new Error(
       'Wrap can only be called on functions written with the firebase-functions SDK.'
     );
   }
 
-  if (has(cloudFunction, '__endpoint.scheduleTrigger')) {
+  if (
+    isObjectOrFunction(cloudFunction?.__endpoint) &&
+    'scheduleTrigger' in cloudFunction.__endpoint
+  ) {
     const scheduledWrapped: WrappedScheduledFunction = (
       options: ContextOptions
     ) => {
@@ -139,7 +149,12 @@ export function wrapV1<T>(
 
       _checkOptionValidity(['eventId', 'timestamp'], options);
       const defaultContext = _makeDefaultContext(cloudFunction, options);
-      const context = merge({}, defaultContext, options);
+      const context = merge.withOptions(
+        { allowUndefinedOverrides: false },
+        {},
+        defaultContext,
+        options
+      );
 
       // @ts-ignore
       return cloudFunction.run(context);
@@ -147,19 +162,24 @@ export function wrapV1<T>(
     return scheduledWrapped;
   }
 
-  if (has(cloudFunction, '__endpoint.httpsTrigger')) {
+  if (
+    isObjectOrFunction(cloudFunction?.__endpoint) &&
+    'httpsTrigger' in cloudFunction.__endpoint
+  ) {
     throw new Error(
       'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.'
     );
   }
 
-  if (!has(cloudFunction, 'run')) {
+  if (!isObjectOrFunction(cloudFunction) || !('run' in cloudFunction)) {
     throw new Error(
       'This library can only be used with functions written with firebase-functions v1.0.0 and above'
     );
   }
 
-  const isCallableFunction = has(cloudFunction, '__endpoint.callableTrigger');
+  const isCallableFunction =
+    isObjectOrFunction(cloudFunction?.__endpoint) &&
+    'callableTrigger' in cloudFunction.__endpoint;
 
   let wrapped: WrappedFunction<T, typeof cloudFunction> = (data, options) => {
     // Although in Typescript we require `options` some of our JS samples do not pass it.
@@ -183,14 +203,18 @@ export function wrapV1<T>(
       const defaultContext = _makeDefaultContext(cloudFunction, _options, data);
 
       if (
-        has(defaultContext, 'eventType') &&
-        defaultContext.eventType !== undefined &&
+        defaultContext?.eventType &&
         defaultContext.eventType.match(/firebase.database/)
       ) {
         defaultContext.authType = 'UNAUTHENTICATED';
         defaultContext.auth = null;
       }
-      context = merge({}, defaultContext, _options);
+      context = merge.withOptions(
+        { allowUndefinedOverrides: false },
+        {},
+        defaultContext,
+        _options
+      );
     }
 
     return cloudFunction.run(data, context);
@@ -208,7 +232,7 @@ export function _makeResourceName(
   const wildcardRegex = new RegExp('{[^/{}]*}', 'g');
   let resourceName = resource.replace(wildcardRegex, (wildcard) => {
     let wildcardNoBraces = wildcard.slice(1, -1); // .slice removes '{' and '}' from wildcard
-    let sub = get(params, wildcardNoBraces);
+    let sub = params?.[wildcardNoBraces];
     return sub || wildcardNoBraces + random(1, 9);
   });
   return resourceName;

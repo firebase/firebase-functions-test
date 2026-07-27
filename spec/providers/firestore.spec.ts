@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as firebase from 'firebase-admin';
 import * as sinon from 'sinon';
-import * as http from 'http';
+import http = require('http');
 import { FeaturesList } from '../../src/features';
 import fft = require('../../src/index');
 

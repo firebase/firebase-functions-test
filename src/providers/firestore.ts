@@ -22,8 +22,25 @@
 
 import { Change } from 'firebase-functions/v1';
 import { firestore, app } from 'firebase-admin';
-import { has, get, isEmpty, isPlainObject, mapValues } from 'lodash';
-import { inspect } from 'util';
+
+function isPlainObject(value: any): boolean {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const proto = Object.getPrototypeOf(value);
+  return proto === null || proto === Object.prototype;
+}
+
+function mapValues<T, U>(
+  obj: Record<string, T>,
+  fn: (val: T) => U
+): Record<string, U> {
+  const res: Record<string, U> = {};
+  for (const [key, val] of Object.entries(obj)) {
+    res[key] = fn(val);
+  }
+  return res;
+}
 
 import { testApp } from '../app';
 
@@ -85,21 +102,22 @@ export function makeDocumentSnapshot(
   }
 
   const resource = `projects/${project}/databases/(default)/documents/${refPath}`;
-  const proto = isEmpty(data)
-    ? resource
-    : {
-        fields: objectToValueProto(data),
-        createTime: dateToTimestampProto(
-          get(options, 'createTime', new Date().toISOString())
-        ),
-        updateTime: dateToTimestampProto(
-          get(options, 'updateTime', new Date().toISOString())
-        ),
-        name: resource,
-      };
+  const proto =
+    !data || Object.keys(data).length === 0
+      ? resource
+      : {
+          fields: objectToValueProto(data),
+          createTime: dateToTimestampProto(
+            options?.createTime ?? new Date().toISOString()
+          ),
+          updateTime: dateToTimestampProto(
+            options?.updateTime ?? new Date().toISOString()
+          ),
+          name: resource,
+        };
 
   const readTimeProto = dateToTimestampProto(
-    get(options, 'readTime') || new Date().toISOString()
+    options?.readTime || new Date().toISOString()
   );
   return firestoreService.snapshot_(proto, readTimeProto, 'json');
 }
@@ -206,8 +224,8 @@ export function objectToValueProto(data: object) {
       };
     }
     if (val instanceof firestore.DocumentReference) {
-      const projectId: string = get(val, '_referencePath.projectId');
-      const database: string = get(val, '_referencePath.databaseId');
+      const projectId: string = (val as any)._referencePath?.projectId;
+      const database: string = (val as any)._referencePath?.databaseId;
       const referenceValue: string = [
         'projects',
         projectId,
@@ -266,7 +284,11 @@ export function clearFirestoreData(options: { projectId: string } | string) {
 
     if (typeof options === 'string') {
       projectId = options;
-    } else if (typeof options === 'object' && has(options, 'projectId')) {
+    } else if (
+      typeof options === 'object' &&
+      options &&
+      'projectId' in options
+    ) {
       projectId = options.projectId;
     } else {
       throw new Error('projectId not specified');
