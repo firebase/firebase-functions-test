@@ -24,11 +24,11 @@ import { Change } from 'firebase-functions/v1';
 import { firestore, app } from 'firebase-admin';
 
 function isPlainObject(value: any): boolean {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    Object.getPrototypeOf(value) === Object.prototype
-  );
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const proto = Object.getPrototypeOf(value);
+  return proto === null || proto === Object.prototype;
 }
 
 function mapValues<T, U>(
@@ -36,10 +36,8 @@ function mapValues<T, U>(
   fn: (val: T) => U
 ): Record<string, U> {
   const res: Record<string, U> = {};
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      res[key] = fn(obj[key]);
-    }
+  for (const [key, val] of Object.entries(obj)) {
+    res[key] = fn(val);
   }
   return res;
 }

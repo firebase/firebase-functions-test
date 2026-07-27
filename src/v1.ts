@@ -26,6 +26,10 @@ function random(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function isObjectOrFunction(val: any): boolean {
+  return val !== null && (typeof val === 'object' || typeof val === 'function');
+}
+
 import {
   CloudFunction,
   EventContext,
@@ -128,14 +132,14 @@ export function wrapV1<T>(
 export function wrapV1<T>(
   cloudFunction: CloudFunction<T>
 ): WrappedScheduledFunction | WrappedFunction<T, CloudFunction<T>> {
-  if (!cloudFunction || !('__endpoint' in cloudFunction)) {
+  if (!isObjectOrFunction(cloudFunction) || !('__endpoint' in cloudFunction)) {
     throw new Error(
       'Wrap can only be called on functions written with the firebase-functions SDK.'
     );
   }
 
   if (
-    cloudFunction?.__endpoint &&
+    isObjectOrFunction(cloudFunction?.__endpoint) &&
     'scheduleTrigger' in cloudFunction.__endpoint
   ) {
     const scheduledWrapped: WrappedScheduledFunction = (
@@ -146,7 +150,12 @@ export function wrapV1<T>(
 
       _checkOptionValidity(['eventId', 'timestamp'], options);
       const defaultContext = _makeDefaultContext(cloudFunction, options);
-      const context = merge({}, defaultContext, options);
+      const context = merge.withOptions(
+        { allowUndefinedOverrides: false },
+        {},
+        defaultContext,
+        options
+      );
 
       // @ts-ignore
       return cloudFunction.run(context);
@@ -154,20 +163,23 @@ export function wrapV1<T>(
     return scheduledWrapped;
   }
 
-  if (cloudFunction?.__endpoint && 'httpsTrigger' in cloudFunction.__endpoint) {
+  if (
+    isObjectOrFunction(cloudFunction?.__endpoint) &&
+    'httpsTrigger' in cloudFunction.__endpoint
+  ) {
     throw new Error(
       'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.'
     );
   }
 
-  if (!cloudFunction || !('run' in cloudFunction)) {
+  if (!isObjectOrFunction(cloudFunction) || !('run' in cloudFunction)) {
     throw new Error(
       'This library can only be used with functions written with firebase-functions v1.0.0 and above'
     );
   }
 
   const isCallableFunction =
-    !!cloudFunction?.__endpoint &&
+    isObjectOrFunction(cloudFunction?.__endpoint) &&
     'callableTrigger' in cloudFunction.__endpoint;
 
   let wrapped: WrappedFunction<T, typeof cloudFunction> = (data, options) => {
@@ -198,7 +210,12 @@ export function wrapV1<T>(
         defaultContext.authType = 'UNAUTHENTICATED';
         defaultContext.auth = null;
       }
-      context = merge({}, defaultContext, _options);
+      context = merge.withOptions(
+        { allowUndefinedOverrides: false },
+        {},
+        defaultContext,
+        _options
+      );
     }
 
     return cloudFunction.run(data, context);
