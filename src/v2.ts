@@ -21,11 +21,14 @@
 // SOFTWARE.
 
 import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
-import { CallableFunction, CallableRequest } from 'firebase-functions/v2/https';
+import {
+  CallableFunction,
+  CallableRequest,
+  Request,
+} from 'firebase-functions/v2/https';
 
 import { generateCombinedCloudEvent } from './cloudevent/generate';
 import { DeepPartial } from './cloudevent/types';
-import * as express from 'express';
 
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
@@ -34,9 +37,19 @@ export type WrappedV2Function<T extends CloudEvent<unknown>> = (
   cloudEventPartial?: DeepPartial<T | object>
 ) => any | Promise<any>;
 
-export type WrappedV2CallableFunction<T> = (
-  data: CallableRequest
-) => T | Promise<T>;
+type WrappedV2CallableRequest<T> = ([T] extends [undefined | void]
+  ? { data?: T }
+  : { data: T }) & {
+  rawRequest?: Partial<Request>;
+} & Partial<Omit<CallableRequest<T>, 'data' | 'rawRequest'>>;
+
+type WrappedV2CallableArgs<T> = [T] extends [undefined | void]
+  ? [request?: WrappedV2CallableRequest<T>]
+  : [request: WrappedV2CallableRequest<T>];
+
+export type WrappedV2CallableFunction<T, Return> = (
+  ...args: WrappedV2CallableArgs<T>
+) => Return;
 
 function isCallableV2Function<T extends CloudEvent<unknown>>(
   cf: CloudFunction<T> | CallableFunction<any, any>
@@ -66,16 +79,18 @@ export function wrapV2<T extends CloudEvent<unknown>>(
  * Takes a v2 HTTP function to be tested, and returns a {@link WrappedV2HttpsFunction}
  * which can be called in test code.
  */
-export function wrapV2(
-  cloudFunction: CallableFunction<any, any>
-): WrappedV2CallableFunction<any>;
+export function wrapV2<T, Return>(
+  cloudFunction: CallableFunction<T, Return>
+): WrappedV2CallableFunction<T, Return>;
 
 export function wrapV2<T extends CloudEvent<unknown>>(
   cloudFunction: CloudFunction<T> | CallableFunction<any, any>
-): WrappedV2Function<T> | WrappedV2CallableFunction<any> {
+): WrappedV2Function<T> | WrappedV2CallableFunction<any, any> {
   if (isCallableV2Function(cloudFunction)) {
-    return (req: CallableRequest) => {
-      return cloudFunction.run(req);
+    return (request?: WrappedV2CallableRequest<any>) => {
+      return cloudFunction.run(
+        (request ?? { data: undefined }) as CallableRequest<any>
+      );
     };
   }
 
