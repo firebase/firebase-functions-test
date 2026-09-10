@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import { database, Change } from 'firebase-functions/v1';
-import { app } from 'firebase-admin';
+import { App } from 'firebase-admin/app';
 
 import { testApp } from '../app';
 
@@ -36,7 +36,7 @@ export function makeDataSnapshot(
    * You do not need to supply this parameter if you supplied Firebase config values when initializing
    * firebase-functions-test.
    */
-  firebaseApp?: app.App,
+  firebaseApp?: App,
   /**
    * The RTDB instance to use when creating snapshot. This will override the `firebaseApp` parameter.
    * If omitted the default RTDB instance is used.
