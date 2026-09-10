@@ -1,5 +1,11 @@
 import { expect } from 'chai';
-import * as firebase from 'firebase-admin';
+import { deleteApp, initializeApp } from 'firebase-admin/app';
+import {
+  DocumentReference,
+  GeoPoint,
+  getFirestore,
+  Timestamp,
+} from 'firebase-admin/firestore';
 import * as sinon from 'sinon';
 import * as http from 'http';
 import { FeaturesList } from '../../src/features';
@@ -51,7 +57,7 @@ describe('providers/firestore', () => {
   });
 
   it('should allow geopoints with makeDocumentSnapshot', () => {
-    const hq = new firebase.firestore.GeoPoint(47.6703, 122.1971);
+    const hq = new GeoPoint(47.6703, 122.1971);
     const snapshot = test.firestore.makeDocumentSnapshot(
       { geopoint: hq },
       'collection/doc-id'
@@ -67,29 +73,30 @@ describe('providers/firestore', () => {
       'collection/doc-id'
     );
 
-    expect(snapshot.data().time).to.be.instanceof(firebase.firestore.Timestamp);
+    expect(snapshot.data().time).to.be.instanceof(Timestamp);
     expect(snapshot.data().time.toDate()).to.deep.equal(time);
   });
 
   it('should allow references with makeDocumentSnapshot', () => {
-    firebase.initializeApp({
+    initializeApp({
       projectId: 'not-a-project',
     });
 
-    const ref = firebase.firestore().doc('collection/doc-id');
+    const ref = getFirestore().doc('collection/doc-id');
     const snapshot = test.firestore.makeDocumentSnapshot(
       { ref },
       'collection/doc-id'
     );
 
-    expect(snapshot.data().ref).to.be.instanceOf(
-      firebase.firestore.DocumentReference
+    expect(snapshot.data().ref).to.be.instanceOf(DocumentReference);
+    expect(snapshot.data().ref.path).to.equal(ref.path);
+    expect(snapshot.data().ref.formattedName).to.equal(
+      'projects/not-a-project/databases/(default)/documents/collection/doc-id'
     );
-    expect(snapshot.data().ref.toString()).to.equal(ref.toString());
   });
 
   it('should use firebaseApp projectId in makeDocumentSnapshot options', async () => {
-    const customApp = firebase.initializeApp(
+    const customApp = initializeApp(
       {
         projectId: 'custom-project',
       },
@@ -112,7 +119,7 @@ describe('providers/firestore', () => {
         'projects/custom-project/databases/(default)/documents/collection/doc-id'
       );
     } finally {
-      await customApp.delete();
+      deleteApp(customApp);
     }
   });
 
