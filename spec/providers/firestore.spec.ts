@@ -95,6 +95,28 @@ describe('providers/firestore', () => {
     );
   });
 
+  it('should fall back to GCLOUD_PROJECT for references whose Firestore has no project id', () => {
+    // Mirrors a functions module creating its Firestore before the test SDK
+    // has set the environment, which is what hoisted imports do.
+    const savedProject = process.env.GCLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    const app = initializeApp({}, 'no-project');
+    const ref = getFirestore(app).doc('collection/doc-id');
+    process.env.GCLOUD_PROJECT = savedProject;
+
+    try {
+      const snapshot = test.firestore.makeDocumentSnapshot(
+        { ref },
+        'collection/doc-id'
+      );
+      expect(snapshot.data().ref.formattedName).to.equal(
+        'projects/not-a-project/databases/(default)/documents/collection/doc-id'
+      );
+    } finally {
+      deleteApp(app);
+    }
+  });
+
   it('should use firebaseApp projectId in makeDocumentSnapshot options', async () => {
     const customApp = initializeApp(
       {

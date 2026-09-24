@@ -212,10 +212,12 @@ export function objectToValueProto(data: object) {
     if (val instanceof DocumentReference) {
       // projectId and databaseId live on the Firestore instance, not on the
       // reference, and neither has a public accessor across the supported
-      // firebase-admin range.
+      // firebase-admin range. The `projectId` getter throws until the client
+      // has resolved a project, so read the field and fall back to the env.
       const projectId: string =
-        get(val, 'firestore.projectId') ||
-        get(val, 'firestore._settings.projectId');
+        get(val, 'firestore._projectId') ||
+        get(val, 'firestore._settings.projectId') ||
+        process.env.GCLOUD_PROJECT;
       const databaseId: string =
         get(val, 'firestore.databaseId') ||
         get(val, 'firestore._settings.databaseId') ||
