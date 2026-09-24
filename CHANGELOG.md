@@ -1,3 +1,4 @@
 - chore: drop support for Node 18 and below (minimum supported version is now Node 20)
 - fix: support firebase-admin v14 by moving to the modular `firebase-admin/app` and `firebase-admin/firestore` entry points (#327)
 - breaking: drop firebase-admin `^8` and `^9` from the peer dependency range
+- fix: type `makeDocumentSnapshot` as returning a `DocumentSnapshot` rather than `any` (#327)
