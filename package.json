@@ -12,7 +12,7 @@
     "test": "mocha .tmp/spec/index.spec.js",
     "posttest": "npm run lint && rm -rf .tmp",
     "preintegrationTest": "node_modules/.bin/tsc",
-    "integrationTest": "firebase emulators:exec --project=not-a-project --only firestore 'mocha .tmp/spec/integration/**/*.spec.js'",
+    "integrationTest": "firebase emulators:exec --project=not-a-project --only firestore 'mocha --timeout 20000 .tmp/spec/integration/**/*.spec.js'",
     "postintegrationTest": "rm -rf .tmp",
     "format": "prettier --check '**/*.{json,ts,yml,yaml}'",
     "format:fix": "prettier --write '**/*.{json,ts,yml,yaml}'"
