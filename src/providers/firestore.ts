@@ -81,18 +81,31 @@ export interface DocumentSnapshotOptions {
   firebaseApp?: App;
 }
 
-/** Create a DocumentSnapshot. */
+/** Create a DocumentSnapshot for a document that doesn't exist. */
 export function makeDocumentSnapshot(
-  /** Key-value pairs representing data in the document, pass in `{}` to mock the snapshot of
-   * a document that doesn't exist.
-   */
+  /** Pass in `{}` to mock the snapshot of a document that doesn't exist. */
+  data: Record<string, never>,
+  /** Full path of the reference (e.g. 'users/alovelace') */
+  refPath: string,
+  options?: DocumentSnapshotOptions
+): DocumentSnapshot;
+
+/** Create a QueryDocumentSnapshot populated with document data. */
+export function makeDocumentSnapshot(
+  /** Key-value pairs representing data in the document. */
   data: { [key: string]: any },
   /** Full path of the reference (e.g. 'users/alovelace') */
   refPath: string,
   options?: DocumentSnapshotOptions
+): QueryDocumentSnapshot;
+
+export function makeDocumentSnapshot(
+  data: { [key: string]: any },
+  refPath: string,
+  options?: DocumentSnapshotOptions
 ): DocumentSnapshot {
   let firestoreService: Firestore;
-  let project: string;
+  let project: string | undefined;
   if (options?.firebaseApp) {
     firestoreService = getFirestore(options.firebaseApp);
     project = options.firebaseApp.options.projectId;
@@ -128,7 +141,7 @@ export function makeDocumentSnapshot(
 /** Fetch an example document snapshot already populated with data. Can be passed into a wrapped
  * Firestore onCreate or onDelete function.
  */
-export function exampleDocumentSnapshot(): DocumentSnapshot {
+export function exampleDocumentSnapshot(): QueryDocumentSnapshot {
   return makeDocumentSnapshot(
     {
       aString: 'foo',
