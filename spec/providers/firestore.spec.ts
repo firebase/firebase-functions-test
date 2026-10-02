@@ -2,8 +2,10 @@ import { expect } from 'chai';
 import { deleteApp, initializeApp } from 'firebase-admin/app';
 import {
   DocumentReference,
+  DocumentSnapshot,
   GeoPoint,
   getFirestore,
+  QueryDocumentSnapshot,
   Timestamp,
 } from 'firebase-admin/firestore';
 import * as sinon from 'sinon';
@@ -44,6 +46,46 @@ describe('providers/firestore', () => {
       email_address: 'test@test.com',
     });
     expect(snapshot.id).to.equal('doc-id');
+  });
+
+  it('types makeDocumentSnapshot with data as a QueryDocumentSnapshot', () => {
+    const snapshot: QueryDocumentSnapshot = test.firestore.makeDocumentSnapshot(
+      {
+        email_address: 'test@test.com',
+      },
+      'collection/doc-id'
+    );
+
+    // This assignment stops compiling if the return type is `any`.
+    // @ts-expect-error a QueryDocumentSnapshot is not a string
+    const notAString: string = test.firestore.makeDocumentSnapshot(
+      { email_address: 'test@test.com' },
+      'collection/doc-id'
+    );
+
+    expect(snapshot).to.be.instanceOf(QueryDocumentSnapshot);
+    expect(notAString).to.be.an('object');
+  });
+
+  it('types makeDocumentSnapshot with {} as a DocumentSnapshot', () => {
+    const snapshot: DocumentSnapshot = test.firestore.makeDocumentSnapshot(
+      {},
+      'collection/doc-id'
+    );
+
+    // @ts-expect-error a missing document is not a QueryDocumentSnapshot
+    const notAQuerySnapshot: QueryDocumentSnapshot =
+      test.firestore.makeDocumentSnapshot({}, 'collection/doc-id');
+
+    expect(snapshot.exists).to.be.false;
+    expect(notAQuerySnapshot).not.to.be.instanceOf(QueryDocumentSnapshot);
+  });
+
+  it('types exampleDocumentSnapshot as a QueryDocumentSnapshot', () => {
+    const snapshot: QueryDocumentSnapshot =
+      test.firestore.exampleDocumentSnapshot();
+
+    expect(snapshot).to.be.instanceOf(QueryDocumentSnapshot);
   });
 
   it('should allow empty document in makeDocumentSnapshot', async () => {
@@ -141,7 +183,12 @@ describe('providers/firestore', () => {
       expect(snapshot.data()).to.deep.equal({
         email_address: 'test@test.com',
       });
-      expect(snapshot.ref.formattedName).to.equal(
+      // `formattedName` is the resource name the snapshot was built from. It
+      // is internal to DocumentReference and has no public equivalent.
+      const { formattedName } = snapshot.ref as unknown as {
+        formattedName: string;
+      };
+      expect(formattedName).to.equal(
         'projects/custom-project/databases/(default)/documents/collection/doc-id'
       );
     } finally {
