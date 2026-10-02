@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import { AppOptions } from 'firebase-admin';
+import { AppOptions } from 'firebase-admin/app';
 import { merge } from 'lodash';
 
 import { FirebaseFunctionsTest } from './lifecycle';

@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import { isEmpty } from 'lodash';
-import { AppOptions } from 'firebase-admin';
+import { AppOptions } from 'firebase-admin/app';
 import { forEach } from 'lodash';
 
 import { testApp } from './app';
