@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import * as firebase from 'firebase-admin';
+import { App as AdminApp, deleteApp, initializeApp } from 'firebase-admin/app';
 
 /** @internal */
 export function testApp(): testApp.App {
@@ -36,15 +36,15 @@ export namespace testApp {
   export let init = () => (singleton = new testApp.App());
 
   export class App {
-    appSingleton: firebase.app.App;
+    appSingleton: AdminApp;
     constructor() {}
 
-    getApp(): firebase.app.App {
+    getApp(): AdminApp {
       if (typeof this.appSingleton === 'undefined') {
         const config = process.env.FIREBASE_CONFIG
           ? JSON.parse(process.env.FIREBASE_CONFIG)
           : {};
-        this.appSingleton = firebase.initializeApp(
+        this.appSingleton = initializeApp(
           config,
           // Give this app a name so it does not conflict with apps that user initialized.
           'firebase-functions-test'
@@ -55,7 +55,7 @@ export namespace testApp {
 
     deleteApp() {
       if (this.appSingleton) {
-        this.appSingleton.delete();
+        deleteApp(this.appSingleton);
         delete this.appSingleton;
       }
     }

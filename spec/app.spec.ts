@@ -22,7 +22,7 @@
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import * as firebase from 'firebase-admin';
+import * as adminApp from 'firebase-admin/app';
 
 import { testApp } from '../src/app';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
@@ -42,34 +42,27 @@ describe('app', () => {
   });
 
   describe('#getApp', () => {
-    const spy = sinon.spy(firebase, 'initializeApp');
-
     afterEach(() => {
-      spy.resetHistory();
       appInstance.deleteApp();
     });
 
     it('should initialize a new app if appSingleton does not exist', () => {
-      appInstance.getApp();
-      expect(spy.called).to.be.true;
+      const app = appInstance.getApp();
+      expect(app.name).to.equal('firebase-functions-test');
     });
 
     it('should only initialize app once', () => {
-      appInstance.getApp();
-      appInstance.getApp();
-      expect(spy.calledOnce).to.be.true;
+      expect(appInstance.getApp()).to.equal(appInstance.getApp());
     });
   });
 
   describe('#deleteApp', () => {
     it('deletes appSingleton if it exists', () => {
-      const spy = sinon.spy();
-      appInstance.appSingleton = {
-        delete: spy,
-      };
+      const app = appInstance.getApp();
+      expect(adminApp.getApps()).to.include(app);
       appInstance.deleteApp();
-      expect(spy.called).to.be.true;
       expect(appInstance.appSingleton).to.equal(undefined);
+      expect(adminApp.getApps()).to.not.include(app);
     });
 
     it('does not throw an error if there are no apps to delete', () => {

@@ -1,5 +1,13 @@
 import { expect } from 'chai';
-import * as firebase from 'firebase-admin';
+import { deleteApp, initializeApp } from 'firebase-admin/app';
+import {
+  DocumentReference,
+  DocumentSnapshot,
+  GeoPoint,
+  getFirestore,
+  QueryDocumentSnapshot,
+  Timestamp,
+} from 'firebase-admin/firestore';
 import * as sinon from 'sinon';
 import * as http from 'http';
 import { FeaturesList } from '../../src/features';
@@ -40,6 +48,46 @@ describe('providers/firestore', () => {
     expect(snapshot.id).to.equal('doc-id');
   });
 
+  it('types makeDocumentSnapshot with data as a QueryDocumentSnapshot', () => {
+    const snapshot: QueryDocumentSnapshot = test.firestore.makeDocumentSnapshot(
+      {
+        email_address: 'test@test.com',
+      },
+      'collection/doc-id'
+    );
+
+    // This assignment stops compiling if the return type is `any`.
+    // @ts-expect-error a QueryDocumentSnapshot is not a string
+    const notAString: string = test.firestore.makeDocumentSnapshot(
+      { email_address: 'test@test.com' },
+      'collection/doc-id'
+    );
+
+    expect(snapshot).to.be.instanceOf(QueryDocumentSnapshot);
+    expect(notAString).to.be.an('object');
+  });
+
+  it('types makeDocumentSnapshot with {} as a DocumentSnapshot', () => {
+    const snapshot: DocumentSnapshot = test.firestore.makeDocumentSnapshot(
+      {},
+      'collection/doc-id'
+    );
+
+    // @ts-expect-error a missing document is not a QueryDocumentSnapshot
+    const notAQuerySnapshot: QueryDocumentSnapshot =
+      test.firestore.makeDocumentSnapshot({}, 'collection/doc-id');
+
+    expect(snapshot.exists).to.be.false;
+    expect(notAQuerySnapshot).not.to.be.instanceOf(QueryDocumentSnapshot);
+  });
+
+  it('types exampleDocumentSnapshot as a QueryDocumentSnapshot', () => {
+    const snapshot: QueryDocumentSnapshot =
+      test.firestore.exampleDocumentSnapshot();
+
+    expect(snapshot).to.be.instanceOf(QueryDocumentSnapshot);
+  });
+
   it('should allow empty document in makeDocumentSnapshot', async () => {
     const snapshot = test.firestore.makeDocumentSnapshot(
       {},
@@ -51,7 +99,7 @@ describe('providers/firestore', () => {
   });
 
   it('should allow geopoints with makeDocumentSnapshot', () => {
-    const hq = new firebase.firestore.GeoPoint(47.6703, 122.1971);
+    const hq = new GeoPoint(47.6703, 122.1971);
     const snapshot = test.firestore.makeDocumentSnapshot(
       { geopoint: hq },
       'collection/doc-id'
@@ -67,29 +115,56 @@ describe('providers/firestore', () => {
       'collection/doc-id'
     );
 
-    expect(snapshot.data().time).to.be.instanceof(firebase.firestore.Timestamp);
+    expect(snapshot.data().time).to.be.instanceof(Timestamp);
     expect(snapshot.data().time.toDate()).to.deep.equal(time);
   });
 
   it('should allow references with makeDocumentSnapshot', () => {
-    firebase.initializeApp({
+    initializeApp({
       projectId: 'not-a-project',
     });
 
-    const ref = firebase.firestore().doc('collection/doc-id');
+    const ref = getFirestore().doc('collection/doc-id');
     const snapshot = test.firestore.makeDocumentSnapshot(
       { ref },
       'collection/doc-id'
     );
 
-    expect(snapshot.data().ref).to.be.instanceOf(
-      firebase.firestore.DocumentReference
+    expect(snapshot.data().ref).to.be.instanceOf(DocumentReference);
+    expect(snapshot.data().ref.path).to.equal(ref.path);
+    expect(snapshot.data().ref.formattedName).to.equal(
+      'projects/not-a-project/databases/(default)/documents/collection/doc-id'
     );
-    expect(snapshot.data().ref.toString()).to.equal(ref.toString());
+  });
+
+  it('should fall back to GCLOUD_PROJECT for references whose Firestore has no project id', async () => {
+    // Mirrors a functions module creating its Firestore before the test SDK
+    // has set the environment, which is what hoisted imports do.
+    const savedProject = process.env.GCLOUD_PROJECT;
+    delete process.env.GCLOUD_PROJECT;
+    const app = initializeApp({}, 'no-project');
+    const ref = getFirestore(app).doc('collection/doc-id');
+    if (typeof savedProject !== 'undefined') {
+      process.env.GCLOUD_PROJECT = savedProject;
+    } else {
+      delete process.env.GCLOUD_PROJECT;
+    }
+
+    try {
+      const snapshot = test.firestore.makeDocumentSnapshot(
+        { ref },
+        'collection/doc-id'
+      );
+      expect(snapshot.data().ref.formattedName).to.equal(
+        'projects/not-a-project/databases/(default)/documents/collection/doc-id'
+      );
+    } finally {
+      await deleteApp(app);
+    }
   });
 
   it('should use firebaseApp projectId in makeDocumentSnapshot options', async () => {
-    const customApp = firebase.initializeApp(
+    const customApp = initializeApp(
       {
         projectId: 'custom-project',
       },
@@ -108,11 +183,16 @@ describe('providers/firestore', () => {
       expect(snapshot.data()).to.deep.equal({
         email_address: 'test@test.com',
       });
-      expect(snapshot.ref.formattedName).to.equal(
+      // `formattedName` is the resource name the snapshot was built from. It
+      // is internal to DocumentReference and has no public equivalent.
+      const { formattedName } = snapshot.ref as unknown as {
+        formattedName: string;
+      };
+      expect(formattedName).to.equal(
         'projects/custom-project/databases/(default)/documents/collection/doc-id'
       );
     } finally {
-      await customApp.delete();
+      await deleteApp(customApp);
     }
   });
 
