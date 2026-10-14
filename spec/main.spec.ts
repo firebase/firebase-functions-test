@@ -259,6 +259,19 @@ describe('main', () => {
       });
     });
 
+    describe('v2 onRequest functions', () => {
+      it('should throw the onCall-only error', () => {
+        const cloudFunction = (_req, _res) => {};
+        set(cloudFunction, '__endpoint', {
+          platform: 'gcfv2',
+          httpsTrigger: {},
+        });
+        expect(() => wrap(cloudFunction as any)).to.throw(
+          'Wrap function is only available for `onCall` HTTP functions, not `onRequest`.'
+        );
+      });
+    });
+
     describe('v1 callable functions with endpoint metadata', () => {
       it('should route v1 callables with callableTrigger metadata to wrapV1', () => {
         const cloudFunction = (input) => input;
