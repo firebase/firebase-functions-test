@@ -3,8 +3,10 @@ import { CloudFunction } from 'firebase-functions/v2';
 import {
   APP_ID,
   getBaseCloudEvent,
+  getEventFilters,
   getEventType,
   PROJECT_ID,
+  resolveStringExpression,
 } from '../helpers';
 import { FirebaseAlertData, AlertEvent } from 'firebase-functions/v2/alerts';
 
@@ -16,8 +18,11 @@ export const alertsOnAlertPublished: MockCloudEventAbstractFactory<
   ): AlertEvent<FirebaseAlertData> {
     const source = `//firebasealerts.googleapis.com/projects/${PROJECT_ID}`;
 
-    const alertType = 'appDistribution.newTesterIosDevice';
-    const appId = APP_ID;
+    const { alerttype, appid } = getEventFilters(cloudFunction);
+    const alertType =
+      resolveStringExpression(alerttype) ||
+      'appDistribution.newTesterIosDevice';
+    const appId = resolveStringExpression(appid) || APP_ID;
 
     return {
       // Spread common fields
