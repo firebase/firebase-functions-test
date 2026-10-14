@@ -24,7 +24,7 @@ import { expect } from 'chai';
 import * as functions from 'firebase-functions/v1';
 import { set } from 'lodash';
 
-import { mockConfig, makeChange, wrap } from '../src/main';
+import { makeChange, wrap } from '../src/main';
 import { _makeResourceName, _extractParams } from '../src/v1';
 import { features } from '../src/features';
 import { FirebaseFunctionsTest } from '../src/lifecycle';
@@ -318,28 +318,30 @@ describe('main', () => {
     });
   });
 
-  describe('#mockConfig', () => {
-    let config: Record<string, unknown>;
-
-    beforeEach(() => {
-      config = { foo: { bar: 'faz ' } };
-    });
-
-    afterEach(() => {
-      delete process.env.CLOUD_RUNTIME_CONFIG;
-    });
-
-    it('should mock functions.config()', () => {
-      mockConfig(config);
-      expect(functions.config()).to.deep.equal(config);
-    });
-
-    it('should purge singleton config object when it is present', () => {
-      mockConfig(config);
-      config.foo = { baz: 'qux' };
-      mockConfig(config);
-
-      expect(functions.config()).to.deep.equal(config);
-    });
-  });
+  // functions.config() has been completely removed in firebase-functions v7.
+  // Since the latest version of the SDK no longer supports runtime config,
+  // this functionality can no longer be tested in modern SDKs.
+  // describe('#mockConfig', () => {
+  //   let config: Record<string, unknown>;
+  //
+  //   beforeEach(() => {
+  //     config = { foo: { bar: 'faz ' } };
+  //   });
+  //
+  //   afterEach(() => {
+  //     delete process.env.CLOUD_RUNTIME_CONFIG;
+  //   });
+  //
+  //   it('should mock functions.config()', () => {
+  //     mockConfig(config);
+  //     expect((functions as any).config()).to.deep.equal(config);
+  //   });
+  //
+  //   it('should purge singleton config object when it is present', () => {
+  //     mockConfig(config);
+  //     config.foo = { baz: 'qux' };
+  //     mockConfig(config);
+  //     expect((functions as any).config()).to.deep.equal(config);
+  //   });
+  // });
 });
