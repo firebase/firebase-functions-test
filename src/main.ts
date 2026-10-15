@@ -88,8 +88,7 @@ export function wrap<T, V extends CloudEvent<unknown>>(
   // v2 callables are checked by trigger rather than arity, since
   // firebase-functions@7 wraps them in rest-param functions of length 0.
   if (isCallableV2Function(cloudFunction)) {
-    const v2Callable = cloudFunction as CallableFunction<any, T>;
-    return wrapV2(v2Callable);
+    return wrapV2(cloudFunction);
   }
   if (isV2CloudFunction<V>(cloudFunction)) {
     return wrapV2(cloudFunction as CloudFunctionV2<V>);
