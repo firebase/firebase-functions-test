@@ -38,9 +38,9 @@ export type WrappedV2CallableFunction<T> = (
   data: CallableRequest
 ) => T | Promise<T>;
 
-export function isCallableV2Function(
-  cf: any
-): cf is CallableFunction<any, any> {
+export function isCallableV2Function(cf: {
+  __endpoint?: { platform?: string; callableTrigger?: unknown };
+}): cf is CallableFunction<any, any> {
   return (
     !!cf?.__endpoint?.callableTrigger &&
     cf.__endpoint.platform === 'gcfv2'
