@@ -43,16 +43,16 @@ jobs:
       - name: Run tests (pinned firebase-functions)
         if: matrix.firebase-functions == 'pinned'
         run: npm run test
-      # Specs do not compile against firebase-functions v7 typings, so
-      # compile against the pinned version, swap in v7, and run the
-      # compiled output. This mirrors how users hit version drift: their
-      # compiled code running against a newer firebase-functions.
+      # Specs do not compile against v7 typings: compile against the pinned version, then swap in v7.
       - name: Compile specs against pinned firebase-functions
         if: matrix.firebase-functions == '7'
         run: npx tsc
       - name: Swap in firebase-functions@7
         if: matrix.firebase-functions == '7'
-        run: npm install --no-save firebase-functions@^7
+        run: npm install --no-save firebase-functions@7.4.0
+      - name: Assert firebase-functions major is 7
+        if: matrix.firebase-functions == '7'
+        run: node -e "const v = require('./node_modules/firebase-functions/package.json').version; console.log(v); if (!v.startsWith('7.')) process.exit(1)"
       - name: Run tests (firebase-functions@7)
         if: matrix.firebase-functions == '7'
         run: npx mocha .tmp/spec/index.spec.js
