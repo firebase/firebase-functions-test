@@ -21,6 +21,8 @@
 // SOFTWARE.
 
 import { expect } from 'chai';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as functions from 'firebase-functions/v1';
 import { set } from 'lodash';
 
@@ -318,6 +320,18 @@ describe('main', () => {
     });
   });
 
+  describe('#_isConfigRemoved', () => {
+    it('should be true exactly when firebase-functions v7+ is installed', () => {
+      const pkgPath = path.resolve(
+        __dirname,
+        '../../node_modules/firebase-functions/package.json'
+      );
+      const { version } = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      const major = parseInt(version.split('.')[0], 10);
+      expect(_isConfigRemoved()).to.equal(major >= 7);
+    });
+  });
+
   describe('#mockConfig', () => {
     let config: Record<string, unknown>;
 
@@ -330,11 +344,12 @@ describe('main', () => {
     });
 
     if (_isConfigRemoved()) {
-      // functions.config() was removed in firebase-functions v7, so
-      // mockConfig() must fail loudly with migration guidance.
       it('should throw explaining that functions.config() was removed', () => {
         expect(() => mockConfig(config)).to.throw(
           'mockConfig() is not supported with firebase-functions v7+'
+        );
+        expect(() => mockConfig(config)).to.throw(
+          'https://firebase.google.com/docs/functions/config-env#migrate-config'
         );
       });
 
