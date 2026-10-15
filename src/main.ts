@@ -91,7 +91,7 @@ export function wrap<T, V extends CloudEvent<unknown>>(
     return wrapV2(cloudFunction);
   }
   if (isV2CloudFunction<V>(cloudFunction)) {
-    return wrapV2(cloudFunction as CloudFunctionV2<V>);
+    return wrapV2<V>(cloudFunction as CloudFunctionV2<V>);
   }
   return wrapV1<T>(
     cloudFunction as HttpsFunctionOrCloudFunctionV1<T, typeof cloudFunction>
