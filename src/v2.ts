@@ -43,7 +43,6 @@ export function isCallableV2Function(
 ): cf is CallableFunction<any, any> {
   return (
     !!cf?.__endpoint?.callableTrigger &&
-    // ensures that v1 callables are not treated as v2
     cf.__endpoint.platform === 'gcfv2'
   );
 }
