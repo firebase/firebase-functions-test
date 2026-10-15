@@ -1431,6 +1431,43 @@ describe('v2', () => {
         const result = await wrappedCF();
         expect(result).equal('hello');
       });
+
+      it('should keep the callable request and return types', async () => {
+        const cloudFunction = https.onCall<{ a: number }, Promise<string>>(
+          async (req) => `${req.data.a}`
+        );
+        cloudFunction.__endpoint = {
+          platform: 'gcfv2',
+          labels: {},
+          callableTrigger: {},
+        };
+
+        const wrappedCF = wrapV2(cloudFunction);
+        const result: string = await wrappedCF({ data: { a: 1 } });
+        expect(result).equal('1');
+
+        // @ts-expect-error wrong data type
+        () => wrappedCF({ data: { a: 'x' } });
+        // @ts-expect-error request is required for typed callables
+        () => wrappedCF();
+        // @ts-expect-error data is required for typed callables
+        () => wrappedCF({});
+      });
+
+      it('should allow omitting the request when the callable takes no data', async () => {
+        const cloudFunction = https.onCall<void, string>(() => 'hello');
+        cloudFunction.__endpoint = {
+          platform: 'gcfv2',
+          labels: {},
+          callableTrigger: {},
+        };
+
+        const wrappedCF = wrapV2(cloudFunction);
+        expect(await wrappedCF()).equal('hello');
+        expect(
+          await wrappedCF({ rawRequest: { headers: { 'x-test': '1' } } })
+        ).equal('hello');
+      });
     });
 
     describe('generated CloudEvent', () => {

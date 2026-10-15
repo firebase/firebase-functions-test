@@ -59,7 +59,7 @@ export {
 } from './v1';
 
 // V2 Exports
-export { WrappedV2Function } from './v2';
+export { WrappedV2Function, WrappedV2CallableFunction } from './v2';
 
 export function wrap<T>(
   cloudFunction: HttpsFunction & Runnable<T>

@@ -47,6 +47,10 @@ type WrappedV2CallableArgs<T> = [T] extends [undefined | void]
   ? [request?: WrappedV2CallableRequest<T>]
   : [request: WrappedV2CallableRequest<T>];
 
+/** A function that can be called with a {@link CallableRequest} for a v2 callable function.
+ * Every request field except `data` is optional, and the request itself can be omitted
+ * when the callable's data type is `undefined` or `void`.
+ */
 export type WrappedV2CallableFunction<T, Return> = (
   ...args: WrappedV2CallableArgs<T>
 ) => Return;
