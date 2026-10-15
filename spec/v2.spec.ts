@@ -1428,8 +1428,11 @@ describe('v2', () => {
         };
 
         const wrappedCF = wrapV2(cloudFunction);
-        const result = await wrappedCF();
+        const result = await wrappedCF({ data: undefined });
         expect(result).equal('hello');
+
+        // @ts-expect-error request is required for untyped callables
+        () => wrappedCF();
       });
 
       it('should keep the callable request and return types', async () => {

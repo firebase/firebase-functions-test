@@ -37,13 +37,20 @@ export type WrappedV2Function<T extends CloudEvent<unknown>> = (
   cloudEventPartial?: DeepPartial<T | object>
 ) => any | Promise<any>;
 
-type WrappedV2CallableRequest<T> = ([T] extends [undefined | void]
+// `any` also matches `undefined | void`, so untyped callables are excluded explicitly.
+type TakesNoData<T> = 0 extends 1 & T
+  ? false
+  : [T] extends [undefined | void]
+  ? true
+  : false;
+
+type WrappedV2CallableRequest<T> = (TakesNoData<T> extends true
   ? { data?: T }
   : { data: T }) & {
   rawRequest?: Partial<Request>;
 } & Partial<Omit<CallableRequest<T>, 'data' | 'rawRequest'>>;
 
-type WrappedV2CallableArgs<T> = [T] extends [undefined | void]
+type WrappedV2CallableArgs<T> = TakesNoData<T> extends true
   ? [request?: WrappedV2CallableRequest<T>]
   : [request: WrappedV2CallableRequest<T>];
 
