@@ -59,7 +59,7 @@ describe('v2', () => {
 
             type: 'google.firebase.firebasealerts.alerts.v1.published',
             source: '//firebasealerts.googleapis.com/projects/42',
-            alertType: 'appDistribution.newTesterIosDevice',
+            alertType: 'alertType',
             appId: '__APP_ID__',
             data: {
               createTime: cloudEvent.data.createTime,
@@ -67,6 +67,34 @@ describe('v2', () => {
               payload: {},
             },
           });
+        });
+
+        it('should use the alertType and appId from the function filters', () => {
+          const cloudFn = alerts.onAlertPublished(
+            { alertType: 'custom.alert', appId: 'my-app' },
+            handler
+          );
+          const cloudEvent = wrapV2(cloudFn)().cloudEvent;
+          expect(cloudEvent.alertType).equal('custom.alert');
+          expect(cloudEvent.appId).equal('my-app');
+        });
+
+        it('should let a user-supplied alertType override the filter', () => {
+          const cloudFn = alerts.onAlertPublished('alertType', handler);
+          const cloudEvent = wrapV2(cloudFn)({
+            alertType: 'billing.planUpdate',
+          }).cloudEvent;
+          expect(cloudEvent.alertType).equal('billing.planUpdate');
+        });
+      });
+
+      describe('alerts.appDistribution.onInAppFeedbackPublished()', () => {
+        it('should use the inAppFeedback alertType', () => {
+          const cloudFn =
+            alerts.appDistribution.onInAppFeedbackPublished(handler);
+          const cloudEvent = wrapV2(cloudFn)().cloudEvent;
+          expect(cloudEvent.alertType).equal('appDistribution.inAppFeedback');
+          expect(cloudEvent.appId).equal('__APP_ID__');
         });
       });
 
