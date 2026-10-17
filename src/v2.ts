@@ -38,10 +38,12 @@ export type WrappedV2CallableFunction<T> = (
   data: CallableRequest
 ) => T | Promise<T>;
 
-function isCallableV2Function<T extends CloudEvent<unknown>>(
-  cf: CloudFunction<T> | CallableFunction<any, any>
-): cf is CallableFunction<any, any> {
-  return !!cf?.__endpoint?.callableTrigger;
+export function isCallableV2Function(cf: {
+  __endpoint?: { platform?: string; callableTrigger?: unknown };
+}): cf is CallableFunction<any, any> {
+  return (
+    !!cf?.__endpoint?.callableTrigger && cf.__endpoint.platform === 'gcfv2'
+  );
 }
 
 function assertIsCloudFunction<T extends CloudEvent<unknown>>(
