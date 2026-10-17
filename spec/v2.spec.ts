@@ -572,6 +572,34 @@ describe('v2', () => {
 
           expect(cloudEvent.data.data()).deep.equal(docData);
         });
+
+        it('should use json data on every call when the partial is reused', () => {
+          const cloudFn = firestore.onDocumentCreated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = { data: { foo: 'bar' } };
+
+          const first = cloudFnWrap(partial).cloudEvent;
+          const second = cloudFnWrap(partial).cloudEvent;
+
+          expect(first.data.data()).to.deep.equal({ foo: 'bar' });
+          expect(second.data.data()).to.deep.equal({ foo: 'bar' });
+        });
+
+        it('should not modify the partial passed to the wrapped function', () => {
+          const cloudFn = firestore.onDocumentCreated('foo/{id}/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            data: { foo: { nested: 'bar' } },
+            params: { id: 'a' },
+          };
+
+          cloudFnWrap(partial);
+
+          expect(partial).to.deep.equal({
+            data: { foo: { nested: 'bar' } },
+            params: { id: 'a' },
+          });
+        });
       });
 
       describe('firestore.onDocumentDeleted()', () => {
@@ -669,6 +697,27 @@ describe('v2', () => {
           expect(cloudEvent.data.before.data()).deep.equal(beforeDataVal);
           expect(cloudEvent.data.after.data()).deep.equal(afterDataVal);
         });
+
+        it('should use json data on every call when the partial is reused', () => {
+          const cloudFn = firestore.onDocumentUpdated('foo/bar/baz', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = {
+            data: {
+              before: { snapshot: 'before' },
+              after: { snapshot: 'after' },
+            },
+          };
+
+          cloudFnWrap(partial);
+          const cloudEvent = cloudFnWrap(partial).cloudEvent;
+
+          expect(cloudEvent.data.before.data()).to.deep.equal({
+            snapshot: 'before',
+          });
+          expect(cloudEvent.data.after.data()).to.deep.equal({
+            snapshot: 'after',
+          });
+        });
       });
 
       describe('firestore.onDocumentWritten', () => {
@@ -727,6 +776,34 @@ describe('v2', () => {
     });
 
     describe('database', () => {
+      describe('data', () => {
+        it('should use json data on every call when the partial is reused', () => {
+          const cloudFn = database.onValueCreated('foo/{id}', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = { data: { a: 1 }, params: { id: 'x' } };
+
+          const first = cloudFnWrap(partial).cloudEvent;
+          const second = cloudFnWrap(partial).cloudEvent;
+
+          expect(first.data.val()).to.deep.equal({ a: 1 });
+          expect(second.data.val()).to.deep.equal({ a: 1 });
+          expect(second.ref).to.equal('foo/x');
+        });
+
+        it('should not modify the partial passed to the wrapped function', () => {
+          const cloudFn = database.onValueCreated('foo/{id}', handler);
+          const cloudFnWrap = wrapV2(cloudFn);
+          const partial = { data: { a: { b: 1 } }, params: { id: 'x' } };
+
+          cloudFnWrap(partial);
+
+          expect(partial).to.deep.equal({
+            data: { a: { b: 1 } },
+            params: { id: 'x' },
+          });
+        });
+      });
+
       describe('ref', () => {
         it('should resolve default ref', () => {
           const referenceOptions = {

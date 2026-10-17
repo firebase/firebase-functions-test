@@ -69,12 +69,15 @@ function mergeCloudEvents<EventType extends CloudEvent<unknown>>(
    * The returned CloudEvent should be returning DataSnapshot that uses the supplied json,
    * NOT the supplied JSON.
    */
-  if (shouldDeleteUserSuppliedData(generatedCloudEvent, cloudEventPartial)) {
-    delete cloudEventPartial.data;
+  if (!cloudEventPartial) {
+    return generatedCloudEvent;
   }
-  return cloudEventPartial
-    ? (merge(generatedCloudEvent, cloudEventPartial) as EventType)
-    : generatedCloudEvent;
+  // Copy so the caller's partial can be reused across calls.
+  const partialToMerge = { ...cloudEventPartial };
+  if (shouldDeleteUserSuppliedData(generatedCloudEvent, cloudEventPartial)) {
+    delete partialToMerge.data;
+  }
+  return merge(generatedCloudEvent, partialToMerge) as EventType;
 }
 
 function shouldDeleteUserSuppliedData<EventType extends CloudEvent<unknown>>(
