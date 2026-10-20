@@ -48,7 +48,7 @@ type WrappedV2CallableRequest<T> = (TakesNoData<T> extends true
   ? { data?: T }
   : { data: T }) & {
   rawRequest?: Partial<Request>;
-} & Partial<Omit<CallableRequest<T>, 'data' | 'rawRequest'>>;
+} & DeepPartial<Required<Omit<CallableRequest<T>, 'data' | 'rawRequest'>>>;
 
 type WrappedV2CallableArgs<T> = TakesNoData<T> extends true
   ? [request?: WrappedV2CallableRequest<T>]
@@ -58,7 +58,7 @@ type WrappedV2CallableArgs<T> = TakesNoData<T> extends true
  * Every request field except `data` is optional, and the request itself can be omitted
  * when the callable's data type is `undefined` or `void`.
  */
-export type WrappedV2CallableFunction<T, Return> = (
+export type WrappedV2CallableFunction<T = any, Return = any> = (
   ...args: WrappedV2CallableArgs<T>
 ) => Return;
 
@@ -89,7 +89,7 @@ export function wrapV2<T extends CloudEvent<unknown>>(
 ): WrappedV2Function<T>;
 
 /**
- * Takes a v2 HTTP function to be tested, and returns a {@link WrappedV2HttpsFunction}
+ * Takes a v2 callable function to be tested, and returns a {@link WrappedV2CallableFunction}
  * which can be called in test code.
  */
 export function wrapV2<T, Return>(
@@ -101,9 +101,10 @@ export function wrapV2<T extends CloudEvent<unknown>>(
 ): WrappedV2Function<T> | WrappedV2CallableFunction<any, any> {
   if (isCallableV2Function(cloudFunction)) {
     return (request?: WrappedV2CallableRequest<any>) => {
-      return cloudFunction.run(
-        (request ?? { data: undefined }) as CallableRequest<any>
-      );
+      return cloudFunction.run({
+        data: undefined,
+        ...request,
+      } as CallableRequest<any>);
     };
   }
 

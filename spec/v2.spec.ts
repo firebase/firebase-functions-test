@@ -1471,6 +1471,42 @@ describe('v2', () => {
           await wrappedCF({ rawRequest: { headers: { 'x-test': '1' } } })
         ).equal('hello');
       });
+
+      it('should pass data as undefined when only request metadata is given', async () => {
+        const cloudFunction = https.onCall<void, boolean>(
+          (req) => 'data' in req && req.data === undefined
+        );
+        cloudFunction.__endpoint = {
+          platform: 'gcfv2',
+          labels: {},
+          callableTrigger: {},
+        };
+
+        const wrappedCF = wrapV2(cloudFunction);
+        expect(await wrappedCF()).equal(true);
+        expect(
+          await wrappedCF({ rawRequest: { headers: { 'x-test': '1' } } })
+        ).equal(true);
+      });
+
+      it('should accept partial auth and app data', async () => {
+        const cloudFunction = https.onCall<{ a: number }, string>(
+          (req) => `${req.auth?.uid}:${req.app?.appId}`
+        );
+        cloudFunction.__endpoint = {
+          platform: 'gcfv2',
+          labels: {},
+          callableTrigger: {},
+        };
+
+        const wrappedCF = wrapV2(cloudFunction);
+        const result = await wrappedCF({
+          data: { a: 1 },
+          auth: { uid: 'test-user' },
+          app: { appId: 'test-app' },
+        });
+        expect(result).equal('test-user:test-app');
+      });
     });
 
     describe('generated CloudEvent', () => {
