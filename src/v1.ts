@@ -27,7 +27,6 @@ import {
   EventContext,
   Change,
   https,
-  config,
   database,
   firestore,
   HttpsFunction,
@@ -369,10 +368,32 @@ export function makeChange<T>(before: T, after: T): Change<T> {
   return Change.fromObjects(before, after);
 }
 
-/** Mock values returned by `functions.config()`. */
+/**
+ * Returns true if the installed firebase-functions no longer supports
+ * `functions.config()`, which was removed in v7.
+ * Exported for internal testing purposes only.
+ * @internal
+ */
+export function _isConfigRemoved(): boolean {
+  // `resetCache` is exported from firebase-functions/v1 in v4-v6 and removed in v7.
+  return typeof resetCache !== 'function';
+}
+
+/**
+ * Mock values returned by `functions.config()`.
+ *
+ * @throws If the installed firebase-functions is v7 or later, where
+ * `functions.config()` was removed.
+ */
 export function mockConfig(conf: { [key: string]: { [key: string]: any } }) {
-  if (resetCache) {
-    resetCache();
+  if (_isConfigRemoved()) {
+    throw new Error(
+      'mockConfig() is not supported with firebase-functions v7+ because ' +
+        'functions.config() was removed. Migrate to environment parameters ' +
+        'using the params module. Migration guide: ' +
+        'https://firebase.google.com/docs/functions/config-env#migrate-config'
+    );
   }
+  resetCache();
   process.env.CLOUD_RUNTIME_CONFIG = JSON.stringify(conf);
 }
