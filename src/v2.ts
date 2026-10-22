@@ -37,29 +37,21 @@ export type WrappedV2Function<T extends CloudEvent<unknown>> = (
   cloudEventPartial?: DeepPartial<T | object>
 ) => any | Promise<any>;
 
-// `any` also matches `undefined | void`, so untyped callables are excluded explicitly.
-type TakesNoData<T> = 0 extends 1 & T
-  ? false
-  : [T] extends [undefined | void]
-  ? true
-  : false;
-
-type WrappedV2CallableRequest<T> = (TakesNoData<T> extends true
-  ? { data?: T }
-  : { data: T }) & {
+export type WrappedV2CallableRequest<T> = {
+  data?: T;
   rawRequest?: Partial<Request>;
-} & DeepPartial<Required<Omit<CallableRequest<T>, 'data' | 'rawRequest'>>>;
+  auth?: DeepPartial<NonNullable<CallableRequest['auth']>>;
+  app?: DeepPartial<NonNullable<CallableRequest['app']>>;
+  instanceIdToken?: string;
+  acceptsStreaming?: boolean;
+};
 
-type WrappedV2CallableArgs<T> = TakesNoData<T> extends true
-  ? [request?: WrappedV2CallableRequest<T>]
-  : [request: WrappedV2CallableRequest<T>];
-
-/** A function that can be called with a {@link CallableRequest} for a v2 callable function.
- * Every request field except `data` is optional, and the request itself can be omitted
- * when the callable's data type is `undefined` or `void`.
+/**
+ * A function that can be called with a {@link CallableRequest} for a v2 callable function.
+ * Every request field is optional to allow focused unit testing of auth, headers, or payloads.
  */
 export type WrappedV2CallableFunction<T = any, Return = any> = (
-  ...args: WrappedV2CallableArgs<T>
+  request?: WrappedV2CallableRequest<T>
 ) => Return;
 
 export function isCallableV2Function(cf: {

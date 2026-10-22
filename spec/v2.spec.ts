@@ -22,7 +22,7 @@
 
 import { expect } from 'chai';
 
-import { wrapV2 } from '../src/v2';
+import { wrapV2, WrappedV2CallableRequest } from '../src/v2';
 
 import {
   CloudFunction,
@@ -36,6 +36,7 @@ import {
   https,
   firestore,
 } from 'firebase-functions/v2';
+import { CallableRequest } from 'firebase-functions/v2/https';
 import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
 import { makeDocumentSnapshot } from '../src/providers/firestore';
@@ -1428,11 +1429,8 @@ describe('v2', () => {
         };
 
         const wrappedCF = wrapV2(cloudFunction);
-        const result = await wrappedCF({ data: undefined });
-        expect(result).equal('hello');
-
-        // @ts-expect-error request is required for untyped callables
-        () => wrappedCF();
+        expect(await wrappedCF()).equal('hello');
+        expect(await wrappedCF({ auth: { uid: 'test-user' } })).equal('hello');
       });
 
       it('should keep the callable request and return types', async () => {
@@ -1451,10 +1449,16 @@ describe('v2', () => {
 
         // @ts-expect-error wrong data type
         () => wrappedCF({ data: { a: 'x' } });
-        // @ts-expect-error request is required for typed callables
-        () => wrappedCF();
-        // @ts-expect-error data is required for typed callables
-        () => wrappedCF({});
+      });
+
+      it('should accept every CallableRequest field', () => {
+        type UnhandledKeys = Exclude<
+          keyof CallableRequest,
+          keyof WrappedV2CallableRequest<any>
+        >;
+        const allKeysCovered: [UnhandledKeys] extends [never] ? true : false =
+          true;
+        expect(allKeysCovered).equal(true);
       });
 
       it('should allow omitting the request when the callable takes no data', async () => {
