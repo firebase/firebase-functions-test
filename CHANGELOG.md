@@ -3,3 +3,4 @@
 - fix: support firebase-admin v14 by moving to the modular `firebase-admin/app` and `firebase-admin/firestore` entry points (#327)
 - breaking: drop firebase-admin `^8` and `^9` from the peer dependency range
 - breaking: type `makeDocumentSnapshot` as returning a `QueryDocumentSnapshot` when given data and a `DocumentSnapshot` when given `{}`, rather than `any` (#327)
+- fix: raise lodash to `^4.18.1` to pick up fixes for GHSA-r5fr-rjxr-66jc and GHSA-f23m-r3pf-42rh (#341)
