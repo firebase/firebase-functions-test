@@ -51,13 +51,8 @@ export function getDatabaseSnapshotCloudEvent(
     database.DatabaseEvent<database.DataSnapshot | object>
   >
 ) {
-  const {
-    instance,
-    firebaseDatabaseHost,
-    ref,
-    location,
-    params,
-  } = getCommonDatabaseFields(cloudFunction, cloudEventPartial);
+  const { instance, firebaseDatabaseHost, ref, location, params } =
+    getCommonDatabaseFields(cloudFunction, cloudEventPartial);
 
   const data = getOrCreateDataSnapshot(cloudEventPartial?.data, ref);
 
@@ -84,13 +79,8 @@ export function getDatabaseChangeSnapshotCloudEvent(
     database.DatabaseEvent<Change<database.DataSnapshot> | ChangeLike>
   >
 ): database.DatabaseEvent<Change<database.DataSnapshot>> {
-  const {
-    instance,
-    firebaseDatabaseHost,
-    ref,
-    location,
-    params,
-  } = getCommonDatabaseFields(cloudFunction, cloudEventPartial);
+  const { instance, firebaseDatabaseHost, ref, location, params } =
+    getCommonDatabaseFields(cloudFunction, cloudEventPartial);
 
   const data = getOrCreateDataSnapshotChange(cloudEventPartial?.data, ref);
 

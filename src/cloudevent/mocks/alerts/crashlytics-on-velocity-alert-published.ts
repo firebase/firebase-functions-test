@@ -12,9 +12,9 @@ import {
 } from 'firebase-functions/v2/alerts/crashlytics';
 import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 
-export const alertsCrashlyticsOnVelocityAlertPublished: MockCloudEventAbstractFactory<CrashlyticsEvent<
-  VelocityAlertPayload
->> = {
+export const alertsCrashlyticsOnVelocityAlertPublished: MockCloudEventAbstractFactory<
+  CrashlyticsEvent<VelocityAlertPayload>
+> = {
   generateMock(
     cloudFunction: CloudFunction<CrashlyticsEvent<VelocityAlertPayload>>
   ): CrashlyticsEvent<VelocityAlertPayload> {
@@ -39,9 +39,7 @@ export const alertsCrashlyticsOnVelocityAlertPublished: MockCloudEventAbstractFa
   },
 };
 
-function getCrashlyticsVelocityAlertData(): FirebaseAlertData<
-  VelocityAlertPayload
-> {
+function getCrashlyticsVelocityAlertData(): FirebaseAlertData<VelocityAlertPayload> {
   const now = new Date().toISOString();
   return {
     createTime: now,

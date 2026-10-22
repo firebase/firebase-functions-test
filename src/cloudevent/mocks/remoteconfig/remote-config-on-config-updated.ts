@@ -3,9 +3,9 @@ import { CloudFunction, CloudEvent } from 'firebase-functions/v2';
 import { ConfigUpdateData } from 'firebase-functions/v2/remoteConfig';
 import { getBaseCloudEvent, getEventType, PROJECT_ID } from '../helpers';
 
-export const remoteConfigOnConfigUpdated: MockCloudEventAbstractFactory<CloudEvent<
-  ConfigUpdateData
->> = {
+export const remoteConfigOnConfigUpdated: MockCloudEventAbstractFactory<
+  CloudEvent<ConfigUpdateData>
+> = {
   generateMock(
     cloudFunction: CloudFunction<CloudEvent<ConfigUpdateData>>
   ): CloudEvent<ConfigUpdateData> {

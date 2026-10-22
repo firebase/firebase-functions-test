@@ -9,9 +9,9 @@ import { getEventType } from '../helpers';
 import { DocumentSnapshot } from 'firebase-admin/firestore';
 import { getDocumentSnapshotChangeCloudEventWithAuthContext } from './helpers';
 
-export const firestoreOnDocumentWrittenWithAuthContext: MockCloudEventAbstractFactory<firestore.FirestoreAuthEvent<
-  Change<DocumentSnapshot>
->> = {
+export const firestoreOnDocumentWrittenWithAuthContext: MockCloudEventAbstractFactory<
+  firestore.FirestoreAuthEvent<Change<DocumentSnapshot>>
+> = {
   generateMock: getDocumentSnapshotChangeCloudEventWithAuthContext,
   match(cloudFunction: CloudFunction<CloudEvent<unknown>>): boolean {
     return (

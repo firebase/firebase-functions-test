@@ -4,9 +4,9 @@ import { getEventType } from '../helpers';
 import { QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { getDocumentSnapshotCloudEvent } from './helpers';
 
-export const firestoreOnDocumentDeleted: MockCloudEventAbstractFactory<firestore.FirestoreEvent<
-  QueryDocumentSnapshot
->> = {
+export const firestoreOnDocumentDeleted: MockCloudEventAbstractFactory<
+  firestore.FirestoreEvent<QueryDocumentSnapshot>
+> = {
   generateMock: getDocumentSnapshotCloudEvent,
   match(cloudFunction: CloudFunction<CloudEvent<unknown>>): boolean {
     return (

@@ -27,8 +27,9 @@ export function makeObjectMetadata(
   /** Fields of ObjectMetadata that you'd like to specify. */
   fields: { [key: string]: string }
 ): storage.ObjectMetadata {
-  const configBucket = JSON.parse(process.env.FIREBASE_CONFIG || '{}')
-    .storageBucket;
+  const configBucket = JSON.parse(
+    process.env.FIREBASE_CONFIG || '{}'
+  ).storageBucket;
   const template = {
     kind: 'storage#object',
     id: '',

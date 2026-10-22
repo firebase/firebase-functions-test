@@ -21,7 +21,6 @@
 // SOFTWARE.
 
 import { Change } from 'firebase-functions/v1';
-import { firestore, app } from 'firebase-admin';
 import { has, get, isEmpty, isPlainObject, mapValues } from 'lodash';
 import { inspect } from 'util';
 
@@ -29,9 +28,15 @@ import { testApp } from '../app';
 
 import * as http from 'http';
 import {
+  DocumentReference,
   DocumentSnapshot,
+  Firestore,
+  GeoPoint,
+  getFirestore,
   QueryDocumentSnapshot,
+  Timestamp,
 } from 'firebase-admin/firestore';
+import { App } from 'firebase-admin/app';
 
 function dateToTimestampProto(
   timeString?: string
@@ -50,6 +55,18 @@ function dateToTimestampProto(
   return { seconds, nanos };
 }
 
+/** `snapshot_` builds a snapshot from a Firestore proto. It is the only way to
+ * mock a snapshot without a live document, and it is absent from the public
+ * `Firestore` typings.
+ */
+type FirestoreWithSnapshotBuilder = Firestore & {
+  snapshot_(
+    documentOrName: unknown,
+    readTime: unknown,
+    encoding: 'json'
+  ): DocumentSnapshot;
+};
+
 /** Optional parameters for creating a DocumentSnapshot. */
 export interface DocumentSnapshotOptions {
   /** ISO timestamp string for the snapshot was read, default is current time.  */
@@ -61,26 +78,39 @@ export interface DocumentSnapshotOptions {
   /** The Firebase app that the Firestore database belongs to. You do not need to supply
    * this parameter if you supplied Firebase config values when initializing firebase-functions-test.
    */
-  firebaseApp?: app.App;
+  firebaseApp?: App;
 }
 
-/** Create a DocumentSnapshot. */
+/** Create a DocumentSnapshot for a document that doesn't exist. */
 export function makeDocumentSnapshot(
-  /** Key-value pairs representing data in the document, pass in `{}` to mock the snapshot of
-   * a document that doesn't exist.
-   */
+  /** Pass in `{}` to mock the snapshot of a document that doesn't exist. */
+  data: Record<string, never>,
+  /** Full path of the reference (e.g. 'users/alovelace') */
+  refPath: string,
+  options?: DocumentSnapshotOptions
+): DocumentSnapshot;
+
+/** Create a QueryDocumentSnapshot populated with document data. */
+export function makeDocumentSnapshot(
+  /** Key-value pairs representing data in the document. */
   data: { [key: string]: any },
   /** Full path of the reference (e.g. 'users/alovelace') */
   refPath: string,
   options?: DocumentSnapshotOptions
-) {
-  let firestoreService;
-  let project;
-  if (has(options, 'app')) {
-    firestoreService = firestore(options.firebaseApp);
-    project = get(options, 'app.options.projectId');
+): QueryDocumentSnapshot;
+
+export function makeDocumentSnapshot(
+  data: { [key: string]: any },
+  refPath: string,
+  options?: DocumentSnapshotOptions
+): DocumentSnapshot {
+  let firestoreService: Firestore;
+  let project: string | undefined;
+  if (options?.firebaseApp) {
+    firestoreService = getFirestore(options.firebaseApp);
+    project = options.firebaseApp.options.projectId;
   } else {
-    firestoreService = firestore(testApp().getApp());
+    firestoreService = getFirestore(testApp().getApp());
     project = process.env.GCLOUD_PROJECT;
   }
 
@@ -101,13 +131,17 @@ export function makeDocumentSnapshot(
   const readTimeProto = dateToTimestampProto(
     get(options, 'readTime') || new Date().toISOString()
   );
-  return firestoreService.snapshot_(proto, readTimeProto, 'json');
+  return (firestoreService as FirestoreWithSnapshotBuilder).snapshot_(
+    proto,
+    readTimeProto,
+    'json'
+  );
 }
 
 /** Fetch an example document snapshot already populated with data. Can be passed into a wrapped
  * Firestore onCreate or onDelete function.
  */
-export function exampleDocumentSnapshot(): firestore.DocumentSnapshot {
+export function exampleDocumentSnapshot(): QueryDocumentSnapshot {
   return makeDocumentSnapshot(
     {
       aString: 'foo',
@@ -124,9 +158,7 @@ export function exampleDocumentSnapshot(): firestore.DocumentSnapshot {
 /** Fetch an example Change object of document snapshots already populated with data.
  * Can be passed into a wrapped Firestore onUpdate or onWrite function.
  */
-export function exampleDocumentSnapshotChange(): Change<
-  firestore.DocumentSnapshot
-> {
+export function exampleDocumentSnapshotChange(): Change<DocumentSnapshot> {
   return Change.fromObjects(
     makeDocumentSnapshot(
       {
@@ -207,24 +239,35 @@ export function objectToValueProto(data: object) {
         bytesValue: val,
       };
     }
-    if (val instanceof firestore.DocumentReference) {
-      const projectId: string = get(val, '_referencePath.projectId');
-      const database: string = get(val, '_referencePath.databaseId');
+    if (val instanceof DocumentReference) {
+      // projectId and databaseId live on the Firestore instance, not on the
+      // reference, and neither has a public accessor across the supported
+      // firebase-admin range. The `projectId` getter throws until the client
+      // has resolved a project, so read the field and fall back to the env.
+      const projectId: string =
+        get(val, 'firestore._projectId') ||
+        get(val, 'firestore._settings.projectId') ||
+        process.env.GCLOUD_PROJECT;
+      const databaseId: string =
+        get(val, 'firestore.databaseId') ||
+        get(val, 'firestore._settings.databaseId') ||
+        '(default)';
       const referenceValue: string = [
         'projects',
         projectId,
         'databases',
-        database,
+        databaseId,
+        'documents',
         val.path,
       ].join('/');
       return { referenceValue };
     }
-    if (val instanceof firestore.Timestamp) {
+    if (val instanceof Timestamp) {
       return {
         timestampValue: val.toDate().toISOString(),
       };
     }
-    if (val instanceof firestore.GeoPoint) {
+    if (val instanceof GeoPoint) {
       return {
         geoPointValue: {
           latitude: val.latitude,

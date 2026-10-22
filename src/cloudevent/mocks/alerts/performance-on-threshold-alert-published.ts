@@ -13,9 +13,9 @@ import {
 } from '../helpers';
 import { FirebaseAlertData } from 'firebase-functions/v2/alerts';
 
-export const performanceThresholdOnThresholdAlertPublished: MockCloudEventAbstractFactory<PerformanceEvent<
-  ThresholdAlertPayload
->> = {
+export const performanceThresholdOnThresholdAlertPublished: MockCloudEventAbstractFactory<
+  PerformanceEvent<ThresholdAlertPayload>
+> = {
   generateMock(
     cloudFunction: CloudFunction<PerformanceEvent<ThresholdAlertPayload>>
   ): PerformanceEvent<ThresholdAlertPayload> {

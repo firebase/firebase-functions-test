@@ -1,4 +1,7 @@
-import { DocumentSnapshot } from 'firebase-admin/firestore';
+import {
+  DocumentSnapshot,
+  QueryDocumentSnapshot,
+} from 'firebase-admin/firestore';
 import { Change, CloudFunction, firestore } from 'firebase-functions/v2';
 import {
   exampleDocumentSnapshot,
@@ -24,15 +27,14 @@ export function getDocumentSnapshotCloudEvent(
     firestore.FirestoreEvent<DocumentSnapshot | object>
   >
 ) {
-  const {
-    location,
-    project,
-    database,
-    namespace,
-    document,
-    params,
-  } = getFirestoreEventFields(cloudFunction, cloudEventPartial);
-  const data = getOrCreateDocumentSnapshot(cloudEventPartial?.data, document);
+  const { location, project, database, namespace, document, params } =
+    getFirestoreEventFields(cloudFunction, cloudEventPartial);
+  // The created and deleted event types declare a QueryDocumentSnapshot, which
+  // this is unless the caller mocks the event data as an empty object.
+  const data = getOrCreateDocumentSnapshot(
+    cloudEventPartial?.data,
+    document
+  ) as QueryDocumentSnapshot;
   return {
     ...getBaseCloudEvent(cloudFunction),
 
@@ -81,14 +83,8 @@ export function getDocumentSnapshotChangeCloudEvent(
     firestore.FirestoreEvent<Change<DocumentSnapshot> | ChangeLike>
   >
 ) {
-  const {
-    location,
-    project,
-    database,
-    namespace,
-    document,
-    params,
-  } = getFirestoreEventFields(cloudFunction, cloudEventPartial);
+  const { location, project, database, namespace, document, params } =
+    getFirestoreEventFields(cloudFunction, cloudEventPartial);
   const data = getOrCreateDocumentSnapshotChange(
     cloudEventPartial?.data,
     document

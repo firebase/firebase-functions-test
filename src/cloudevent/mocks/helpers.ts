@@ -42,12 +42,8 @@ export function resolveStringExpression(
 
 function makeEventId(): string {
   return (
-    Math.random()
-      .toString(36)
-      .substring(2, 15) +
-    Math.random()
-      .toString(36)
-      .substring(2, 15)
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
   );
 }
 
@@ -58,10 +54,7 @@ export function extractRef(rawRef: string, params: Record<string, string>) {
   return refSegments
     .map((segment) => {
       if (segment.startsWith('{') && segment.endsWith('}')) {
-        const param = segment
-          .slice(1, -1)
-          .replace('=**', '')
-          .replace('=*', '');
+        const param = segment.slice(1, -1).replace('=**', '').replace('=*', '');
         return params[param] || 'undefined';
       }
       return segment;
