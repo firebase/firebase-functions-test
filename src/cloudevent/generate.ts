@@ -57,6 +57,9 @@ function mergeCloudEvents<EventType extends CloudEvent<unknown>>(
   generatedCloudEvent: EventType,
   cloudEventPartial: DeepPartial<EventType>
 ) {
+  if (!cloudEventPartial) {
+    return generatedCloudEvent;
+  }
   /**
    * There are several CloudEvent.data types that can not be overridden with json.
    * In these circumstances, we generate the CloudEvent.data given the user supplies
@@ -69,9 +72,6 @@ function mergeCloudEvents<EventType extends CloudEvent<unknown>>(
    * The returned CloudEvent should be returning DataSnapshot that uses the supplied json,
    * NOT the supplied JSON.
    */
-  if (!cloudEventPartial) {
-    return generatedCloudEvent;
-  }
   // Copy so the caller's partial can be reused across calls.
   const partialToMerge = { ...cloudEventPartial };
   if (shouldDeleteUserSuppliedData(generatedCloudEvent, cloudEventPartial)) {
