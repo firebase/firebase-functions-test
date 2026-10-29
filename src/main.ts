@@ -64,14 +64,14 @@ export {
 } from './v1';
 
 // V2 Exports
-export { WrappedV2Function } from './v2';
+export { WrappedV2Function, WrappedV2CallableFunction } from './v2';
 
 export function wrap<T>(
   cloudFunction: HttpsFunction & Runnable<T>
 ): WrappedFunction<T, HttpsFunction & Runnable<T>>;
-export function wrap<T>(
-  cloudFunction: CallableFunction<any, T>
-): WrappedV2CallableFunction<T>;
+export function wrap<T, Return>(
+  cloudFunction: CallableFunction<T, Return>
+): WrappedV2CallableFunction<T, Return>;
 export function wrap<T>(
   cloudFunction: CloudFunctionV1<T>
 ): WrappedScheduledFunction | WrappedFunction<T>;
@@ -84,7 +84,7 @@ export function wrap<T, V extends CloudEvent<unknown>>(
   | WrappedScheduledFunction
   | WrappedFunction<T>
   | WrappedV2Function<V>
-  | WrappedV2CallableFunction<T> {
+  | WrappedV2CallableFunction<any, any> {
   // v2 callables are checked by trigger rather than arity, since
   // firebase-functions@7 wraps them in rest-param functions of length 0.
   if (isCallableV2Function(cloudFunction)) {

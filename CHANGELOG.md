@@ -1,5 +1,7 @@
+- fix: mark `jest` as an optional peer dependency so it is no longer installed into projects that do not use it
 - chore: drop support for Node 18 and below (minimum supported version is now Node 20)
 - fix: support firebase-admin v14 by moving to the modular `firebase-admin/app` and `firebase-admin/firestore` entry points (#327)
 - breaking: drop firebase-admin `^8` and `^9` from the peer dependency range
 - breaking: type `makeDocumentSnapshot` as returning a `QueryDocumentSnapshot` when given data and a `DocumentSnapshot` when given `{}`, rather than `any` (#327)
+- breaking: `WrappedV2CallableFunction` now takes the callable's request data and return types (`WrappedV2CallableFunction<T, Return>`), and wrapped v2 callables check the request against the callable's data type. Code that named `WrappedV2CallableFunction<Return>` should pass both type arguments (#257)
 - fix: raise lodash to `^4.18.1` to pick up fixes for GHSA-r5fr-rjxr-66jc and GHSA-f23m-r3pf-42rh (#341)

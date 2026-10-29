@@ -22,7 +22,7 @@
 
 import { expect } from 'chai';
 
-import { wrapV2 } from '../src/v2';
+import { wrapV2, WrappedV2CallableRequest } from '../src/v2';
 
 import {
   CloudFunction,
@@ -36,6 +36,7 @@ import {
   https,
   firestore,
 } from 'firebase-functions/v2';
+import { CallableRequest } from 'firebase-functions/v2/https';
 import { defineString } from 'firebase-functions/params';
 import { makeDataSnapshot } from '../src/providers/database';
 import { makeDocumentSnapshot } from '../src/providers/firestore';
@@ -1428,8 +1429,87 @@ describe('v2', () => {
         };
 
         const wrappedCF = wrapV2(cloudFunction);
-        const result = await wrappedCF({} as any);
-        expect(result).equal('hello');
+        expect(await wrappedCF()).equal('hello');
+        expect(await wrappedCF({ auth: { uid: 'test-user' } })).equal('hello');
+      });
+
+      it('should keep the callable request and return types', async () => {
+        const cloudFunction = https.onCall<{ a: number }, Promise<string>>(
+          async (req) => `${req.data.a}`
+        );
+        cloudFunction.__endpoint = {
+          platform: 'gcfv2',
+          labels: {},
+          callableTrigger: {},
+        };
+
+        const wrappedCF = wrapV2(cloudFunction);
+        const result: string = await wrappedCF({ data: { a: 1 } });
+        expect(result).equal('1');
+
+        // @ts-expect-error wrong data type
+        () => wrappedCF({ data: { a: 'x' } });
+      });
+
+      it('should accept every CallableRequest field', () => {
+        type UnhandledKeys = Exclude<
+          keyof CallableRequest,
+          keyof WrappedV2CallableRequest<any>
+        >;
+        const allKeysCovered: [UnhandledKeys] extends [never] ? true : false =
+          true;
+        expect(allKeysCovered).equal(true);
+      });
+
+      it('should allow omitting the request when the callable takes no data', async () => {
+        const cloudFunction = https.onCall<void, string>(() => 'hello');
+        cloudFunction.__endpoint = {
+          platform: 'gcfv2',
+          labels: {},
+          callableTrigger: {},
+        };
+
+        const wrappedCF = wrapV2(cloudFunction);
+        expect(await wrappedCF()).equal('hello');
+        expect(
+          await wrappedCF({ rawRequest: { headers: { 'x-test': '1' } } })
+        ).equal('hello');
+      });
+
+      it('should pass data as undefined when only request metadata is given', async () => {
+        const cloudFunction = https.onCall<void, boolean>(
+          (req) => 'data' in req && req.data === undefined
+        );
+        cloudFunction.__endpoint = {
+          platform: 'gcfv2',
+          labels: {},
+          callableTrigger: {},
+        };
+
+        const wrappedCF = wrapV2(cloudFunction);
+        expect(await wrappedCF()).equal(true);
+        expect(
+          await wrappedCF({ rawRequest: { headers: { 'x-test': '1' } } })
+        ).equal(true);
+      });
+
+      it('should accept partial auth and app data', async () => {
+        const cloudFunction = https.onCall<{ a: number }, string>(
+          (req) => `${req.auth?.uid}:${req.app?.appId}`
+        );
+        cloudFunction.__endpoint = {
+          platform: 'gcfv2',
+          labels: {},
+          callableTrigger: {},
+        };
+
+        const wrappedCF = wrapV2(cloudFunction);
+        const result = await wrappedCF({
+          data: { a: 1 },
+          auth: { uid: 'test-user' },
+          app: { appId: 'test-app' },
+        });
+        expect(result).equal('test-user:test-app');
       });
     });
 
