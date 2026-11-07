@@ -71,7 +71,7 @@ steps:
     args:
       - "-c"
       - |
-        if [ "${_USE_OSS_GATE}" = "true" ] && [ "${_DRY_RUN}" = "false" ]; then
+        if [ "${_USE_OSS_GATE}" = "true" ] && [ -z "${_DRY_RUN}" ]; then
           test -s manifest.json
           MANIFEST_NAME="manifest-fft-$(date +%Y%m%d%H%M%S).json"
           gcloud storage cp manifest.json \

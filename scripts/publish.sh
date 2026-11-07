@@ -139,6 +139,7 @@ if [ "$USE_OSS_GATE" = true ]; then
     }' > manifest.json
   echo "Manifest generated to trigger Exit Gate publishing:"
   cat manifest.json
+  cp manifest.json "$WDIR/manifest.json"
 fi
 
 if [[ $DRY_RUN != "" ]]; then
