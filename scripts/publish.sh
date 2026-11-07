@@ -21,7 +21,7 @@ elif [[ ! ($VERSION == "patch" || $VERSION == "minor" || $VERSION == "major") ]]
 fi
 
 USE_OSS_GATE=false
-if [[ "$2" -eq "true" ]]; then
+if [[ "$2" == "true" ]]; then
   USE_OSS_GATE=true
 fi
 
