@@ -65,11 +65,11 @@ steps:
       - 'DRY_RUN=${_DRY_RUN}'
 
   # Only for Exit Gate deploys, copy manifest.json to GCS bucket to trigger publish.
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
-    dir: "${_REPOSITORY_NAME}"
-    entrypoint: "bash"
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    dir: '${_REPOSITORY_NAME}'
+    entrypoint: 'bash'
     args:
-      - "-c"
+      - '-c'
       - |
         set -e
         if [ "${_USE_OSS_GATE}" = "true" ] && [ -z "${_DRY_RUN}" ]; then
