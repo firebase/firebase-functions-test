@@ -2,7 +2,7 @@
 set -e
 
 printusage() {
-  echo "publish.sh <version>"
+  echo "publish.sh <version> [use-oss-gate]"
   echo "REPOSITORY_ORG and REPOSITORY_NAME should be set in the environment."
   echo "e.g. REPOSITORY_ORG=user, REPOSITORY_NAME=repo"
   echo ""
@@ -82,23 +82,6 @@ echo "Running tests..."
 npm test
 echo "Ran tests."
 
-if [ "$USE_OSS_GATE" = true ]; then
-  echo "Configuring NPM to release to OSS Exit Gate..."
-  # Install the auth helper without saving to package.json.
-  npm install --no-save google-artifactregistry-auth
-
-  # Configure .npmrc for Artifact Registry
-  echo "registry=https://us-npm.pkg.dev/oss-exit-gate-prod/firebase-functions-test--npm/" >> .npmrc
-  echo "//us-npm.pkg.dev/oss-exit-gate-prod/firebase-functions-test--npm/:always-auth=true" >> .npmrc
-
-  # Authenticate with Artifact Registry
-  npx google-artifactregistry-auth
-
-  # Remove the hardcoded Wombat registry from publishConfig
-  # TODO(vsfan): Once we're confident in Exit Gate, remove from package.json
-  npm pkg delete publishConfig.registry
-fi
-
 echo "Running publish build..."
 npm run build:release
 echo "Ran publish build."
@@ -116,6 +99,23 @@ echo "" >> "${RELEASE_NOTES_FILE}"
 cat CHANGELOG.md >> "${RELEASE_NOTES_FILE}"
 echo "Made the release notes."
 
+if [ "$USE_OSS_GATE" = true ]; then
+  echo "Configuring NPM to release to OSS Exit Gate..."
+  # Install the auth helper without saving to package.json.
+  npm install --no-save google-artifactregistry-auth
+
+  # Configure .npmrc for Artifact Registry
+  echo "registry=https://us-npm.pkg.dev/oss-exit-gate-prod/firebase-functions-test--npm/" >> .npmrc
+  echo "//us-npm.pkg.dev/oss-exit-gate-prod/firebase-functions-test--npm/:always-auth=true" >> .npmrc
+
+  # Authenticate with Artifact Registry
+  npx google-artifactregistry-auth
+
+  # Remove the hardcoded Wombat registry from publishConfig
+  # TODO(vsfan): Once we're confident in Exit Gate, remove from package.json
+  npm pkg delete publishConfig.registry
+fi
+
 echo "Publishing to npm..."
 if [[ $DRY_RUN == "" ]]; then
   npm publish
@@ -126,6 +126,7 @@ fi
 echo "Published to npm."
 
 if [ "$USE_OSS_GATE" = true ]; then
+  git checkout -- package.json
   PACKAGE_NAME=$(jq -r '.name' package.json)
   NPM_TAGS='["latest"]'
   jq -n \
