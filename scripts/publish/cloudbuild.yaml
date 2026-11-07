@@ -54,15 +54,31 @@ steps:
     entrypoint: 'bash'
     args: ['-c', 'cp -v npmrc ~/.npmrc']
 
-  # Publish the package.
+  # Publish the package to NPM or Exit Gate repository.
   - name: 'gcr.io/$PROJECT_ID/fft-package-builder'
     dir: '${_REPOSITORY_NAME}'
-    args: ['bash', './scripts/publish.sh', '${_VERSION}']
+    args: ['bash', './scripts/publish.sh', '${_VERSION}', '${_USE_OSS_GATE}']
     secretEnv: ['GITHUB_TOKEN']
     env:
       - 'REPOSITORY_ORG=${_REPOSITORY_ORG}'
       - 'REPOSITORY_NAME=${_REPOSITORY_NAME}'
       - 'DRY_RUN=${_DRY_RUN}'
+
+  # Only for Exit Gate deploys, copy manifest.json to GCS bucket to trigger publish.
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    dir: "${_REPOSITORY_NAME}"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        if [ "${_USE_OSS_GATE}" = "true" ] && [ "${_DRY_RUN}" = "false" ]; then
+          test -s manifest.json
+          MANIFEST_NAME="manifest-fft-$(date +%Y%m%d%H%M%S).json"
+          gcloud storage cp manifest.json \
+            "gs://oss-exit-gate-prod-projects-bucket/firebase-functions-test/npm/manifests/$${MANIFEST_NAME}"
+        else
+          echo "Skipping OSS Exit Gate manifest upload (_USE_OSS_GATE=${_USE_OSS_GATE}, _DRY_RUN=${_DRY_RUN})."
+        fi
 
 options:
   volumes:
@@ -71,6 +87,7 @@ options:
 
 substitutions:
   _VERSION: ''
+  _USE_OSS_GATE: 'false'
   _DRY_RUN: ''
   _KEY_RING: 'npm-publish-keyring'
   _KEY_NAME: 'publish'
