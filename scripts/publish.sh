@@ -50,6 +50,8 @@ which jq &> /dev/null
 trap - ERR
 echo "Checked for commands."
 
+# N.B: This will start failing when the wombat creds go away.
+# TODO(vsfan@): Leaving it like this as a forcing function to update publish.sh and remove publishConfig.registry.
 echo "Checking for logged-in npm user..."
 trap "echo 'Please login to npm using \`npm login --registry https://wombat-dressing-room.appspot.com\`'; exit 1" ERR
 npm whoami --registry https://wombat-dressing-room.appspot.com
