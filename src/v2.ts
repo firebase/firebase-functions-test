@@ -30,11 +30,17 @@ import {
 import { generateCombinedCloudEvent } from './cloudevent/generate';
 import { DeepPartial } from './cloudevent/types';
 
+type WrappedV2CloudEventPartial<T extends CloudEvent<unknown>> = DeepPartial<
+  Omit<T, 'data'>
+> & {
+  data?: T['data'] | object;
+};
+
 /** A function that can be called with test data and optional override values for {@link CloudEvent}
  * It will subsequently invoke the cloud function it wraps with the provided {@link CloudEvent}
  */
 export type WrappedV2Function<T extends CloudEvent<unknown>> = (
-  cloudEventPartial?: DeepPartial<T | object>
+  cloudEventPartial?: WrappedV2CloudEventPartial<T>
 ) => any | Promise<any>;
 
 export type WrappedV2CallableRequest<T> = {
