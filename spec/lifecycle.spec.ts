@@ -24,7 +24,17 @@ import { expect } from 'chai';
 
 import { FirebaseFunctionsTest } from '../src/lifecycle';
 import { mockConfig } from '../src/main';
+import { _isConfigRemoved } from '../src/v1';
 import { afterEach } from 'mocha';
+
+// mockConfig() throws on firebase-functions v7+, so seed CLOUD_RUNTIME_CONFIG directly there.
+function setRuntimeConfig(conf: { [key: string]: { [key: string]: any } }) {
+  if (_isConfigRemoved()) {
+    process.env.CLOUD_RUNTIME_CONFIG = JSON.stringify(conf);
+  } else {
+    mockConfig(conf);
+  }
+}
 
 describe('lifecycle', () => {
   describe('#init', () => {
@@ -87,7 +97,7 @@ describe('lifecycle', () => {
     it('deletes all the env variables if they did not previously exist', () => {
       let test = new FirebaseFunctionsTest();
       test.init();
-      mockConfig({ foo: { bar: 'faz ' } });
+      setRuntimeConfig({ foo: { bar: 'faz ' } });
       test.cleanup();
       expect(process.env.FIREBASE_CONFIG).to.be.undefined;
       expect(process.env.GCLOUD_PROJECT).to.be.undefined;
@@ -103,7 +113,7 @@ describe('lifecycle', () => {
       let test = new FirebaseFunctionsTest();
 
       test.init();
-      mockConfig({ foo: { bar: 'faz ' } });
+      setRuntimeConfig({ foo: { bar: 'faz ' } });
       test.cleanup();
 
       expect(process.env.FIREBASE_CONFIG).to.equal('oldFb');
